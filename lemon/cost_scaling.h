@@ -265,6 +265,9 @@ namespace lemon {
     IntArcMap _arc_idf;
     IntArcMap _arc_idb;
     IntVector _first_out;
+    // The arcs whose infinite upper bound init() has replaced by a finite
+    // one, which the next init() makes infinite again
+    IntVector _inf_upper;
     BoolVector _forward;
     IntVector _source;
     IntVector _target;
@@ -396,6 +399,7 @@ namespace lemon {
       for (ArcIt a(_graph); a != INVALID; ++a) {
         _upper[_arc_idf[a]] = map[a];
       }
+      _inf_upper.clear();
       return *this;
     }
 
@@ -552,6 +556,7 @@ namespace lemon {
     ///
     /// \see reset(), run()
     CostScaling& resetParams() {
+      _inf_upper.clear();
       for (int i = 0; i != _res_node_num; ++i) {
         _supply[i] = 0;
       }
@@ -756,6 +761,12 @@ namespace lemon {
 
     // Initialize the algorithm
     ProblemType init() {
+      // The infinite upper bounds that the last init() replaced
+      for (int i = 0; i != int(_inf_upper.size()); ++i) {
+        _upper[_inf_upper[i]] = INF;
+      }
+      _inf_upper.clear();
+
       if (_res_node_num <= 1) return INFEASIBLE;
 
       // Check the sum of supply values
@@ -811,7 +822,10 @@ namespace lemon {
         if (ex < 0) max_cap -= ex;
       }
       for (int j = 0; j != _res_arc_num; ++j) {
-        if (_upper[j] >= MAX) _upper[j] = max_cap;
+        if (_upper[j] >= MAX) {
+          _upper[j] = max_cap;
+          _inf_upper.push_back(j);
+        }
       }
 
       // Initialize the large cost vector and the epsilon parameter

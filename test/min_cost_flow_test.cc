@@ -569,6 +569,35 @@ int main()
     check(mcf.totalCost() == -623, "Wrong total cost: negative costs");
   }
 
+  // Test CostScaling and CycleCanceling run again after the supplies have
+  // grown, on arcs with no upper bound: the bound that a run puts in place
+  // of the infinite one, the sum of the supplies, must not stay for the
+  // next run, which would find the larger supplies infeasible
+  {
+    SmartDigraph g;
+    SmartDigraph::Node n[3];
+    for (int i = 0; i != 3; ++i) n[i] = g.addNode();
+    SmartDigraph::ArcMap<int> cost(g);
+    for (int i = 0; i != 2; ++i) cost[g.addArc(n[i], n[i + 1])] = 1;
+    SmartDigraph::NodeMap<int> sup(g, 0);
+    sup[n[0]] = 4; sup[n[2]] = -4;
+    CostScaling<SmartDigraph> cs(g);
+    CycleCanceling<SmartDigraph> cc(g);
+    cs.costMap(cost).supplyMap(sup);
+    cc.costMap(cost).supplyMap(sup);
+    check(cs.run() == cs.OPTIMAL && cs.totalCost() == 8,
+          "Wrong result: CostScaling, no upper bounds");
+    check(cc.run() == cc.OPTIMAL && cc.totalCost() == 8,
+          "Wrong result: CycleCanceling, no upper bounds");
+    sup[n[0]] = 40; sup[n[2]] = -40;
+    cs.supplyMap(sup);
+    cc.supplyMap(sup);
+    check(cs.run() == cs.OPTIMAL && cs.totalCost() == 80,
+          "Wrong result: CostScaling, no upper bounds, supplies grown");
+    check(cc.run() == cc.OPTIMAL && cc.totalCost() == 80,
+          "Wrong result: CycleCanceling, no upper bounds, supplies grown");
+  }
+
   // Test CapacityScaling
   {
     typedef CapacityScaling<Digraph> MCF;
