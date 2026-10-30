@@ -45,7 +45,6 @@ int main()
   // Create a small digraph
   ListDigraph g;
   typedef ListDigraph::Node Node;
-  typedef ListDigraph::NodeIt NodeIt;
   typedef ListDigraph::Arc Arc;
   typedef dim2::Point<int> Point;
 

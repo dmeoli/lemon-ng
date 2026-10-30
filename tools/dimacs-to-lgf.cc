@@ -47,10 +47,7 @@ using namespace lemon;
 int main(int argc, const char *argv[]) {
   typedef SmartDigraph Digraph;
 
-  typedef Digraph::Arc Arc;
   typedef Digraph::Node Node;
-  typedef Digraph::ArcIt ArcIt;
-  typedef Digraph::NodeIt NodeIt;
   typedef Digraph::ArcMap<double> DoubleArcMap;
   typedef Digraph::NodeMap<double> DoubleNodeMap;
 
