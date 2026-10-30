@@ -17,10 +17,13 @@
  */
 
 #include <iostream>
+#include <cmath>
 #include <fstream>
 #include <limits>
+#include <vector>
 
 #include <lemon/list_graph.h>
+#include <lemon/smart_graph.h>
 #include <lemon/lgf_reader.h>
 
 #include <lemon/network_simplex.h>
@@ -519,6 +522,51 @@ int main()
     runMcfLeqTests<MCF>(MCF::CANDIDATE_LIST, "NS-CL");
     runMcfGeqTests<MCF>(MCF::ALTERING_LIST,  "NS-AL", true);
     runMcfLeqTests<MCF>(MCF::ALTERING_LIST,  "NS-AL");
+  }
+
+  // Test NetworkSimplex on floating-point supplies that sum to zero, which
+  // they do in decimal and not in binary: 0.1 + 0.2 - 0.3 is 5.55e-17, and
+  // the problem has to be balanced and not infeasible
+  {
+    SmartDigraph g;
+    SmartDigraph::Node a = g.addNode(), b = g.addNode(), t = g.addNode();
+    SmartDigraph::Arc at = g.addArc(a, t), bt = g.addArc(b, t);
+    SmartDigraph::ArcMap<double> cost(g), cap(g);
+    cost[at] = 1; cost[bt] = 2; cap[at] = cap[bt] = 1;
+    SmartDigraph::NodeMap<double> sup(g);
+    sup[a] = 0.1; sup[b] = 0.2; sup[t] = -0.3;
+    NetworkSimplex<SmartDigraph, double> mcf(g);
+    mcf.costMap(cost).upperMap(cap).supplyMap(sup);
+    check(mcf.run() == mcf.OPTIMAL, "Wrong result: balanced supplies");
+    check(std::abs(mcf.totalCost() - 0.5) < 1e-12,
+          "Wrong total cost: balanced supplies");
+  }
+
+  // Test NetworkSimplex on floating-point costs that are mostly negative:
+  // the cost of the artificial arcs has to be larger than the absolute
+  // value of the cost of any path, while taken on the positive costs alone
+  // it made this problem, whose optimum is -623, infeasible
+  {
+    const int src[] = {2, 7, 0, 1, 4, 2, 4, 3, 4, 4, 5, 4, 4};
+    const int trg[] = {5, 4, 2, 8, 1, 4, 7, 0, 0, 6, 8, 1, 3};
+    const double cst[] = {-1, -19, -21, -48, -37, -35, -40, -7, -2, -19, -7,
+                          0, -44};
+    const double cp[] = {-1, 5, -1, 2, 2, -1, 2, 1, 1, 5, 3, 2, 5};
+    SmartDigraph g;
+    std::vector<SmartDigraph::Node> n(9);
+    for (int i = 0; i != 9; ++i) n[i] = g.addNode();
+    SmartDigraph::ArcMap<double> cost(g), cap(g);
+    for (int i = 0; i != 13; ++i) {
+      SmartDigraph::Arc a = g.addArc(n[src[i]], n[trg[i]]);
+      cost[a] = cst[i];
+      cap[a] = cp[i] < 0 ? std::numeric_limits<double>::infinity() : cp[i];
+    }
+    SmartDigraph::NodeMap<double> sup(g, 0);
+    sup[n[0]] = 4; sup[n[8]] = -4;
+    NetworkSimplex<SmartDigraph, double> mcf(g);
+    mcf.costMap(cost).upperMap(cap).supplyMap(sup);
+    check(mcf.run() == mcf.OPTIMAL, "Wrong result: negative costs");
+    check(mcf.totalCost() == -623, "Wrong total cost: negative costs");
   }
 
   // Test CapacityScaling

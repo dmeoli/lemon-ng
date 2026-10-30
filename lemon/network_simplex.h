@@ -65,8 +65,13 @@ namespace lemon {
   /// algorithm. By default, it is the same as \c V.
   ///
   /// \warning Both \c V and \c C must be signed number types.
-  /// \warning All input data (capacities, supply values, and costs) must
-  /// be integer.
+  /// \warning With integer types all input data (capacities, supply
+  /// values, and costs) must be integer. With floating-point types they
+  /// need not be: the reduced costs and the flow left on the artificial
+  /// arcs are compared against a tolerance of 10^6 units in the last place
+  /// of the largest cost and of the largest supply, respectively, so that
+  /// rounding errors make neither a degenerate pivot for ever nor a
+  /// feasible problem infeasible.
   ///
   /// \note %NetworkSimplex provides five different pivot rule
   /// implementations, from which the most efficient one is used
@@ -247,6 +252,30 @@ namespace lemon {
 
   private:
 
+    // The tolerance of the pivot rules on the reduced costs: zero for an
+    // exact cost type, otherwise relative to the largest of the n costs.
+    static Cost pivotTolerance(const CostVector& cost, int n) {
+      if (std::numeric_limits<Cost>::is_exact) return 0;
+      Cost m = 1;
+      for (int i = 0; i != n; ++i) {
+        if (cost[i] > m) m = cost[i];
+        else if (-cost[i] > m) m = -cost[i];
+      }
+      return m * std::numeric_limits<Cost>::epsilon() * 1e6;
+    }
+
+    // The tolerance on the flow left on the artificial arcs: zero for an
+    // exact flow type, otherwise relative to the largest of the n supplies.
+    static Value flowTolerance(const ValueVector& supply, int n) {
+      if (std::numeric_limits<Value>::is_exact) return 0;
+      Value m = 1;
+      for (int i = 0; i != n; ++i) {
+        if (supply[i] > m) m = supply[i];
+        else if (-supply[i] > m) m = -supply[i];
+      }
+      return m * std::numeric_limits<Value>::epsilon() * 1e6;
+    }
+
     // Implementation of the First Eligible pivot rule
     class FirstEligiblePivotRule
     {
@@ -260,6 +289,7 @@ namespace lemon {
       const CostVector &_pi;
       int &_in_arc;
       int _search_arc_num;
+      Cost _eps;
 
       // Pivot rule data
       int _next_arc;
@@ -271,6 +301,7 @@ namespace lemon {
         _source(ns._source), _target(ns._target),
         _cost(ns._cost), _state(ns._state), _pi(ns._pi),
         _in_arc(ns.in_arc), _search_arc_num(ns._search_arc_num),
+        _eps(pivotTolerance(ns._cost, ns._arc_num)),
         _next_arc(0)
       {}
 
@@ -279,7 +310,7 @@ namespace lemon {
         Cost c;
         for (int e = _next_arc; e != _search_arc_num; ++e) {
           c = _state[e] * (_cost[e] + _pi[_source[e]] - _pi[_target[e]]);
-          if (c < 0) {
+          if (c < -_eps) {
             _in_arc = e;
             _next_arc = e + 1;
             return true;
@@ -287,7 +318,7 @@ namespace lemon {
         }
         for (int e = 0; e != _next_arc; ++e) {
           c = _state[e] * (_cost[e] + _pi[_source[e]] - _pi[_target[e]]);
-          if (c < 0) {
+          if (c < -_eps) {
             _in_arc = e;
             _next_arc = e + 1;
             return true;
@@ -312,6 +343,7 @@ namespace lemon {
       const CostVector &_pi;
       int &_in_arc;
       int _search_arc_num;
+      Cost _eps;
 
     public:
 
@@ -319,7 +351,8 @@ namespace lemon {
       BestEligiblePivotRule(NetworkSimplex &ns) :
         _source(ns._source), _target(ns._target),
         _cost(ns._cost), _state(ns._state), _pi(ns._pi),
-        _in_arc(ns.in_arc), _search_arc_num(ns._search_arc_num)
+        _in_arc(ns.in_arc), _search_arc_num(ns._search_arc_num),
+        _eps(pivotTolerance(ns._cost, ns._arc_num))
       {}
 
       // Find next entering arc
@@ -332,7 +365,7 @@ namespace lemon {
             _in_arc = e;
           }
         }
-        return min < 0;
+        return min < -_eps;
       }
 
     }; //class BestEligiblePivotRule
@@ -351,6 +384,7 @@ namespace lemon {
       const CostVector &_pi;
       int &_in_arc;
       int _search_arc_num;
+      Cost _eps;
 
       // Pivot rule data
       int _block_size;
@@ -363,6 +397,7 @@ namespace lemon {
         _source(ns._source), _target(ns._target),
         _cost(ns._cost), _state(ns._state), _pi(ns._pi),
         _in_arc(ns.in_arc), _search_arc_num(ns._search_arc_num),
+        _eps(pivotTolerance(ns._cost, ns._arc_num)),
         _next_arc(0)
       {
         // The main parameters of the pivot rule
@@ -386,7 +421,7 @@ namespace lemon {
             _in_arc = e;
           }
           if (--cnt == 0) {
-            if (min < 0) goto search_end;
+            if (min < -_eps) goto search_end;
             cnt = _block_size;
           }
         }
@@ -397,11 +432,11 @@ namespace lemon {
             _in_arc = e;
           }
           if (--cnt == 0) {
-            if (min < 0) goto search_end;
+            if (min < -_eps) goto search_end;
             cnt = _block_size;
           }
         }
-        if (min >= 0) return false;
+        if (min >= -_eps) return false;
 
       search_end:
         _next_arc = e;
@@ -424,6 +459,7 @@ namespace lemon {
       const CostVector &_pi;
       int &_in_arc;
       int _search_arc_num;
+      Cost _eps;
 
       // Pivot rule data
       IntVector _candidates;
@@ -438,6 +474,7 @@ namespace lemon {
         _source(ns._source), _target(ns._target),
         _cost(ns._cost), _state(ns._state), _pi(ns._pi),
         _in_arc(ns.in_arc), _search_arc_num(ns._search_arc_num),
+        _eps(pivotTolerance(ns._cost, ns._arc_num)),
         _next_arc(0)
       {
         // The main parameters of the pivot rule
@@ -471,11 +508,11 @@ namespace lemon {
               min = c;
               _in_arc = e;
             }
-            else if (c >= 0) {
+            else if (c >= -_eps) {
               _candidates[i--] = _candidates[--_curr_length];
             }
           }
-          if (min < 0) return true;
+          if (min < -_eps) return true;
         }
 
         // Major iteration: build a new candidate list
@@ -483,7 +520,7 @@ namespace lemon {
         _curr_length = 0;
         for (e = _next_arc; e != _search_arc_num; ++e) {
           c = _state[e] * (_cost[e] + _pi[_source[e]] - _pi[_target[e]]);
-          if (c < 0) {
+          if (c < -_eps) {
             _candidates[_curr_length++] = e;
             if (c < min) {
               min = c;
@@ -494,7 +531,7 @@ namespace lemon {
         }
         for (e = 0; e != _next_arc; ++e) {
           c = _state[e] * (_cost[e] + _pi[_source[e]] - _pi[_target[e]]);
-          if (c < 0) {
+          if (c < -_eps) {
             _candidates[_curr_length++] = e;
             if (c < min) {
               min = c;
@@ -527,6 +564,7 @@ namespace lemon {
       const CostVector &_pi;
       int &_in_arc;
       int _search_arc_num;
+      Cost _eps;
 
       // Pivot rule data
       int _block_size, _head_length, _curr_length;
@@ -555,6 +593,7 @@ namespace lemon {
         _source(ns._source), _target(ns._target),
         _cost(ns._cost), _state(ns._state), _pi(ns._pi),
         _in_arc(ns.in_arc), _search_arc_num(ns._search_arc_num),
+        _eps(pivotTolerance(ns._cost, ns._arc_num)),
         _next_arc(0), _cand_cost(ns._search_arc_num), _sort_func(_cand_cost)
       {
         // The main parameters of the pivot rule
@@ -580,7 +619,7 @@ namespace lemon {
         for (int i = 0; i != _curr_length; ++i) {
           e = _candidates[i];
           c = _state[e] * (_cost[e] + _pi[_source[e]] - _pi[_target[e]]);
-          if (c < 0) {
+          if (c < -_eps) {
             _cand_cost[e] = c;
           } else {
             _candidates[i--] = _candidates[--_curr_length];
@@ -593,7 +632,7 @@ namespace lemon {
 
         for (e = _next_arc; e != _search_arc_num; ++e) {
           c = _state[e] * (_cost[e] + _pi[_source[e]] - _pi[_target[e]]);
-          if (c < 0) {
+          if (c < -_eps) {
             _cand_cost[e] = c;
             _candidates[_curr_length++] = e;
           }
@@ -605,7 +644,7 @@ namespace lemon {
         }
         for (e = 0; e != _next_arc; ++e) {
           c = _state[e] * (_cost[e] + _pi[_source[e]] - _pi[_target[e]]);
-          if (c < 0) {
+          if (c < -_eps) {
             _cand_cost[e] = c;
             _candidates[_curr_length++] = e;
           }
@@ -1064,6 +1103,11 @@ namespace lemon {
       for (int i = 0; i != _node_num; ++i) {
         _sum_supply += _supply[i];
       }
+      // A sum within the tolerance on the flow is zero: supplies that sum to
+      // zero sum, in floating point, to a few units in the last place of
+      // either sign, which would make a balanced problem infeasible.
+      const Value feps = flowTolerance(_supply, _node_num);
+      if (_sum_supply <= feps && _sum_supply >= -feps) _sum_supply = 0;
       if ( !((_stype == GEQ && _sum_supply <= 0) ||
              (_stype == LEQ && _sum_supply >= 0)) ) return false;
 
@@ -1097,6 +1141,7 @@ namespace lemon {
         ART_COST = 0;
         for (int i = 0; i != _arc_num; ++i) {
           if (_cost[i] > ART_COST) ART_COST = _cost[i];
+          else if (-_cost[i] > ART_COST) ART_COST = -_cost[i];
         }
         ART_COST = (ART_COST + 1) * _node_num;
       }
@@ -1606,9 +1651,10 @@ namespace lemon {
         }
       }
 
-      // Check feasibility
+      // Check feasibility, up to the tolerance on the artificial arcs
+      const Value feps = flowTolerance(_supply, _node_num);
       for (int e = _search_arc_num; e != _all_arc_num; ++e) {
-        if (_flow[e] != 0) return INFEASIBLE;
+        if (_flow[e] > feps || _flow[e] < -feps) return INFEASIBLE;
       }
 
       // Transform the solution and the supply map to the original form
