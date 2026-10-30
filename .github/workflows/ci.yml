@@ -1,0 +1,57 @@
+# Build and test of lemon-ng on every operating system it supports: Linux
+# with GCC and Clang, macOS with AppleClang and Windows with MSVC, each from
+# the oldest C++ standard it accepts to the latest, with all the warnings on.
+
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build-test:
+    name: ${{ matrix.os }} ${{ matrix.cc }} C++${{ matrix.std }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: ubuntu-latest,  cc: gcc,   cxx: g++,     std: 11 }
+          - { os: ubuntu-latest,  cc: gcc,   cxx: g++,     std: 17 }
+          - { os: ubuntu-latest,  cc: gcc,   cxx: g++,     std: 20 }
+          - { os: ubuntu-latest,  cc: gcc,   cxx: g++,     std: 23 }
+          - { os: ubuntu-latest,  cc: clang, cxx: clang++, std: 11 }
+          - { os: ubuntu-latest,  cc: clang, cxx: clang++, std: 20 }
+          - { os: macos-latest,   cc: clang, cxx: clang++, std: 11 }
+          - { os: macos-latest,   cc: clang, cxx: clang++, std: 20 }
+          - { os: windows-latest, cc: cl,    cxx: cl,      std: 14 }
+          - { os: windows-latest, cc: cl,    cxx: cl,      std: 20 }
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Configure (Linux and macOS)
+        if: runner.os != 'Windows'
+        run: >
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+          -DCMAKE_C_COMPILER=${{ matrix.cc }}
+          -DCMAKE_CXX_COMPILER=${{ matrix.cxx }}
+          -DCMAKE_CXX_STANDARD=${{ matrix.std }}
+          -DCMAKE_CXX_FLAGS="-Wall -Wextra -Werror"
+          -DLEMON_VERSION=ci
+
+      - name: Configure (Windows)
+        if: runner.os == 'Windows'
+        run: >
+          cmake -S . -B build
+          -DCMAKE_CXX_STANDARD=${{ matrix.std }}
+          -DCMAKE_CXX_FLAGS="/W3 /EHsc"
+          -DLEMON_VERSION=ci
+
+      - name: Build
+        run: cmake --build build --config Release --parallel 4
+
+      - name: Test
+        run: ctest --test-dir build -C Release --output-on-failure --no-tests=error
