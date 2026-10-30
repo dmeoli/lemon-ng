@@ -30,6 +30,19 @@ namespace lemon {
 
   namespace concepts {
 
+    namespace _maps_bits {
+
+      // An lvalue of type T for the archetypes below to return: their
+      // member functions are compiled to check an interface, never run,
+      // and T needs not be default constructible.
+      template <typename T>
+      T& dummyValue() {
+        alignas(T) static unsigned char buf[sizeof(T)];
+        return *reinterpret_cast<T*>(buf);
+      }
+
+    }
+
     /// \addtogroup map_concepts
     /// @{
 
@@ -49,12 +62,7 @@ namespace lemon {
 
       /// Returns the value associated with the given key.
       Value operator[](const Key &) const {
-        // return *(static_cast<Value *>(0));
-        // return *(static_cast<Value *>(0)+1);
-        // return *(static_cast<Value *>(sizeof(Value)));
-        // return *(reinterpret_cast<Value *>(0));
-        // return *(reinterpret_cast<Value *>(0)+1);
-        return *(reinterpret_cast<Value *>(sizeof(Value)));
+        return _maps_bits::dummyValue<Value>();
       }
 
       template<typename _ReadMap>
@@ -136,7 +144,7 @@ namespace lemon {
 
       /// Returns the value associated with the given key.
       Value operator[](const Key &) const {
-        return *(reinterpret_cast<Value *>(sizeof(Value)));
+        return _maps_bits::dummyValue<Value>();
       }
 
       /// Sets the value associated with the given key.
@@ -176,12 +184,12 @@ namespace lemon {
 
       /// Returns a reference to the value associated with the given key.
       Reference operator[](const Key &) {
-        return *(reinterpret_cast<Value *>(sizeof(Value)));
+        return _maps_bits::dummyValue<Value>();
       }
 
       /// Returns a const reference to the value associated with the given key.
       ConstReference operator[](const Key &) const {
-        return *(reinterpret_cast<Value *>(sizeof(Value)));
+        return _maps_bits::dummyValue<Value>();
       }
 
       /// Sets the value associated with the given key.
