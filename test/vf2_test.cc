@@ -184,7 +184,7 @@ void make_graphs() {
 
 class EqComparable {
 public:
-  bool operator==(const EqComparable&) {
+  bool operator==(const EqComparable&) const {
     return false;
   }
 };

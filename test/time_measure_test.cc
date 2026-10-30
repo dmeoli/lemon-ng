@@ -23,7 +23,7 @@ using namespace lemon;
 
 void f()
 {
-  double d=0;
+  volatile double d=0;
   for(int i=0;i<1000;i++)
     d+=0.1;
 }

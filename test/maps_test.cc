@@ -836,13 +836,13 @@ int main()
     }
 
     Ivm map1(g, 0.0);
-    check(distance(map1.beginValue(), map1.endValue()) == 1, "Wrong size");
+    check(std::distance(map1.beginValue(), map1.endValue()) == 1, "Wrong size");
     check(*map1.beginValue() == 0.0, "Wrong value");
 
     for (int i = 0; i < num; ++i) {
       map1.set(items[i], static_cast<double>(i));
     }
-    check(distance(map1.beginValue(), map1.endValue()) == num, "Wrong size");
+    check(std::distance(map1.beginValue(), map1.endValue()) == num, "Wrong size");
 
     for (int i = 0; i < num; ++i) {
       Ivm::ItemIt it(map1, static_cast<double>(i));
@@ -860,7 +860,7 @@ int main()
     for (int i = 0; i < num; ++i) {
       map1.set(items[i], static_cast<double>(i % 2));
     }
-    check(distance(map1.beginValue(), map1.endValue()) == 2, "Wrong size");
+    check(std::distance(map1.beginValue(), map1.endValue()) == 2, "Wrong size");
 
     int n = 0;
     for (Ivm::ItemIt it(map1, 0.0); it != INVALID; ++it) {

@@ -48,7 +48,7 @@ void checkDigraphReaderCompile() {
   Digraph::ArcMap<int> arc_map(digraph);
   Digraph::Node node;
   Digraph::Arc arc;
-  int attr;
+  int attr = 0;
 
   lemon::DigraphReader<Digraph> reader(digraph, "filename");
   reader.nodeMap("node_map", node_map);
@@ -84,7 +84,7 @@ void checkDigraphWriterCompile() {
   Digraph::ArcMap<int> arc_map(digraph);
   Digraph::Node node;
   Digraph::Arc arc;
-  int attr;
+  int attr = 0;
 
   lemon::DigraphWriter<Digraph> writer(digraph, "filename");
   writer.nodeMap("node_map", node_map);
@@ -116,7 +116,7 @@ void checkGraphReaderCompile() {
   Graph::Node node;
   Graph::Arc arc;
   Graph::Edge edge;
-  int attr;
+  int attr = 0;
 
   lemon::GraphReader<Graph> reader(graph, "filename");
   reader.nodeMap("node_map", node_map);
@@ -156,7 +156,7 @@ void checkGraphWriterCompile() {
   Graph::Node node;
   Graph::Arc arc;
   Graph::Edge edge;
-  int attr;
+  int attr = 0;
 
   lemon::GraphWriter<Graph> writer(graph, "filename");
   writer.nodeMap("node_map", node_map);
@@ -197,7 +197,7 @@ void checkBpGraphReaderCompile() {
   BpGraph::BlueNode blue_node;
   BpGraph::Arc arc;
   BpGraph::Edge edge;
-  int attr;
+  int attr = 0;
 
   lemon::BpGraphReader<BpGraph> reader(graph, "filename");
   reader.nodeMap("node_map", node_map);
@@ -247,7 +247,7 @@ void checkBpGraphWriterCompile() {
   BpGraph::BlueNode blue_node;
   BpGraph::Arc arc;
   BpGraph::Edge edge;
-  int attr;
+  int attr = 0;
 
   lemon::BpGraphWriter<BpGraph> writer(graph, "filename");
   writer.nodeMap("node_map", node_map);
