@@ -42,11 +42,11 @@ namespace lemon {
   class Exception : public std::exception {
   public:
     ///Constructor
-    Exception() throw() {}
+    Exception() noexcept {}
     ///Virtual destructor
-    virtual ~Exception() throw() {}
+    virtual ~Exception() noexcept {}
     ///A short description of the exception
-    virtual const char* what() const throw() {
+    virtual const char* what() const noexcept {
       return "lemon::Exception";
     }
   };
@@ -64,68 +64,68 @@ namespace lemon {
   public:
 
     /// Copy constructor
-    IoError(const IoError &error) throw() : Exception() {
+    IoError(const IoError &error) noexcept : Exception() {
       message(error._message);
       file(error._file);
     }
 
     /// Constructor
-    explicit IoError(const char *message) throw() {
+    explicit IoError(const char *message) noexcept {
       IoError::message(message);
     }
 
     /// Constructor
-    explicit IoError(const std::string &message) throw() {
+    explicit IoError(const std::string &message) noexcept {
       IoError::message(message);
     }
 
     /// Constructor
     explicit IoError(const char *message,
-                     const std::string &file) throw() {
+                     const std::string &file) noexcept {
       IoError::message(message);
       IoError::file(file);
     }
 
     /// Constructor
     explicit IoError(const std::string &message,
-                     const std::string &file) throw() {
+                     const std::string &file) noexcept {
       IoError::message(message);
       IoError::file(file);
     }
 
     /// Virtual destructor
-    virtual ~IoError() throw() {}
+    virtual ~IoError() noexcept {}
 
     /// Set the error message
-    void message(const char *message) throw() {
+    void message(const char *message) noexcept {
       try {
         _message = message;
       } catch (...) {}
     }
 
     /// Set the error message
-    void message(const std::string& message) throw() {
+    void message(const std::string& message) noexcept {
       try {
         _message = message;
       } catch (...) {}
     }
 
     /// Set the file name
-    void file(const std::string &file) throw() {
+    void file(const std::string &file) noexcept {
       try {
         _file = file;
       } catch (...) {}
     }
 
     /// Returns the error message
-    const std::string& message() const throw() {
+    const std::string& message() const noexcept {
       return _message;
     }
 
     /// \brief Returns the filename
     ///
     /// Returns the filename or an empty string if it was not specified.
-    const std::string& file() const throw() {
+    const std::string& file() const noexcept {
       return _file;
     }
 
@@ -133,7 +133,7 @@ namespace lemon {
     ///
     /// Returns a short error message which contains the message and the
     /// file name.
-    virtual const char* what() const throw() {
+    virtual const char* what() const noexcept {
       try {
         _what.clear();
         std::ostringstream oss;
@@ -165,27 +165,27 @@ namespace lemon {
   public:
 
     /// Copy constructor
-    FormatError(const FormatError &error) throw() : Exception() {
+    FormatError(const FormatError &error) noexcept : Exception() {
       message(error._message);
       file(error._file);
       line(error._line);
     }
 
     /// Constructor
-    explicit FormatError(const char *message) throw() {
+    explicit FormatError(const char *message) noexcept {
       FormatError::message(message);
       _line = 0;
     }
 
     /// Constructor
-    explicit FormatError(const std::string &message) throw() {
+    explicit FormatError(const std::string &message) noexcept {
       FormatError::message(message);
       _line = 0;
     }
 
     /// Constructor
     explicit FormatError(const char *message,
-                         const std::string &file, int line = 0) throw() {
+                         const std::string &file, int line = 0) noexcept {
       FormatError::message(message);
       FormatError::file(file);
       FormatError::line(line);
@@ -193,34 +193,34 @@ namespace lemon {
 
     /// Constructor
     explicit FormatError(const std::string &message,
-                         const std::string &file, int line = 0) throw() {
+                         const std::string &file, int line = 0) noexcept {
       FormatError::message(message);
       FormatError::file(file);
       FormatError::line(line);
     }
 
     /// Virtual destructor
-    virtual ~FormatError() throw() {}
+    virtual ~FormatError() noexcept {}
 
     /// Set the line number
-    void line(int line) throw() { _line = line; }
+    void line(int line) noexcept { _line = line; }
 
     /// Set the error message
-    void message(const char *message) throw() {
+    void message(const char *message) noexcept {
       try {
         _message = message;
       } catch (...) {}
     }
 
     /// Set the error message
-    void message(const std::string& message) throw() {
+    void message(const std::string& message) noexcept {
       try {
         _message = message;
       } catch (...) {}
     }
 
     /// Set the file name
-    void file(const std::string &file) throw() {
+    void file(const std::string &file) noexcept {
       try {
         _file = file;
       } catch (...) {}
@@ -229,17 +229,17 @@ namespace lemon {
     /// \brief Returns the line number
     ///
     /// Returns the line number or zero if it was not specified.
-    int line() const throw() { return _line; }
+    int line() const noexcept { return _line; }
 
     /// Returns the error message
-    const std::string& message() const throw() {
+    const std::string& message() const noexcept {
       return _message;
     }
 
     /// \brief Returns the filename
     ///
     /// Returns the filename or an empty string if it was not specified.
-    const std::string& file() const throw() {
+    const std::string& file() const noexcept {
       return _file;
     }
 
@@ -247,7 +247,7 @@ namespace lemon {
     ///
     /// Returns a short error message which contains the message, the
     /// file name and the line number.
-    virtual const char* what() const throw() {
+    virtual const char* what() const noexcept {
       try {
         _what.clear();
         std::ostringstream oss;

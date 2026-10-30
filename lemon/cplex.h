@@ -60,7 +60,7 @@ namespace lemon {
     public:
 
       /// The short error message
-      virtual const char* what() const throw() {
+      virtual const char* what() const noexcept {
         return _message;
       }
     };

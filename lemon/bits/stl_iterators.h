@@ -4,6 +4,8 @@
 #ifndef STL_ITERATORS_H_
 #define STL_ITERATORS_H_
 
+#include <cstddef>
+#include <iterator>
 #include <lemon/core.h>
 
 namespace lemon {
@@ -12,12 +14,17 @@ namespace lemon {
   ///
   /// This template makes an STL iterator from a Lemon iterator
   /// by adding the missing features.
-  /// It inherits from \c std::iterator to make \c iterator_concept work
-  /// (so that STL algorithms work).
+  /// It defines the member types of an input iterator to make
+  /// \c iterator_concept work (so that STL algorithms work).
   /// \c T should be the lemon iterator to be decorated.
   template<class T>
-  struct LemonItWrapper
-      : public T, public std::iterator<std::input_iterator_tag, T> {
+  struct LemonItWrapper : public T {
+
+    typedef std::input_iterator_tag iterator_category;
+    typedef T value_type;
+    typedef std::ptrdiff_t difference_type;
+    typedef T* pointer;
+    typedef T& reference;
 
     LemonItWrapper(const T &x) : T(x) {}
 

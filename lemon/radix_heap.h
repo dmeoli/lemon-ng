@@ -60,7 +60,7 @@ namespace lemon {
     /// \see RadixHeap
     class PriorityUnderflowError : public Exception {
     public:
-      virtual const char* what() const throw() {
+      virtual const char* what() const noexcept {
         return "lemon::RadixHeap::PriorityUnderflowError";
       }
     };

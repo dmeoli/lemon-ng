@@ -394,7 +394,7 @@ namespace lemon {
     //
     // It notifies all the registed observers about an item erased from
     // the container.
-    void erase(const Item& item) throw() {
+    void erase(const Item& item) noexcept {
       typename Observers::iterator it = _observers.begin();
       while (it != _observers.end()) {
         try {

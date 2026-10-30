@@ -1047,10 +1047,10 @@ namespace lemon {
       std::string _format;
       mutable std::string _what;
     public:
-      explicit UnsupportedFormatError(std::string format) throw()
+      explicit UnsupportedFormatError(std::string format) noexcept
         : _format(format) { }
-      virtual ~UnsupportedFormatError() throw() {}
-      virtual const char* what() const throw() {
+      virtual ~UnsupportedFormatError() noexcept {}
+      virtual const char* what() const noexcept {
         try {
           _what.clear();
           std::ostringstream oss;

@@ -25,6 +25,7 @@
 #define LEMON_PATH_H
 
 #include <vector>
+#include <memory>
 #include <algorithm>
 
 #include <lemon/error.h>
@@ -504,6 +505,7 @@ namespace lemon {
     Node *first, *last;
 
     std::allocator<Node> alloc;
+    typedef std::allocator_traits<std::allocator<Node> > AllocTraits;
 
   public:
 
@@ -663,7 +665,7 @@ namespace lemon {
     void clear() {
       while (first != 0) {
         last = first->next;
-        alloc.destroy(first);
+        AllocTraits::destroy(alloc, first);
         alloc.deallocate(first, 1);
         first = last;
       }
@@ -677,7 +679,7 @@ namespace lemon {
     /// \brief Add a new arc before the current path
     void addFront(const Arc& arc) {
       Node *node = alloc.allocate(1);
-      alloc.construct(node, Node());
+      AllocTraits::construct(alloc, node, Node());
       node->prev = 0;
       node->next = first;
       node->arc = arc;
@@ -698,7 +700,7 @@ namespace lemon {
       } else {
         last = 0;
       }
-      alloc.destroy(node);
+      AllocTraits::destroy(alloc, node);
       alloc.deallocate(node, 1);
     }
 
@@ -710,7 +712,7 @@ namespace lemon {
     /// \brief Add a new arc behind the current path.
     void addBack(const Arc& arc) {
       Node *node = alloc.allocate(1);
-      alloc.construct(node, Node());
+      AllocTraits::construct(alloc, node, Node());
       node->next = 0;
       node->prev = last;
       node->arc = arc;
@@ -731,7 +733,7 @@ namespace lemon {
       } else {
         first = 0;
       }
-      alloc.destroy(node);
+      AllocTraits::destroy(alloc, node);
       alloc.deallocate(node, 1);
     }
 
