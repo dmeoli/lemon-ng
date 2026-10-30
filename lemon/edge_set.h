@@ -52,7 +52,7 @@ namespace lemon {
       Node source, target;
       int next_out, next_in;
       int prev_out, prev_in;
-      ArcT() : prev_out(-1), prev_in(-1) {}
+      ArcT() : next_out(-1), next_in(-1), prev_out(-1), prev_in(-1) {}
     };
 
     std::vector<ArcT> arcs;
@@ -801,7 +801,7 @@ namespace lemon {
     struct ArcT {
       Node source, target;
       int next_out, next_in;
-      ArcT() {}
+      ArcT() : next_out(-1), next_in(-1) {}
     };
 
     std::vector<ArcT> arcs;
@@ -1087,7 +1087,7 @@ namespace lemon {
     struct ArcT {
       Node target;
       int next_out;
-      ArcT() {}
+      ArcT() : next_out(-1) {}
     };
 
     std::vector<ArcT> arcs;

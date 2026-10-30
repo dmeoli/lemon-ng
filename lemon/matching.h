@@ -788,7 +788,7 @@ namespace lemon {
     struct NodeData {
 
       NodeData(IntArcMap& node_heap_index)
-        : heap(node_heap_index) {}
+        : blossom(0), pot(), heap(node_heap_index), tree(0) {}
 
       int blossom;
       Value pot;
@@ -2280,7 +2280,7 @@ namespace lemon {
     struct NodeData {
 
       NodeData(IntArcMap& node_heap_index)
-        : heap(node_heap_index) {}
+        : blossom(0), pot(), heap(node_heap_index), tree(0) {}
 
       int blossom;
       Value pot;
