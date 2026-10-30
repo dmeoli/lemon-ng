@@ -222,6 +222,9 @@ namespace lemon {
     ValueVector _supply;
     ValueVector _flow;
     CostVector _pi;
+    // How far the potential of the root may move from zero [see
+    // updatePotential()]
+    Cost _pi_lim;
 
     // Data for storing the spanning tree structure
     IntVector _parent;
@@ -1146,6 +1149,12 @@ namespace lemon {
         ART_COST = (ART_COST + 1) * _node_num;
       }
 
+      // The potential of the root may move from zero by half the cost of
+      // the artificial arcs for an exact type, which keeps the sums of the
+      // pivot rules within the range of the type, and by the cost itself
+      // otherwise, which costs the potentials no more than one bit
+      _pi_lim = std::numeric_limits<Cost>::is_exact ? ART_COST / 2 : ART_COST;
+
       // Initialize arc maps
       for (int i = 0; i != _arc_num; ++i) {
         _flow[i] = 0;
@@ -1510,14 +1519,37 @@ namespace lemon {
       }
     }
 
-    // Update potentials in the subtree that has been moved
+    // Update potentials in the subtree that has been moved, or in the rest
+    // of the tree if that is the smaller part: the rest follows the subtree
+    // in the thread, up to the first node of the subtree, and its potentials
+    // go the other way, which leaves every reduced cost as it is and moves
+    // the potential of the root away from zero, by no more than _pi_lim,
+    // the potentials being shifted back at the end of start()
     void updatePotential() {
       Cost sigma = _pi[v_in] - _pi[u_in] -
                    _pred_dir[u_in] * _cost[in_arc];
-      int end = _thread[_last_succ[u_in]];
-      for (int u = u_in; u != end; u = _thread[u]) {
+      int beg = u_in, end = _thread[_last_succ[u_in]];
+      if (2 * _succ_num[u_in] > _node_num + 1) {
+        const Cost r = _pi[_root];
+        if (sigma >= r - _pi_lim && sigma <= r + _pi_lim) {
+          beg = end;
+          end = u_in;
+          sigma = -sigma;
+        }
+      }
+      for (int u = beg; u != end; u = _thread[u]) {
         _pi[u] += sigma;
       }
+    }
+
+    // Shift the potentials so that the one of the root is zero again
+    void alignPotential() {
+      const Cost r = _pi[_root];
+      if (r == 0) return;
+      for (int u = 0; u != _node_num; ++u) {
+        _pi[u] -= r;
+      }
+      _pi[_root] = 0;
     }
 
     // Heuristic initial pivots
@@ -1650,6 +1682,7 @@ namespace lemon {
           updatePotential();
         }
       }
+      alignPotential();
 
       // Check feasibility, up to the tolerance on the artificial arcs
       const Value feps = flowTolerance(_supply, _node_num);
