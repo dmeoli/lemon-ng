@@ -600,7 +600,7 @@ namespace lemon {
     template <typename TDGR>
     friend DigraphReader<TDGR> digraphReader(TDGR& digraph, const char *fn);
 
-    DigraphReader(DigraphReader& other)
+    DigraphReader(DigraphReader&& other)
       : _is(other._is), local_is(other.local_is), _digraph(other._digraph),
         _use_nodes(other._use_nodes), _use_arcs(other._use_arcs),
         _skip_nodes(other._skip_nodes), _skip_arcs(other._skip_arcs) {
@@ -1432,7 +1432,7 @@ namespace lemon {
     template <typename TGR>
     friend GraphReader<TGR> graphReader(TGR& graph, const char *fn);
 
-    GraphReader(GraphReader& other)
+    GraphReader(GraphReader&& other)
       : _is(other._is), local_is(other.local_is), _graph(other._graph),
         _use_nodes(other._use_nodes), _use_edges(other._use_edges),
         _skip_nodes(other._skip_nodes), _skip_edges(other._skip_edges) {
@@ -2316,7 +2316,7 @@ namespace lemon {
     template <typename TBGR>
     friend BpGraphReader<TBGR> bpGraphReader(TBGR& graph, const char *fn);
 
-    BpGraphReader(BpGraphReader& other)
+    BpGraphReader(BpGraphReader&& other)
       : _is(other._is), local_is(other.local_is), _graph(other._graph),
         _use_nodes(other._use_nodes), _use_edges(other._use_edges),
         _skip_nodes(other._skip_nodes), _skip_edges(other._skip_edges) {
@@ -3314,7 +3314,7 @@ namespace lemon {
     friend SectionReader sectionReader(const std::string& fn);
     friend SectionReader sectionReader(const char* fn);
 
-    SectionReader(SectionReader& other)
+    SectionReader(SectionReader&& other)
       : _is(other._is), local_is(other.local_is) {
 
       other._is = 0;

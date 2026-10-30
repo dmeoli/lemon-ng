@@ -542,7 +542,7 @@ namespace lemon {
     friend DigraphWriter<TDGR> digraphWriter(const TDGR& digraph,
                                              const char *fn);
 
-    DigraphWriter(DigraphWriter& other)
+    DigraphWriter(DigraphWriter&& other)
       : _os(other._os), local_os(other.local_os), _digraph(other._digraph),
         _skip_nodes(other._skip_nodes), _skip_arcs(other._skip_arcs) {
 
@@ -1137,7 +1137,7 @@ namespace lemon {
     template <typename TGR>
     friend GraphWriter<TGR> graphWriter(const TGR& graph, const char *fn);
 
-    GraphWriter(GraphWriter& other)
+    GraphWriter(GraphWriter&& other)
       : _os(other._os), local_os(other.local_os), _graph(other._graph),
         _skip_nodes(other._skip_nodes), _skip_edges(other._skip_edges) {
 
@@ -1782,7 +1782,7 @@ namespace lemon {
     template <typename TBGR>
     friend BpGraphWriter<TBGR> bpGraphWriter(const TBGR& graph, const char *fn);
 
-    BpGraphWriter(BpGraphWriter& other)
+    BpGraphWriter(BpGraphWriter&& other)
       : _os(other._os), local_os(other.local_os), _graph(other._graph),
         _skip_nodes(other._skip_nodes), _skip_edges(other._skip_edges) {
 
@@ -2538,7 +2538,7 @@ namespace lemon {
     friend SectionWriter sectionWriter(const std::string& fn);
     friend SectionWriter sectionWriter(const char* fn);
 
-    SectionWriter(SectionWriter& other)
+    SectionWriter(SectionWriter&& other)
       : _os(other._os), local_os(other.local_os) {
 
       other._os = 0;
