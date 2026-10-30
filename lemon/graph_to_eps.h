@@ -652,7 +652,6 @@ protected:
   }
 
 public:
-  ~GraphToEps() { }
 
   ///Draws the graph.
 

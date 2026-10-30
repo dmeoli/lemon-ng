@@ -46,6 +46,7 @@
 #endif
 
 #include <vector>
+#include <utility>
 #include <algorithm>
 
 #include <lemon/bits/enable_if.h>
@@ -684,6 +685,18 @@ namespace lemon {
     DigraphCopy(const From& from, To& to)
       : _from(from), _to(to) {}
 
+    /// \brief Move constructor of DigraphCopy.
+    ///
+    /// Move constructor of DigraphCopy, which takes over the maps to be
+    /// copied, so that digraphCopy() can be returned by value.
+    DigraphCopy(DigraphCopy&& copy)
+      : _from(copy._from), _to(copy._to),
+        _node_maps(std::move(copy._node_maps)),
+        _arc_maps(std::move(copy._arc_maps)) {}
+
+    DigraphCopy(const DigraphCopy&) = delete;
+    DigraphCopy& operator=(const DigraphCopy&) = delete;
+
     /// \brief Destructor of DigraphCopy
     ///
     /// Destructor of DigraphCopy.
@@ -929,6 +942,19 @@ namespace lemon {
     /// \c from graph into the \c to graph.
     GraphCopy(const From& from, To& to)
       : _from(from), _to(to) {}
+
+    /// \brief Move constructor of GraphCopy.
+    ///
+    /// Move constructor of GraphCopy, which takes over the maps to be
+    /// copied, so that graphCopy() can be returned by value.
+    GraphCopy(GraphCopy&& copy)
+      : _from(copy._from), _to(copy._to),
+        _node_maps(std::move(copy._node_maps)),
+        _arc_maps(std::move(copy._arc_maps)),
+        _edge_maps(std::move(copy._edge_maps)) {}
+
+    GraphCopy(const GraphCopy&) = delete;
+    GraphCopy& operator=(const GraphCopy&) = delete;
 
     /// \brief Destructor of GraphCopy
     ///
@@ -1255,6 +1281,21 @@ namespace lemon {
     /// \c from graph into the \c to graph.
     BpGraphCopy(const From& from, To& to)
       : _from(from), _to(to) {}
+
+    /// \brief Move constructor of BpGraphCopy.
+    ///
+    /// Move constructor of BpGraphCopy, which takes over the maps to be
+    /// copied, so that bpGraphCopy() can be returned by value.
+    BpGraphCopy(BpGraphCopy&& copy)
+      : _from(copy._from), _to(copy._to),
+        _node_maps(std::move(copy._node_maps)),
+        _red_maps(std::move(copy._red_maps)),
+        _blue_maps(std::move(copy._blue_maps)),
+        _arc_maps(std::move(copy._arc_maps)),
+        _edge_maps(std::move(copy._edge_maps)) {}
+
+    BpGraphCopy(const BpGraphCopy&) = delete;
+    BpGraphCopy& operator=(const BpGraphCopy&) = delete;
 
     /// \brief Destructor of BpGraphCopy
     ///

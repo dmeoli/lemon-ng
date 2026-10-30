@@ -933,7 +933,6 @@ namespace lemon {
     ///Copy constructor
     DfsWizard(const TR &b) : TR(b) {}
 
-    ~DfsWizard() {}
 
     ///Runs DFS algorithm from the given source node.
 

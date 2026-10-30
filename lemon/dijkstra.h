@@ -1137,7 +1137,6 @@ namespace lemon {
     ///Copy constructor
     DijkstraWizard(const TR &b) : TR(b) {}
 
-    ~DijkstraWizard() {}
 
     ///Runs Dijkstra algorithm from the given source node.
 

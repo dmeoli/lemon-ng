@@ -991,7 +991,6 @@ namespace lemon {
     /// \brief Copy constructor
     BellmanFordWizard(const TR &b) : TR(b) {}
 
-    ~BellmanFordWizard() {}
 
     /// \brief Runs the Bellman-Ford algorithm from the given source node.
     ///

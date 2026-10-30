@@ -57,8 +57,6 @@ namespace lemon {
   public:
     ///Constructor
     ArgParserException(Reason r) noexcept : _reason(r) {}
-    ///Virtual destructor
-    virtual ~ArgParserException() noexcept {}
     ///A short description of the exception
     virtual const char* what() const noexcept {
       switch(_reason)

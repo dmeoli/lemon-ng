@@ -399,6 +399,9 @@ namespace lemon {
     SparseMap(const SparseMap<Key, V1, Comp1> &c)
       : _map(c._map.begin(), c._map.end()), _value(c._value) {}
 
+    /// \brief Copy constructor.
+    SparseMap(const SparseMap&) = default;
+
   private:
 
     SparseMap& operator=(const SparseMap&);
@@ -2448,6 +2451,8 @@ namespace lemon {
         : _key(key), _map(map) {}
     public:
 
+      Reference(const Reference&) = default;
+
       Reference& operator=(const Reference& value) {
         _map.set(_key, static_cast<bool>(value));
          return *this;
@@ -2889,6 +2894,8 @@ namespace lemon {
       Reference(IterableIntMap& map, const Key& key)
         : _key(key), _map(map) {}
     public:
+
+      Reference(const Reference&) = default;
 
       Reference& operator=(const Reference& value) {
         _map.set(_key, static_cast<const int&>(value));

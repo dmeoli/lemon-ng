@@ -1049,7 +1049,6 @@ namespace lemon {
     public:
       explicit UnsupportedFormatError(std::string format) noexcept
         : _format(format) { }
-      virtual ~UnsupportedFormatError() noexcept {}
       virtual const char* what() const noexcept {
         try {
           _what.clear();

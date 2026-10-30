@@ -1002,7 +1002,6 @@ namespace lemon {
     ///Copy constructor
     BfsWizard(const TR &b) : TR(b) {}
 
-    ~BfsWizard() {}
 
     ///Runs BFS algorithm from the given source node.
 

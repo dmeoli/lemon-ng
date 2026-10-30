@@ -44,7 +44,11 @@ namespace lemon {
     ///Constructor
     Exception() noexcept {}
     ///Virtual destructor
-    virtual ~Exception() noexcept {}
+    virtual ~Exception() = default;
+    ///Copy constructor
+    Exception(const Exception&) = default;
+    ///Copy assignment
+    Exception& operator=(const Exception&) = default;
     ///A short description of the exception
     virtual const char* what() const noexcept {
       return "lemon::Exception";
