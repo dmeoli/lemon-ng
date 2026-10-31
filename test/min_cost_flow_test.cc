@@ -347,6 +347,80 @@ void checkNarrowType() {
         "Wrong result on a narrow value type");
 }
 
+// NetworkSimplex::runWarm() after every change of a pseudo-random sequence
+// of changes of the costs, of the upper bounds (some of them infinite) and
+// of the supplies, against a run from scratch: the same result, and on an
+// unbounded problem a cycle of negative cost and infinite capacity
+template <typename V>
+void checkWarmStart(int seeds) {
+  typedef NetworkSimplex<SmartDigraph, V, V> NS;
+  const V inf = std::numeric_limits<V>::has_infinity ?
+    std::numeric_limits<V>::infinity() : (std::numeric_limits<V>::max)();
+  unsigned int r = 7;
+  for (int seed = 0; seed != seeds; ++seed) {
+    SmartDigraph g;
+    r = r * 1103515245 + 12345;
+    int n = 3 + (r >> 16) % 20;
+    for (int i = 0; i != n; ++i) g.addNode();
+    std::vector<SmartDigraph::Arc> arcs;
+    for (int k = 0; k != 3 * n; ++k) {
+      r = r * 1103515245 + 12345;
+      int u = (r >> 8) % n, v = (r >> 20) % n;
+      if (u != v) arcs.push_back(g.addArc(g.nodeFromId(u), g.nodeFromId(v)));
+    }
+    if (arcs.empty()) continue;
+    SmartDigraph::ArcMap<V> cap(g), cost(g);
+    SmartDigraph::NodeMap<V> sup(g, 0);
+    for (std::size_t k = 0; k != arcs.size(); ++k) {
+      r = r * 1103515245 + 12345;
+      cap[arcs[k]] = (r >> 4) % 5 == 0 ? inf : V((r >> 8) % 15);
+      cost[arcs[k]] = V(int((r >> 16) % 41) - 5);
+    }
+    NS warm(g);
+    for (int step = 0; step != 20; ++step) {
+      r = r * 1103515245 + 12345;
+      int what = (r >> 24) % 3;
+      for (int k = 0; k != 3; ++k) {
+        r = r * 1103515245 + 12345;
+        SmartDigraph::Arc a = arcs[(r >> 8) % arcs.size()];
+        if (what == 0) cost[a] = V(int((r >> 16) % 41) - 5);
+        if (what == 1) cap[a] = (r >> 4) % 4 == 0 ? inf : V((r >> 16) % 15);
+      }
+      if (what == 2 || step == 0) {
+        V t = 0;
+        for (int i = 1; i != n; ++i) {
+          r = r * 1103515245 + 12345;
+          V d = V((r >> 16) % 5);
+          sup[g.nodeFromId(i)] = -d;
+          t += d;
+        }
+        sup[g.nodeFromId(0)] = t;
+      }
+      warm.costMap(cost).upperMap(cap).supplyMap(sup);
+      typename NS::ProblemType rw = step == 0 ? warm.run() : warm.runWarm();
+      NS cold(g);
+      cold.costMap(cost).upperMap(cap).supplyMap(sup);
+      typename NS::ProblemType rc = cold.run();
+      check(rw == rc, "Wrong result of runWarm()");
+      if (rw == NS::OPTIMAL) {
+        check(warm.totalCost() == cold.totalCost(),
+              "Wrong total cost of runWarm()");
+      }
+      if (rw == NS::UNBOUNDED) {
+        std::vector<SmartDigraph::Arc> cyc = warm.unboundedCycle();
+        V c = 0;
+        for (std::size_t i = 0; i != cyc.size(); ++i) {
+          c += cost[cyc[i]];
+          check(cap[cyc[i]] == inf, "Wrong unbounded cycle: finite arc");
+          check(g.target(cyc[i]) == g.source(cyc[(i + 1) % cyc.size()]),
+                "Wrong unbounded cycle: not a cycle");
+        }
+        check(!cyc.empty() && c < 0, "Wrong unbounded cycle: cost");
+      }
+    }
+  }
+}
+
 template < typename MCF, typename Param >
 void runMcfGeqTests( Param param,
                      const std::string &test_str = "",
@@ -666,6 +740,10 @@ int main()
             "Wrong result of CostScaling on a chain of signed costs");
     }
   }
+
+  // Test the warm start of NetworkSimplex
+  checkWarmStart<long>(200);
+  checkWarmStart<double>(200);
 
   // Test CapacityScaling
   {

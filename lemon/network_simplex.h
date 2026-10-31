@@ -238,6 +238,12 @@ namespace lemon {
     IntVector _dirty_revs;
     int _root;
 
+    // The basis of the last run is there for runWarm() to start from, and
+    // it has to be made primal feasible first [see repairBasis()]
+    bool _warm, _repair;
+    // The entering arc of the pivot that proved the problem unbounded
+    int _unb_arc;
+
     // Temporary data used in the current pivot iteration
     int in_arc, join, u_in, v_in, u_out, v_out;
     Value delta;
@@ -702,6 +708,8 @@ namespace lemon {
         "The cost type of NetworkSimplex must be signed");
 
       // Reset data structures
+      _warm = _repair = false;
+      _unb_arc = -1;
       reset();
     }
 
@@ -724,6 +732,7 @@ namespace lemon {
     /// \return <tt>(*this)</tt>
     template <typename LowerMap>
     NetworkSimplex& lowerMap(const LowerMap& map) {
+      _warm = false;
       _has_lower = true;
       for (ArcIt a(_graph); a != INVALID; ++a) {
         _lower[_arc_id[a]] = map[a];
@@ -746,7 +755,7 @@ namespace lemon {
     template<typename UpperMap>
     NetworkSimplex& upperMap(const UpperMap& map) {
       for (ArcIt a(_graph); a != INVALID; ++a) {
-        _upper[_arc_id[a]] = map[a];
+        warmUpper(_arc_id[a], map[a]);
       }
       return *this;
     }
@@ -786,7 +795,7 @@ namespace lemon {
     template<typename SupplyMap>
     NetworkSimplex& supplyMap(const SupplyMap& map) {
       for (NodeIt n(_graph); n != INVALID; ++n) {
-        _supply[_node_id[n]] = map[n];
+        warmSupply(_node_id[n], map[n]);
       }
       return *this;
     }
@@ -809,6 +818,7 @@ namespace lemon {
     ///
     /// \return <tt>(*this)</tt>
     NetworkSimplex& stSupply(const Node& s, const Node& t, Value k) {
+      _warm = false;
       for (int i = 0; i != _node_num; ++i) {
         _supply[i] = 0;
       }
@@ -827,6 +837,7 @@ namespace lemon {
     ///
     /// \return <tt>(*this)</tt>
     NetworkSimplex& supplyType(SupplyType supply_type) {
+      _warm = false;
       _stype = supply_type;
       return *this;
     }
@@ -872,10 +883,104 @@ namespace lemon {
     /// \see ProblemType, PivotRule
     /// \see resetParams(), reset()
     ProblemType run(PivotRule pivot_rule = BLOCK_SEARCH) {
+      _unb_arc = -1;
+      _warm = _repair = false;
       // A problem without nodes has the empty flow, which is optimal
       if (_node_num == 0) return OPTIMAL;
       if (!init()) return INFEASIBLE;
-      return start(pivot_rule);
+      return finish(start(pivot_rule));
+    }
+
+    /// \brief Run the algorithm again from the basis of the last run.
+    ///
+    /// This function runs the algorithm again after a change of the
+    /// costs, of the upper bounds or of the supplies, starting from the
+    /// basis that the last run ended at rather than from the artificial
+    /// one, which re-optimizes the problem with far fewer pivots when the
+    /// change is small.
+    ///
+    /// After a change of the costs alone the basis is still primal
+    /// feasible: its potentials are computed anew and the simplex goes on
+    /// from there. After a change of the upper bounds or of the supplies
+    /// the flow of its tree is computed anew, and the subtree below an arc
+    /// whose flow falls outside its bounds is hung from the root by an
+    /// artificial arc, as the artificial basis hangs every node, so that
+    /// the basis is primal feasible again and the artificial arcs are
+    /// driven out by their cost. A basis is kept from a run that ended
+    /// with \ref OPTIMAL or, without lower bounds, \ref INFEASIBLE; a
+    /// change of the digraph, of the lower bounds, of the supply type,
+    /// \ref stSupply(), \ref resetParams(), \ref reset(), or supplies
+    /// that do not sum to zero drop it, and then this function does what
+    /// \ref run() does.
+    ///
+    /// \param pivot_rule The pivot rule that will be used during the
+    /// algorithm. For more information, see \ref PivotRule.
+    ///
+    /// \return The same as \ref run().
+    ProblemType runWarm(PivotRule pivot_rule = BLOCK_SEARCH) {
+      if (!_warm) return run(pivot_rule);
+      _unb_arc = -1;
+      if (_repair) {
+        if (!repairBasis()) return run(pivot_rule);
+        _repair = false;
+      }
+
+      // The artificial arcs keep a cost larger than that of any path, which
+      // the change may have made larger than it was
+      const Cost art = initArtificialCost();
+      for (int e = _arc_num; e != _all_arc_num; ++e) {
+        if (_cost[e] != 0) _cost[e] = art;
+      }
+
+      // The potentials of the tree of the basis, in the order of the
+      // thread, which gives every node after its father
+      _pi[_root] = 0;
+      for (int u = _thread[_root]; u != _root; u = _thread[u]) {
+        int e = _pred[u];
+        _pi[u] = _pred_dir[u] == DIR_UP ? _pi[_parent[u]] - _cost[e]
+                                        : _pi[_parent[u]] + _cost[e];
+      }
+      return finish(start(pivot_rule));
+    }
+
+    /// \brief The cycle that proves the problem unbounded.
+    ///
+    /// This function gives the directed cycle of negative cost and
+    /// infinite capacity that proves the problem unbounded, which the
+    /// algorithm has at hand when it says so: the cycle of the pivot it
+    /// cannot perform, i.e., the entering arc and the path of the tree of
+    /// the basis between its two ends, every arc of which the flow
+    /// traverses forward. The arcs are given in the direction of the flow.
+    /// The cycle is empty if the last run did not end with
+    /// \ref UNBOUNDED, or if it goes through an artificial arc, which is
+    /// no cycle of the problem.
+    std::vector<Arc> unboundedCycle() const {
+      std::vector<Arc> cycle;
+      if (_unb_arc < 0) return cycle;
+
+      std::vector<int> ids;
+      ids.push_back(_unb_arc);
+      // The entering arc goes from v_in to u_in, as findLeavingArc() sets
+      // them when no arc leaves; the flow goes on from u_in up to join, and
+      // then from join down to v_in, i.e., along the path from v_in to join
+      // taken backwards
+      for (int u = u_in; u != join; u = _parent[u]) ids.push_back(_pred[u]);
+      std::vector<int> down;
+      for (int u = v_in; u != join; u = _parent[u]) down.push_back(_pred[u]);
+      ids.insert(ids.end(), down.rbegin(), down.rend());
+
+      for (std::size_t i = 0; i != ids.size(); ++i) {
+        if (ids[i] >= _arc_num) return std::vector<Arc>();
+      }
+
+      // The inverse of the numbering of the arcs, taken once here
+      std::vector<Arc> arc_of(_arc_num, INVALID);
+      for (ArcIt a(_graph); a != INVALID; ++a) arc_of[_arc_id[a]] = a;
+      for (std::size_t i = 0; i != ids.size(); ++i) {
+        if (arc_of[ids[i]] == INVALID) return std::vector<Arc>();
+        cycle.push_back(arc_of[ids[i]]);
+      }
+      return cycle;
     }
 
     /// \brief Reset all the parameters that have been given before.
@@ -915,6 +1020,7 @@ namespace lemon {
     ///
     /// \see reset(), run()
     NetworkSimplex& resetParams() {
+      _warm = false;
       for (int i = 0; i != _node_num; ++i) {
         _supply[i] = 0;
       }
@@ -949,6 +1055,7 @@ namespace lemon {
     ///
     /// \see resetParams(), run()
     NetworkSimplex& reset() {
+      _warm = false;
       // Resize vectors
       _node_num = countNodes(_graph);
       _arc_num = countArcs(_graph);
@@ -1139,23 +1246,7 @@ namespace lemon {
       }
 
       // Initialize artifical cost
-      Cost ART_COST;
-      if (std::numeric_limits<Cost>::is_exact) {
-        ART_COST = (std::numeric_limits<Cost>::max)() / 2 + 1;
-      } else {
-        ART_COST = 0;
-        for (int i = 0; i != _arc_num; ++i) {
-          if (_cost[i] > ART_COST) ART_COST = _cost[i];
-          else if (-_cost[i] > ART_COST) ART_COST = -_cost[i];
-        }
-        ART_COST = (ART_COST + 1) * _node_num;
-      }
-
-      // The potential of the root may move from zero by half the cost of
-      // the artificial arcs for an exact type, which keeps the sums of the
-      // pivot rules within the range of the type, and by the cost itself
-      // otherwise, which costs the potentials no more than one bit
-      _pi_lim = std::numeric_limits<Cost>::is_exact ? ART_COST / 2 : ART_COST;
+      const Cost ART_COST = initArtificialCost();
 
       // Initialize arc maps
       for (int i = 0; i != _arc_num; ++i) {
@@ -1544,6 +1635,204 @@ namespace lemon {
       }
     }
 
+    // The cost of the artificial arcs, larger than the absolute value of
+    // the cost of any path, and how far the potential of the root may move
+    // from zero [see updatePotential()]: half of that cost for an exact
+    // type, which keeps the sums of the pivot rules within the range of the
+    // type, the cost itself otherwise, which costs the potentials no more
+    // than one bit of precision
+    Cost initArtificialCost() {
+      Cost art = 0;
+      if (std::numeric_limits<Cost>::is_exact) {
+        art = (std::numeric_limits<Cost>::max)() / 2 + 1;
+      } else {
+        for (int i = 0; i != _arc_num; ++i) {
+          if (_cost[i] > art) art = _cost[i];
+          else if (-_cost[i] > art) art = -_cost[i];
+        }
+        art = (art + 1) * _node_num;
+      }
+      _pi_lim = std::numeric_limits<Cost>::is_exact ? art / 2 : art;
+      return art;
+    }
+
+    // Take in the new upper bound of the arc of index i, keeping the basis
+    // of the last run as it is if the flow of the arc stays within the new
+    // bound, the arc does not sit at its upper bound and, if it is in the
+    // tree, the tree stays strongly feasible (i.e., the arc is not directed
+    // towards the root with its flow at the new bound), as for an arc out of
+    // the tree that is closed while it carries no flow and for one that is
+    // opened again; otherwise the flow of the tree has to be recomputed,
+    // which runWarm() does [see repairBasis()]. With lower bounds the basis
+    // is dropped instead.
+    void warmUpper(int i, Value up) {
+      if (up == _upper[i]) return;
+      _upper[i] = up;
+      if (!_warm) return;
+
+      Value cap;
+      if (_has_lower) {
+        Value c = _lower[i];
+        if (c >= 0) {
+          cap = up < MAX_VALUE ? up - c : INF;
+        } else {
+          cap = up < MAX_VALUE + c ? up - c : INF;
+        }
+      } else {
+        cap = up;
+      }
+
+      bool moves = _state[i] == STATE_UPPER || _flow[i] > cap;
+      if (!moves && _state[i] == STATE_TREE && _flow[i] >= cap) {
+        const int u = _pred[_source[i]] == i ? _source[i] : _target[i];
+        moves = _pred_dir[u] == DIR_UP;
+      }
+      if (moves && _has_lower) {
+        _warm = false;
+        return;
+      }
+      _cap[i] = cap;
+      if (moves) _repair = true;
+    }
+
+    // Take in the new supply of the node of index i, keeping the basis of
+    // the last run, whose flow runWarm() recomputes [see repairBasis()]
+    void warmSupply(int i, Value s) {
+      if (s == _supply[i]) return;
+      _supply[i] = s;
+      if (_warm) _repair = true;
+    }
+
+    // Make the basis of the last run primal feasible again after a change
+    // of the upper bounds or of the supplies, keeping its tree: every arc
+    // out of the tree is put at the bound it sits at, and the flow of the
+    // arcs of the tree is recomputed from the leaves up, each carrying what
+    // the subtree below it has to send. An arc whose flow falls outside its
+    // bounds, or sits at the bound that would leave the tree not strongly
+    // feasible (i.e., at its capacity if directed towards the root, at zero
+    // if directed away from it), on which the rule of the leaving arc
+    // relies against cycling, leaves the tree at that bound, and the
+    // subtree below it is hung from the root by the artificial arc of its
+    // top node, directed as the flow it has to carry and with the cost that
+    // init() would give it, i.e., zero towards the root and larger than any
+    // real one from it, so that the simplex drives it out as it does from
+    // the artificial basis. The thread and the sizes of the subtrees are
+    // then rebuilt from the fathers by a depth-first visit. It returns
+    // false, the basis having to be dropped, if there are lower bounds or
+    // if the supplies of the last run or the new ones do not sum to zero,
+    // the artificial arcs being built differently then.
+    bool repairBasis() {
+      if (_has_lower || _sum_supply != 0) return false;
+      Value sum = 0;
+      for (int u = 0; u != _node_num; ++u) sum += _supply[u];
+      const Value feps = flowTolerance(_supply, _node_num);
+      if (sum > feps || sum < -feps) return false;
+
+      // What each node has to send along the tree: its supply, net of the
+      // flow of the arcs out of the tree, each at the bound it sits at
+      std::vector<Value> net(_node_num + 1, 0);
+      for (int u = 0; u != _node_num; ++u) net[u] = _supply[u];
+      for (int e = 0; e != _arc_num; ++e) {
+        if (_state[e] == STATE_TREE) continue;
+        if (_state[e] == STATE_UPPER && _cap[e] >= MAX_VALUE) {
+          _state[e] = STATE_LOWER;  // an upper bound no longer there
+        }
+        _flow[e] = _state[e] == STATE_UPPER ? _cap[e] : 0;
+        net[_source[e]] -= _flow[e];
+        net[_target[e]] += _flow[e];
+      }
+      for (int e = _arc_num; e != _all_arc_num; ++e) {
+        if (_state[e] != STATE_TREE) _flow[e] = 0;
+      }
+
+      // The flow of the arcs of the tree, from the leaves up, i.e., in the
+      // reverse order of the thread, which gives every node after its
+      // subtree
+      for (int u = _rev_thread[_root]; u != _root; u = _rev_thread[u]) {
+        int e = _pred[u];
+        Value n = net[u];
+        if (e < _arc_num) {
+          const int p = _parent[u];
+          const Value f = _pred_dir[u] == DIR_UP ? n : -n;
+          // Strongly feasible: flow can still be sent from u to the root
+          if (_pred_dir[u] == DIR_UP ? f >= 0 && f < _cap[e]
+                                     : f > 0 && f <= _cap[e]) {
+            _flow[e] = f;
+            net[p] += n;
+            continue;
+          }
+          // The arc leaves the tree at the bound it violates, or at the one
+          // it is degenerate at, and what it carries there goes from u to p
+          _state[e] = f <= 0 ? STATE_LOWER : STATE_UPPER;
+          _flow[e] = f <= 0 ? 0 : _cap[e];
+          const Value s = _pred_dir[u] == DIR_UP ? _flow[e] : -_flow[e];
+          n -= s;
+          net[p] += s;
+          e = _arc_num + u;
+          _state[e] = STATE_TREE;
+          _parent[u] = _root;
+          _pred[u] = e;
+        }
+        // u hangs from the root by its artificial arc, directed as n says
+        if (n >= 0) {
+          _pred_dir[u] = DIR_UP;
+          _source[e] = u;
+          _target[e] = _root;
+          _flow[e] = n;
+          _cost[e] = 0;
+        } else {
+          _pred_dir[u] = DIR_DOWN;
+          _source[e] = _root;
+          _target[e] = u;
+          _flow[e] = -n;
+          _cost[e] = 1;  // nonzero: runWarm() gives it the artificial cost
+        }
+        net[_root] += n;
+      }
+
+      // The thread and its reverse, the sizes of the subtrees and their
+      // last nodes, from the fathers, by a depth-first visit from the root
+      std::vector<int> child(_node_num + 1, -1), sibling(_node_num + 1, -1);
+      for (int u = _node_num - 1; u >= 0; --u) {
+        sibling[u] = child[_parent[u]];
+        child[_parent[u]] = u;
+      }
+      std::vector<int> order, stack(1, _root);
+      order.reserve(_node_num + 1);
+      while (!stack.empty()) {
+        const int u = stack.back();
+        stack.pop_back();
+        order.push_back(u);
+        for (int v = child[u]; v != -1; v = sibling[v]) stack.push_back(v);
+      }
+      const int k = static_cast<int>(order.size());
+      if (k != _node_num + 1) return false;  // not a tree: cannot happen
+
+      for (int i = 0; i != k; ++i) {
+        const int u = order[i], v = order[(i + 1) % k];
+        _thread[u] = v;
+        _rev_thread[v] = u;
+        _succ_num[u] = 1;
+      }
+      for (int i = k - 1; i > 0; --i) {
+        _succ_num[_parent[order[i]]] += _succ_num[order[i]];
+      }
+      for (int i = 0; i != k; ++i) {
+        _last_succ[order[i]] = order[i + _succ_num[order[i]] - 1];
+      }
+      return true;
+    }
+
+    // The end of a run: a basis is there to reuse if the run has ended at
+    // an optimal one, or at one that proves the problem infeasible, which
+    // is optimal for the problem with the artificial arcs and as good a
+    // start after a change as any; not with lower bounds, which start()
+    // does not put back in the supplies when it answers INFEASIBLE
+    ProblemType finish(ProblemType pt) {
+      _warm = pt == OPTIMAL || (pt == INFEASIBLE && !_has_lower);
+      return pt;
+    }
+
     // Shift the potentials so that the one of the root is zero again
     void alignPotential() {
       const Cost r = _pi[_root];
@@ -1671,13 +1960,19 @@ namespace lemon {
       PivotRuleImpl pivot(*this);
 
       // Perform heuristic initial pivots
-      if (!initialPivots()) return UNBOUNDED;
+      if (!initialPivots()) {
+        _unb_arc = in_arc;
+        return UNBOUNDED;
+      }
 
       // Execute the Network Simplex algorithm
       while (pivot.findEnteringArc()) {
         findJoinNode();
         bool change = findLeavingArc();
-        if (delta >= MAX_VALUE) return UNBOUNDED;
+        if (delta >= MAX_VALUE) {
+          _unb_arc = in_arc;
+          return UNBOUNDED;
+        }
         changeFlow(change);
         if (change) {
           updateTreeStructure();
