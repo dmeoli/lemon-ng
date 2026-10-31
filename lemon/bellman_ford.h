@@ -32,6 +32,7 @@
 #include <lemon/bits/stl_iterators.h>
 
 #include <limits>
+#include <memory>
 
 namespace lemon {
 
@@ -220,14 +221,16 @@ namespace lemon {
     const Digraph *_gr;
     // Pointer to the length map
     const LengthMap *_length;
-    // Pointer to the map of predecessors arcs.
+    // Pointer to the map of predecessors arcs, either the one of the user
+    // or _local_pred, and never deleted through this pointer
     PredMap *_pred;
-    // Indicates if _pred is locally allocated (true) or not.
-    bool _local_pred;
-    // Pointer to the map of distances.
+    // The map of predecessors arcs allocated here, if any: an address of
+    // the user never reaches it, so that it cannot reach a delete either
+    std::unique_ptr<PredMap> _local_pred;
+    // Pointer to the map of distances, as _pred
     DistMap *_dist;
-    // Indicates if _dist is locally allocated (true) or not.
-    bool _local_dist;
+    // The map of distances allocated here, if any, as _local_pred
+    std::unique_ptr<DistMap> _local_dist;
 
     typedef typename Digraph::template NodeMap<bool> MaskMap;
     MaskMap *_mask;
@@ -237,12 +240,12 @@ namespace lemon {
     // Creates the maps if necessary.
     void create_maps() {
       if(!_pred) {
-        _local_pred = true;
-        _pred = Traits::createPredMap(*_gr);
+        _local_pred.reset(Traits::createPredMap(*_gr));
+        _pred = _local_pred.get();
       }
       if(!_dist) {
-        _local_dist = true;
-        _dist = Traits::createDistMap(*_gr);
+        _local_dist.reset(Traits::createDistMap(*_gr));
+        _dist = _local_dist.get();
       }
       if(!_mask) {
         _mask = new MaskMap(*_gr);
@@ -332,13 +335,10 @@ namespace lemon {
     /// \param length The length map used by the algorithm.
     BellmanFord(const Digraph& g, const LengthMap& length) :
       _gr(&g), _length(&length),
-      _pred(0), _local_pred(false),
-      _dist(0), _local_dist(false), _mask(0) {}
+      _pred(0), _dist(0), _mask(0) {}
 
     ///Destructor.
     ~BellmanFord() {
-      if(_local_pred) delete _pred;
-      if(_local_dist) delete _dist;
       if(_mask) delete _mask;
     }
 
@@ -360,10 +360,7 @@ namespace lemon {
     /// of course.
     /// \return <tt>(*this)</tt>
     BellmanFord &predMap(PredMap &map) {
-      if(_local_pred) {
-        delete _pred;
-        _local_pred=false;
-      }
+      _local_pred.reset();
       _pred = &map;
       return *this;
     }
@@ -378,10 +375,7 @@ namespace lemon {
     /// of course.
     /// \return <tt>(*this)</tt>
     BellmanFord &distMap(DistMap &map) {
-      if(_local_dist) {
-        delete _dist;
-        _local_dist=false;
-      }
+      _local_dist.reset();
       _dist = &map;
       return *this;
     }
