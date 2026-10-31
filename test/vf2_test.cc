@@ -407,8 +407,29 @@ void checkSub(const G1 &g1, const G2 &g2, const L1 &l1, const L2 &l2, bool expec
   check(checkSub(g1,g2,l1,l2,vf2pp(g1,g2)) == expected, msg);
 }
 
+// The objects the wizards create, which have to compile and to find the
+// same mappings as the wizards themselves
+void checkWizardObjects() {
+  Vf2<SmartGraph, SmartGraph, SmartGraph::NodeMap<SmartGraph::Node> >*
+    v = vf2(c5, petersen).getPtrToVf2Object();
+  int n = 0;
+  while (v->find()) ++n;
+  delete v;
+  check(n == vf2(c5, petersen).count(),
+        "Wrong number of mappings from getPtrToVf2Object()");
+  Vf2pp<SmartGraph, SmartGraph, SmartGraph::NodeMap<SmartGraph::Node> >*
+    w = vf2pp(c5, petersen).getPtrToVf2ppObject();
+  n = 0;
+  while (w->find()) ++n;
+  delete w;
+  check(n == vf2pp(c5, petersen).count(),
+        "Wrong number of mappings from getPtrToVf2ppObject()");
+}
+
 int main() {
   make_graphs();
+
+  checkWizardObjects();
 
   checkSub(c5,petersen,true,
       "There should exist a C5->Petersen mapping.");

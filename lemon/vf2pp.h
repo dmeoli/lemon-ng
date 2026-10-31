@@ -66,6 +66,10 @@ namespace lemon {
            class M2 = typename G2::template NodeMap<int> >
 #endif
   class Vf2pp {
+    // the wizard sets what a Vf2pp it creates has to deallocate
+    template <class TR>
+    friend class Vf2ppWizard;
+
     //The graph to be embedded
     const G1 &_g1;
 
@@ -778,7 +782,7 @@ namespace lemon {
       if(Base::_local_mapping)
         ptr->_deallocMappingAfterUse=true;
       if(Base::_local_nodeLabels)
-        ptr->_deallocLabelMapsAfterUse=true;
+        ptr->_deallocLabelsAfterUse=true;
 
       return ptr;
     }
