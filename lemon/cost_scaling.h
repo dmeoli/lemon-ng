@@ -272,6 +272,9 @@ namespace lemon {
     // The arcs whose infinite upper bound init() has replaced by a finite
     // one, which the next init() makes infinite again
     IntVector _inf_upper;
+    // The flow and the potentials of the last run are there for runWarm()
+    // to start from
+    bool _warm;
     BoolVector _forward;
     IntVector _source;
     IntVector _target;
@@ -379,6 +382,7 @@ namespace lemon {
     /// \return <tt>(*this)</tt>
     template <typename LowerMap>
     CostScaling& lowerMap(const LowerMap& map) {
+      _warm = false;
       _has_lower = true;
       for (ArcIt a(_graph); a != INVALID; ++a) {
         _lower[_arc_idf[a]] = map[a];
@@ -517,11 +521,86 @@ namespace lemon {
     ProblemType run(Method method = PARTIAL_AUGMENT, int factor = 16) {
       LEMON_ASSERT(factor >= 2, "The scaling factor must be at least 2");
       _alpha = factor;
+      _warm = false;
       // A problem without nodes has the empty flow, which is optimal
       if (_node_num == 0) return OPTIMAL;
       ProblemType pt = init();
       if (pt != OPTIMAL) return pt;
       start(method);
+      _warm = true;
+      return OPTIMAL;
+    }
+
+    /// \brief Run the algorithm again from the last run.
+    ///
+    /// This function runs the algorithm again after a change of the
+    /// costs, of the upper bounds or of the supplies, starting from the
+    /// flow and the potentials of the last run rather than from a feasible
+    /// flow found anew and the zero potentials: the flow is put within the
+    /// new bounds, and what this and a change of the supplies leave at the
+    /// nodes is sent where it is due on the residual network, which after a
+    /// change of the costs alone is nothing; the scaling then starts from
+    /// the largest amount by which a residual arc violates the optimality
+    /// conditions under the potentials, rather than from the largest cost,
+    /// so that a small change costs a few phases at a small epsilon.
+    ///
+    /// It does what \ref run() does if the last run did not end with
+    /// \ref OPTIMAL, with lower bounds, with an arc of infinite upper
+    /// bound, with supplies that do not sum to zero, and when no flow
+    /// meets the new bounds and supplies, which \ref run() then proves.
+    ///
+    /// \param method, factor As for \ref run().
+    ///
+    /// \return The same as \ref run().
+    ProblemType runWarm(Method method = PARTIAL_AUGMENT, int factor = 16) {
+      if (!_warm || _has_lower || _sum_supply != 0 || !_inf_upper.empty()) {
+        return run(method, factor);
+      }
+      LEMON_ASSERT(factor >= 2, "The scaling factor must be at least 2");
+      const Value MAX = (std::numeric_limits<Value>::max)();
+      Value sum = 0;
+      for (int i = 0; i != _root; ++i) sum += _supply[i];
+      if (sum != 0) return run(method, factor);
+      for (int j = 0; j != _res_arc_num; ++j) {
+        if (_forward[j] && _source[j] != _root && _upper[j] >= MAX) {
+          return run(method, factor);
+        }
+      }
+      if (!_mcf_bits::feasibleFlow(*this, true, Value(0), _sup_node_num)) {
+        return run(method, factor);
+      }
+
+      _alpha = factor;
+      const LargeCost scale = static_cast<LargeCost>(_res_node_num) * _alpha;
+      for (int i = 0; i != _res_node_num; ++i) {
+        _excess[i] = 0;
+        _pi[i] *= scale;
+      }
+
+      // The costs the algorithm works on, and how far the potentials are
+      // from optimal
+      _epsilon = 0;
+      for (int j = 0; j != _res_arc_num; ++j) {
+        if (_source[j] == _root || _target[j] == _root) continue;
+        _cost[j] = static_cast<LargeCost>(_scost[j]) * scale;
+      }
+      for (int j = 0; j != _res_arc_num; ++j) {
+        if (_res_cap[j] <= 0) continue;
+        const LargeCost rc = _cost[j] + _pi[_source[j]] - _pi[_target[j]];
+        if (-rc > _epsilon) _epsilon = -rc;
+      }
+
+      // The flow and the potentials are already epsilon-optimal, hence the
+      // first phase is the one after epsilon, as the loop of start() would
+      // take it, rather than a refinement to where they already are
+      _epsilon = _epsilon >= _alpha ? _epsilon / _alpha :
+                                      (_epsilon >= 1 ? 1 : _epsilon);
+
+      _max_rank = _alpha * _res_node_num;
+      _buckets.resize(_max_rank);
+
+      start(method);
+      _warm = true;
       return OPTIMAL;
     }
 
@@ -562,6 +641,7 @@ namespace lemon {
     ///
     /// \see reset(), run()
     CostScaling& resetParams() {
+      _warm = false;
       _inf_upper.clear();
       for (int i = 0; i != _res_node_num; ++i) {
         _supply[i] = 0;
@@ -602,6 +682,7 @@ namespace lemon {
     ///
     /// \see resetParams(), run()
     CostScaling& reset() {
+      _warm = false;
       // Resize vectors
       _node_num = countNodes(_graph);
       _arc_num = countArcs(_graph);

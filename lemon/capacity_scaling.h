@@ -173,6 +173,9 @@ namespace lemon {
     IntNodeMap _node_id;
     IntArcMap _arc_idf;
     IntArcMap _arc_idb;
+    // The flow and the potentials of the last run are there for runWarm()
+    // to start from
+    bool _warm;
     IntVector _first_out;
     BoolVector _forward;
     IntVector _source;
@@ -359,6 +362,7 @@ namespace lemon {
     /// \return <tt>(*this)</tt>
     template <typename LowerMap>
     CapacityScaling& lowerMap(const LowerMap& map) {
+      _warm = false;
       _has_lower = true;
       for (ArcIt a(_graph); a != INVALID; ++a) {
         _lower[_arc_idf[a]] = map[a];
@@ -495,12 +499,113 @@ namespace lemon {
     /// \see resetParams(), reset()
     ProblemType run(int factor = 4) {
       _factor = factor;
+      _warm = false;
       // A problem without nodes (the only one here being the root) has the
       // empty flow, which is optimal
       if (_node_num == 1) return OPTIMAL;
       ProblemType pt = init();
       if (pt != OPTIMAL) return pt;
-      return start();
+      pt = start();
+      _warm = pt == OPTIMAL;
+      return pt;
+    }
+
+    /// \brief Run the algorithm again from the last run.
+    ///
+    /// This function runs the algorithm again after a change of the
+    /// costs, of the upper bounds or of the supplies, starting from the
+    /// flow and the potentials of the last run rather than from the zero
+    /// flow and the zero potentials, which a primal-dual algorithm allows
+    /// after any such change: the flow of each arc is put within its new
+    /// bounds, and then at the bound that the reduced cost of the arc under
+    /// the potentials says (the upper one if it is negative, the lower one
+    /// if it is positive), so that the reduced cost of every residual arc
+    /// is nonnegative again; what this leaves at the nodes is an excess,
+    /// which the shortest augmenting paths send where it is due, as they do
+    /// in a run from scratch.
+    ///
+    /// It does what \ref run() does if the last run did not end with
+    /// \ref OPTIMAL, with lower bounds, with an arc of infinite upper
+    /// bound, whose flow could not be put at its upper bound, and with
+    /// supplies that do not sum to zero.
+    ///
+    /// \param factor As for \ref run().
+    ///
+    /// \return The same as \ref run().
+    ProblemType runWarm(int factor = 4) {
+      if (!_warm || _has_lower || _sum_supply != 0) return run(factor);
+      Value sum = 0;
+      for (int i = 0; i != _root; ++i) sum += _supply[i];
+      if (sum != 0) return run(factor);
+
+      const Value MAX = (std::numeric_limits<Value>::max)();
+      for (int j = 0; j != _res_arc_num; ++j) {
+        if (_forward[j] && _source[j] != _root && _upper[j] >= MAX) {
+          return run(factor);
+        }
+      }
+      _factor = factor;
+      for (int i = 0; i != _root; ++i) _excess[i] = _supply[i];
+      _excess[_root] = 0;
+
+      // The potentials of the last run, shifted so that the smallest is
+      // zero, which leaves the reduced costs as they are and keeps their
+      // values from drifting over a long sequence of runs
+      Cost pmin = _pi[0];
+      for (int i = 1; i <= _root; ++i) {
+        if (_pi[i] < pmin) pmin = _pi[i];
+      }
+      for (int i = 0; i <= _root; ++i) _pi[i] -= pmin;
+
+      // The flow of the last run, within the new bounds and at the bound
+      // that the reduced cost says; the last arc out of a node is the one to
+      // the root
+      for (int u = 0; u != _root; ++u) {
+        const int last_out = _first_out[u + 1] - 1;
+        for (int j = _first_out[u]; j != last_out; ++j) {
+          if (!_forward[j]) continue;
+          const int v = _target[j], rj = _reverse[j];
+          const Value up = _upper[j];
+          Value x = _res_cap[rj];
+          if (x > up) x = up;
+          const Cost c = _cost[j] + _pi[u] - _pi[v];
+          if (c < 0) {
+            x = up;
+          } else if (c > 0) {
+            x = 0;
+          }
+          _res_cap[j] = up - x;
+          _res_cap[rj] = x;
+          _excess[u] -= x;
+          _excess[v] += x;
+        }
+      }
+      for (int a = _first_out[_root]; a != _res_arc_num; ++a) {
+        _res_cap[a] = 1;
+        _res_cap[_reverse[a]] = 0;
+      }
+
+      // The scaling starts from the largest excess, as in init()
+      if (_factor > 1) {
+        Value max_sup = 0, max_dem = 0, max_cap = 0;
+        for (int i = 0; i != _root; ++i) {
+          const Value ex = _excess[i];
+          if (ex > max_sup) max_sup = ex;
+          if (-ex > max_dem) max_dem = -ex;
+          const int last_out = _first_out[i + 1] - 1;
+          for (int j = _first_out[i]; j != last_out; ++j) {
+            if (_res_cap[j] > max_cap) max_cap = _res_cap[j];
+          }
+        }
+        max_sup = (std::min)((std::min)(max_sup, max_dem), max_cap);
+        for (_delta = 1; 2 * _delta <= max_sup; _delta *= 2) ;
+      } else {
+        _delta = 1;
+      }
+
+      const ProblemType pt = start();
+      _warm = pt == OPTIMAL;
+      return pt;
     }
 
     /// \brief Reset all the parameters that have been given before.
@@ -540,6 +645,7 @@ namespace lemon {
     ///
     /// \see reset(), run()
     CapacityScaling& resetParams() {
+      _warm = false;
       for (int i = 0; i != _node_num; ++i) {
         _supply[i] = 0;
       }
@@ -572,6 +678,7 @@ namespace lemon {
     ///
     /// \see resetParams(), run()
     CapacityScaling& reset() {
+      _warm = false;
       // Resize vectors
       _node_num = countNodes(_graph);
       _arc_num = countArcs(_graph);
