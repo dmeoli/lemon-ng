@@ -23,38 +23,38 @@ using namespace lemon;
 
 void f()
 {
-  volatile double d=0;
-  for(int i=0;i<1000;i++)
-    d+=0.1;
-}
+ volatile double d = 0;
+ for( int i = 0 ; i < 1000 ; i++ )
+  d += 0.1;
+ }
 
 void g()
 {
-  static Timer T;
+ static Timer T;
 
-  for(int i=0;i<1000;i++)
-    {
-      TimeStamp x(T);
-      ::lemon::ignore_unused_variable_warning(x);
-    }
-}
+ for( int i = 0 ; i < 1000 ; i++ ) {
+  TimeStamp x( T );
+  ::lemon::ignore_unused_variable_warning( x );
+  }
+ }
 
 int main()
 {
-  Timer T;
-  unsigned int n;
-  for(n=0;T.realTime()<0.1;n++) ;
-  std::cout << T << " (" << n << " time queries)\n";
+ Timer T;
+ unsigned int n;
+ for( n = 0 ; T.realTime() < 0.1 ; n++ )
+  ;
+ std::cout << T << " (" << n << " time queries)\n";
 
-  TimeStamp full;
-  TimeStamp t;
-  t=runningTimeTest(f,0.1,&n,&full);
-  std::cout << t << " (" << n << " tests)\n";
-  std::cout << "Total: " << full << "\n";
+ TimeStamp full;
+ TimeStamp t;
+ t = runningTimeTest( f , 0.1 , &n , &full );
+ std::cout << t << " (" << n << " tests)\n";
+ std::cout << "Total: " << full << "\n";
 
-  t=runningTimeTest(g,0.1,&n,&full);
-  std::cout << t << " (" << n << " tests)\n";
-  std::cout << "Total: " << full << "\n";
+ t = runningTimeTest( g , 0.1 , &n , &full );
+ std::cout << t << " (" << n << " tests)\n";
+ std::cout << "Total: " << full << "\n";
 
-  return 0;
-}
+ return( 0 );
+ }

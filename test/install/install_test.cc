@@ -25,25 +25,25 @@
 #include <lemon/network_simplex.h>
 #include <lemon/smart_graph.h>
 
-int main(int argc, char *argv[])
+int main( int argc , char * argv[] )
 {
-  lemon::ArgParser ap(argc, argv);
-  ap.run();
+ lemon::ArgParser ap( argc , argv );
+ ap.run();
 
-  lemon::SmartDigraph g;
-  lemon::SmartDigraph::Node s = g.addNode(), t = g.addNode();
-  lemon::SmartDigraph::Arc a = g.addArc(s, t);
-  lemon::SmartDigraph::ArcMap<int> cost(g, 2), cap(g, 5);
-  lemon::SmartDigraph::NodeMap<int> supply(g, 0);
-  supply[s] = 3;
-  supply[t] = -3;
+ lemon::SmartDigraph g;
+ lemon::SmartDigraph::Node s = g.addNode() , t = g.addNode();
+ lemon::SmartDigraph::Arc a = g.addArc( s , t );
+ lemon::SmartDigraph::ArcMap< int > cost( g , 2 ) , cap( g , 5 );
+ lemon::SmartDigraph::NodeMap< int > supply( g , 0 );
+ supply[ s ] = 3;
+ supply[ t ] = -3;
 
-  lemon::NetworkSimplex<lemon::SmartDigraph> ns(g);
-  ns.costMap(cost).upperMap(cap).supplyMap(supply);
-  if (ns.run() != ns.OPTIMAL || ns.totalCost() != 6 || ns.flow(a) != 3) {
-    std::cerr << "wrong result" << std::endl;
-    return 1;
+ lemon::NetworkSimplex< lemon::SmartDigraph > ns( g );
+ ns.costMap( cost ).upperMap( cap ).supplyMap( supply );
+ if( ns.run() != ns.OPTIMAL || ns.totalCost() != 6 || ns.flow( a ) != 3 ) {
+  std::cerr << "wrong result" << std::endl;
+  return( 1 );
   }
-  std::cout << "ok" << std::endl;
-  return 0;
-}
+ std::cout << "ok" << std::endl;
+ return( 0 );
+ }

@@ -39,52 +39,60 @@ using namespace lemon;
 #define LEMON_DISABLE_ASSERTS
 #include <lemon/assert.h>
 
-void no_assertion_text_disable() {
-  LEMON_ASSERT(true, "This is a fault message");
-}
+void no_assertion_text_disable()
+{
+ LEMON_ASSERT( true , "This is a fault message" );
+ }
 
-void assertion_text_disable() {
-  LEMON_ASSERT(false, "This is a fault message");
-}
+void assertion_text_disable()
+{
+ LEMON_ASSERT( false , "This is a fault message" );
+ }
 
-void check_assertion_disable() {
-  no_assertion_text_disable();
-  assertion_text_disable();
-}
+void check_assertion_disable()
+{
+ no_assertion_text_disable();
+ assertion_text_disable();
+ }
 #undef LEMON_DISABLE_ASSERTS
 
 //checking custom assert handler
 #define LEMON_ASSERT_CUSTOM
 
 static int cnt = 0;
-void my_assert_handler(const char*, int, const char*,
-                       const char*, const char*) {
-  ++cnt;
-}
+void my_assert_handler( const char * , int , const char * , const char * ,
+			const char * )
+{
+ ++cnt;
+ }
 
 #define LEMON_CUSTOM_ASSERT_HANDLER my_assert_handler
 #include <lemon/assert.h>
 
-void no_assertion_text_custom() {
-  LEMON_ASSERT(true, "This is a fault message");
-}
+void no_assertion_text_custom()
+{
+ LEMON_ASSERT( true , "This is a fault message" );
+ }
 
-void assertion_text_custom() {
-  LEMON_ASSERT(false, "This is a fault message");
-}
+void assertion_text_custom()
+{
+ LEMON_ASSERT( false , "This is a fault message" );
+ }
 
-void check_assertion_custom() {
-  no_assertion_text_custom();
-  assertion_text_custom();
-  check(cnt == 1, "The custom assert handler does not work");
-}
+void check_assertion_custom()
+{
+ no_assertion_text_custom();
+ assertion_text_custom();
+ check( cnt == 1 , "The custom assert handler does not work" );
+ }
 
 #undef LEMON_ASSERT_CUSTOM
 
 
-int main() {
-  check_assertion_disable();
-  check_assertion_custom();
+int main()
+{
+ check_assertion_disable();
+ check_assertion_custom();
 
-  return 0;
-}
+ return( 0 );
+ }

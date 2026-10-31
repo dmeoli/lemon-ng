@@ -38,33 +38,43 @@
 
 using namespace lemon;
 
-int main() {
-  SmartDigraph g;
-  SmartDigraph::ArcMap<int> cap(g);
-  SmartDigraph::Node s, t;
+int main()
+{
+ SmartDigraph g;
+ SmartDigraph::ArcMap< int > cap( g );
+ SmartDigraph::Node s , t;
 
-  try {
-    digraphReader(g, "digraph.lgf"). // read the directed graph into g
-      arcMap("capacity", cap).       // read the 'capacity' arc map into cap
-      node("source", s).             // read 'source' node to s
-      node("target", t).             // read 'target' node to t
-      run();
-  } catch (Exception& error) { // check if there was any error
-    std::cerr << "Error: " << error.what() << std::endl;
-    return -1;
+ try {
+  digraphReader( g , "digraph.lgf" )
+    .  // read the directed graph into g
+    arcMap( "capacity" , cap )
+    .  // read the 'capacity' arc map into cap
+    node( "source" , s )
+    .  // read 'source' node to s
+    node( "target" , t )
+    .  // read 'target' node to t
+    run();
+  }
+ catch( Exception & error ) {  // check if there was any error
+  std::cerr << "Error: " << error.what() << std::endl;
+  return( -1 );
   }
 
-  std::cout << "A digraph is read from 'digraph.lgf'." << std::endl;
-  std::cout << "Number of nodes: " << countNodes(g) << std::endl;
-  std::cout << "Number of arcs: " << countArcs(g) << std::endl;
+ std::cout << "A digraph is read from 'digraph.lgf'." << std::endl;
+ std::cout << "Number of nodes: " << countNodes( g ) << std::endl;
+ std::cout << "Number of arcs: " << countArcs( g ) << std::endl;
 
-  std::cout << "We can write it to the standard output:" << std::endl;
+ std::cout << "We can write it to the standard output:" << std::endl;
 
-  digraphWriter(g).                // write g to the standard output
-    arcMap("capacity", cap).       // write cap into 'capacity'
-    node("source", s).             // write s to 'source'
-    node("target", t).             // write t to 'target'
-    run();
+ digraphWriter( g )
+   .  // write g to the standard output
+   arcMap( "capacity" , cap )
+   .  // write cap into 'capacity'
+   node( "source" , s )
+   .  // write s to 'source'
+   node( "target" , t )
+   .  // write t to 'target'
+   run();
 
-  return 0;
-}
+ return( 0 );
+ }

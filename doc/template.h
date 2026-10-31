@@ -17,6 +17,6 @@
  */
 
 #ifndef LEMON_TEMPLATE_H
-#define LEMON_TEMPLATE_H
+ #define LEMON_TEMPLATE_H
 
-#endif // LEMON_TEMPLATE_H
+#endif  // LEMON_TEMPLATE_H

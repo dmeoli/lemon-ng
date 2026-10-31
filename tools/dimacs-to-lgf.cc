@@ -44,104 +44,94 @@ using namespace std;
 using namespace lemon;
 
 
-int main(int argc, const char *argv[]) {
-  typedef SmartDigraph Digraph;
+int main( int argc , const char * argv[] )
+{
+ typedef SmartDigraph Digraph;
 
-  typedef Digraph::Node Node;
-  typedef Digraph::ArcMap<double> DoubleArcMap;
-  typedef Digraph::NodeMap<double> DoubleNodeMap;
+ typedef Digraph::Node Node;
+ typedef Digraph::ArcMap< double > DoubleArcMap;
+ typedef Digraph::NodeMap< double > DoubleNodeMap;
 
-  std::string inputName;
-  std::string outputName;
+ std::string inputName;
+ std::string outputName;
 
-  ArgParser ap(argc, argv);
-  ap.other("[INFILE [OUTFILE]]",
-           "If either the INFILE or OUTFILE file is missing the standard\n"
-           "     input/output will be used instead.")
-    .run();
+ ArgParser ap( argc , argv );
+ ap.other( "[INFILE [OUTFILE]]" ,
+	   "If either the INFILE or OUTFILE file is missing the standard\n"
+	   "     input/output will be used instead." )
+   .run();
 
-  ifstream input;
-  ofstream output;
+ ifstream input;
+ ofstream output;
 
-  switch(ap.files().size())
-    {
-    case 2:
-      output.open(ap.files()[1].c_str());
-      if (!output) {
-        throw IoError("Cannot open the file for writing", ap.files()[1]);
-      }
-      // fall through
-    case 1:
-      input.open(ap.files()[0].c_str());
-      if (!input) {
-        throw IoError("File cannot be found", ap.files()[0]);
-      }
-      // fall through
-    case 0:
-      break;
-    default:
-      cerr << ap.commandName() << ": too many arguments\n";
-      return 1;
-  }
-  istream& is = (ap.files().size()<1 ? cin : input);
-  ostream& os = (ap.files().size()<2 ? cout : output);
-
-  DimacsDescriptor desc = dimacsType(is);
-  switch(desc.type)
-    {
-    case DimacsDescriptor::MIN:
-      {
-        Digraph digraph;
-        DoubleArcMap lower(digraph), capacity(digraph), cost(digraph);
-        DoubleNodeMap supply(digraph);
-        readDimacsMin(is, digraph, lower, capacity, cost, supply, 0, desc);
-        DigraphWriter<Digraph>(digraph, os).
-          nodeMap("supply", supply).
-          arcMap("lower", lower).
-          arcMap("capacity", capacity).
-          arcMap("cost", cost).
-          attribute("problem","min").
-          run();
-      }
-      break;
-    case DimacsDescriptor::MAX:
-      {
-        Digraph digraph;
-        Node s, t;
-        DoubleArcMap capacity(digraph);
-        readDimacsMax(is, digraph, capacity, s, t, 0, desc);
-        DigraphWriter<Digraph>(digraph, os).
-          arcMap("capacity", capacity).
-          node("source", s).
-          node("target", t).
-          attribute("problem","max").
-          run();
-      }
-      break;
-    case DimacsDescriptor::SP:
-      {
-        Digraph digraph;
-        Node s;
-        DoubleArcMap capacity(digraph);
-        readDimacsSp(is, digraph, capacity, s, desc);
-        DigraphWriter<Digraph>(digraph, os).
-          arcMap("capacity", capacity).
-          node("source", s).
-          attribute("problem","sp").
-          run();
-      }
-      break;
-    case DimacsDescriptor::MAT:
-      {
-        Digraph digraph;
-        readDimacsMat(is, digraph,desc);
-        DigraphWriter<Digraph>(digraph, os).
-          attribute("problem","mat").
-          run();
-      }
-      break;
-    default:
-      break;
+ switch( ap.files().size() ) {
+  case 2:
+   output.open( ap.files()[ 1 ].c_str() );
+   if( ! output ) {
+    throw( IoError( "Cannot open the file for writing" , ap.files()[ 1 ] ) );
     }
-  return 0;
-}
+   // fall through
+  case 1:
+   input.open( ap.files()[ 0 ].c_str() );
+   if( ! input ) {
+    throw( IoError( "File cannot be found" , ap.files()[ 0 ] ) );
+    }
+   // fall through
+  case 0:
+   break;
+  default:
+   cerr << ap.commandName() << ": too many arguments\n";
+   return( 1 );
+  }
+ istream & is = ( ap.files().size() < 1 ? cin : input );
+ ostream & os = ( ap.files().size() < 2 ? cout : output );
+
+ DimacsDescriptor desc = dimacsType( is );
+ switch( desc.type ) {
+  case DimacsDescriptor::MIN: {
+   Digraph digraph;
+   DoubleArcMap lower( digraph ) , capacity( digraph ) , cost( digraph );
+   DoubleNodeMap supply( digraph );
+   readDimacsMin( is , digraph , lower , capacity , cost , supply , 0 , desc );
+   DigraphWriter< Digraph >( digraph , os )
+     .nodeMap( "supply" , supply )
+     .arcMap( "lower" , lower )
+     .arcMap( "capacity" , capacity )
+     .arcMap( "cost" , cost )
+     .attribute( "problem" , "min" )
+     .run();
+   } break;
+  case DimacsDescriptor::MAX: {
+   Digraph digraph;
+   Node s , t;
+   DoubleArcMap capacity( digraph );
+   readDimacsMax( is , digraph , capacity , s , t , 0 , desc );
+   DigraphWriter< Digraph >( digraph , os )
+     .arcMap( "capacity" , capacity )
+     .node( "source" , s )
+     .node( "target" , t )
+     .attribute( "problem" , "max" )
+     .run();
+   } break;
+  case DimacsDescriptor::SP: {
+   Digraph digraph;
+   Node s;
+   DoubleArcMap capacity( digraph );
+   readDimacsSp( is , digraph , capacity , s , desc );
+   DigraphWriter< Digraph >( digraph , os )
+     .arcMap( "capacity" , capacity )
+     .node( "source" , s )
+     .attribute( "problem" , "sp" )
+     .run();
+   } break;
+  case DimacsDescriptor::MAT: {
+   Digraph digraph;
+   readDimacsMat( is , digraph , desc );
+   DigraphWriter< Digraph >( digraph , os ).attribute( "problem" ,
+						       "mat" ).run();
+   } break;
+  default:
+   break;
+  }
+ return( 0 );
+ }

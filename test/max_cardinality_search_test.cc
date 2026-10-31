@@ -29,134 +29,134 @@
 using namespace lemon;
 using namespace std;
 
-char test_lgf[] =
-  "@nodes\n"
-  "label\n"
-  "0\n"
-  "1\n"
-  "2\n"
-  "3\n"
-  "@arcs\n"
-  "    label capacity\n"
-  "0 1 0     2\n"
-  "1 0 1     2\n"
-  "2 1 2     1\n"
-  "2 3 3     3\n"
-  "3 2 4     3\n"
-  "3 1 5     5\n"
-  "@attributes\n"
-  "s 0\n"
-  "x 1\n"
-  "y 2\n"
-  "z 3\n";
+char test_lgf[] = "@nodes\n"
+		  "label\n"
+		  "0\n"
+		  "1\n"
+		  "2\n"
+		  "3\n"
+		  "@arcs\n"
+		  "    label capacity\n"
+		  "0 1 0     2\n"
+		  "1 0 1     2\n"
+		  "2 1 2     1\n"
+		  "2 3 3     3\n"
+		  "3 2 4     3\n"
+		  "3 1 5     5\n"
+		  "@attributes\n"
+		  "s 0\n"
+		  "x 1\n"
+		  "y 2\n"
+		  "z 3\n";
 
-void checkMaxCardSearchCompile() {
+void checkMaxCardSearchCompile()
+{
 
-  typedef concepts::Digraph Digraph;
-  typedef int Value;
-  typedef Digraph::Node Node;
-  typedef Digraph::Arc Arc;
-  typedef concepts::ReadMap<Arc,Value> CapMap;
-  typedef concepts::ReadWriteMap<Node,Value> CardMap;
-  typedef concepts::ReadWriteMap<Node,bool> ProcMap;
-  typedef Digraph::NodeMap<int> HeapCrossRef;
+ typedef concepts::Digraph Digraph;
+ typedef int Value;
+ typedef Digraph::Node Node;
+ typedef Digraph::Arc Arc;
+ typedef concepts::ReadMap< Arc , Value > CapMap;
+ typedef concepts::ReadWriteMap< Node , Value > CardMap;
+ typedef concepts::ReadWriteMap< Node , bool > ProcMap;
+ typedef Digraph::NodeMap< int > HeapCrossRef;
 
-  Digraph g;
-  Node n,s;
-  CapMap cap;
-  CardMap card;
-  ProcMap proc;
-  HeapCrossRef crossref(g);
+ Digraph g;
+ Node n , s;
+ CapMap cap;
+ CardMap card;
+ ProcMap proc;
+ HeapCrossRef crossref( g );
 
-  typedef MaxCardinalitySearch<Digraph,CapMap>
-    ::SetCapacityMap<CapMap>
-    ::SetCardinalityMap<CardMap>
-    ::SetProcessedMap<ProcMap>
-    ::SetStandardHeap<BinHeap<Value,HeapCrossRef> >
-    ::Create MaxCardType;
+ typedef MaxCardinalitySearch< Digraph , CapMap >::SetCapacityMap< CapMap >::
+   SetCardinalityMap< CardMap >::SetProcessedMap< ProcMap >::SetStandardHeap<
+     BinHeap< Value , HeapCrossRef > >::Create MaxCardType;
 
-  MaxCardType maxcard(g,cap);
-  const MaxCardType& const_maxcard = maxcard;
+ MaxCardType maxcard( g , cap );
+ const MaxCardType & const_maxcard = maxcard;
 
-  const MaxCardType::Heap& heap_const = const_maxcard.heap();
-  MaxCardType::Heap& heap = const_cast<MaxCardType::Heap&>(heap_const);
-  maxcard.heap(heap,crossref);
+ const MaxCardType::Heap & heap_const = const_maxcard.heap();
+ MaxCardType::Heap & heap = const_cast< MaxCardType::Heap & >( heap_const );
+ maxcard.heap( heap , crossref );
 
-  maxcard.capacityMap(cap).cardinalityMap(card).processedMap(proc);
+ maxcard.capacityMap( cap ).cardinalityMap( card ).processedMap( proc );
 
-  maxcard.init();
-  maxcard.addSource(s);
-  n = maxcard.nextNode();
-   maxcard.processNextNode();
-   maxcard.start();
-   maxcard.run(s);
-   maxcard.run();
+ maxcard.init();
+ maxcard.addSource( s );
+ n = maxcard.nextNode();
+ maxcard.processNextNode();
+ maxcard.start();
+ maxcard.run( s );
+ maxcard.run();
  }
 
- void checkWithIntMap( std::istringstream& input)
- {
-   typedef SmartDigraph Digraph;
-   typedef Digraph::Node Node;
-   typedef Digraph::ArcMap<int> CapMap;
+void checkWithIntMap( std::istringstream & input )
+{
+ typedef SmartDigraph Digraph;
+ typedef Digraph::Node Node;
+ typedef Digraph::ArcMap< int > CapMap;
 
-   Digraph g;
-   Node s,x,y,z,a;
-   CapMap cap(g);
+ Digraph g;
+ Node s , x , y , z , a;
+ CapMap cap( g );
 
-   DigraphReader<Digraph>(g,input).
-     arcMap("capacity", cap).
-     node("s",s).
-     node("x",x).
-     node("y",y).
-     node("z",z).
-     run();
+ DigraphReader< Digraph >( g , input )
+   .arcMap( "capacity" , cap )
+   .node( "s" , s )
+   .node( "x" , x )
+   .node( "y" , y )
+   .node( "z" , z )
+   .run();
 
-   MaxCardinalitySearch<Digraph,CapMap> maxcard(g,cap);
+ MaxCardinalitySearch< Digraph , CapMap > maxcard( g , cap );
 
-   maxcard.init();
-   maxcard.addSource(s);
-   maxcard.start(x);
+ maxcard.init();
+ maxcard.addSource( s );
+ maxcard.start( x );
 
-   check(maxcard.processed(s) && !maxcard.processed(x) &&
-         !maxcard.processed(y), "Wrong processed()!");
+ check( maxcard.processed( s ) && ! maxcard.processed( x ) &&
+	  ! maxcard.processed( y ) ,
+	"Wrong processed()!" );
 
-   a=maxcard.nextNode();
-   check(maxcard.processNextNode()==a,
-         "Wrong nextNode() or processNextNode() return value!");
+ a = maxcard.nextNode();
+ check( maxcard.processNextNode() == a ,
+	"Wrong nextNode() or processNextNode() return value!" );
 
-   check(maxcard.processed(a), "Wrong processNextNode()!");
+ check( maxcard.processed( a ) , "Wrong processNextNode()!" );
 
-   maxcard.start();
-   check(maxcard.cardinality(x)==2 && maxcard.cardinality(y)>=4,
-         "Wrong cardinalities!");
+ maxcard.start();
+ check( maxcard.cardinality( x ) == 2 && maxcard.cardinality( y ) >= 4 ,
+	"Wrong cardinalities!" );
  }
 
- void checkWithConst1Map(std::istringstream &input) {
-   typedef SmartDigraph Digraph;
-   typedef Digraph::Node Node;
+void checkWithConst1Map( std::istringstream & input )
+{
+ typedef SmartDigraph Digraph;
+ typedef Digraph::Node Node;
 
-   Digraph g;
-   Node s,x,y,z;
+ Digraph g;
+ Node s , x , y , z;
 
-  DigraphReader<Digraph>(g,input).
-    node("s",s).
-    node("x",x).
-    node("y",y).
-    node("z",z).
-    run();
+ DigraphReader< Digraph >( g , input )
+   .node( "s" , s )
+   .node( "x" , x )
+   .node( "y" , y )
+   .node( "z" , z )
+   .run();
 
-  MaxCardinalitySearch<Digraph> maxcard(g);
-  maxcard.run(s);
-  check(maxcard.cardinality(x)==1 &&
-        maxcard.cardinality(y)+maxcard.cardinality(z)==3,
-        "Wrong cardinalities!");
-}
+ MaxCardinalitySearch< Digraph > maxcard( g );
+ maxcard.run( s );
+ check( maxcard.cardinality( x ) == 1 &&
+	  maxcard.cardinality( y ) + maxcard.cardinality( z ) == 3 ,
+	"Wrong cardinalities!" );
+ }
 
-int main() {
+int main()
+{
 
-  std::istringstream input1(test_lgf);
-  checkWithIntMap(input1);
+ std::istringstream input1( test_lgf );
+ checkWithIntMap( input1 );
 
-  std::istringstream input2(test_lgf);
-  checkWithConst1Map(input2);
-}
+ std::istringstream input2( test_lgf );
+ checkWithConst1Map( input2 );
+ }

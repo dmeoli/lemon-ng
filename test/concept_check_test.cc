@@ -23,23 +23,31 @@
 
 #include "test_tools.h"
 
-namespace other {
+namespace other
+{
 
-  int calls = 0;
+int calls = 0;
 
-  template <class T>
-  inline void ignore_unused_variable_warning(const T&) { ++calls; }
+template< class T >
+inline void ignore_unused_variable_warning( const T & )
+{
+ ++calls;
+ }
 
-  template <class T>
-  void touch(const T& t) { ignore_unused_variable_warning(t); }
+template< class T >
+void touch( const T & t )
+{
+ ignore_unused_variable_warning( t );
+ }
 
 }
 
-int main() {
-  lemon::ListDigraph g;
-  lemon::ListDigraph::Node n = g.addNode();
-  other::touch(n);
-  check(other::calls == 1, "The function of the other library not called");
-  ::lemon::ignore_unused_variable_warning(n, g);
-  return 0;
-}
+int main()
+{
+ lemon::ListDigraph g;
+ lemon::ListDigraph::Node n = g.addNode();
+ other::touch( n );
+ check( other::calls == 1 , "The function of the other library not called" );
+ ::lemon::ignore_unused_variable_warning( n , g );
+ return( 0 );
+ }

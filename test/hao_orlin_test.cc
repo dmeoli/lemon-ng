@@ -30,135 +30,140 @@
 using namespace lemon;
 using namespace std;
 
-const std::string lgf =
-  "@nodes\n"
-  "label\n"
-  "0\n"
-  "1\n"
-  "2\n"
-  "3\n"
-  "4\n"
-  "5\n"
-  "@edges\n"
-  "     cap1 cap2 cap3\n"
-  "0 1  1    1    1   \n"
-  "0 2  2    2    4   \n"
-  "1 2  4    4    4   \n"
-  "3 4  1    1    1   \n"
-  "3 5  2    2    4   \n"
-  "4 5  4    4    4   \n"
-  "5 4  4    4    4   \n"
-  "2 3  1    6    6   \n"
-  "4 0  1    6    6   \n";
+const std::string lgf = "@nodes\n"
+			"label\n"
+			"0\n"
+			"1\n"
+			"2\n"
+			"3\n"
+			"4\n"
+			"5\n"
+			"@edges\n"
+			"     cap1 cap2 cap3\n"
+			"0 1  1    1    1   \n"
+			"0 2  2    2    4   \n"
+			"1 2  4    4    4   \n"
+			"3 4  1    1    1   \n"
+			"3 5  2    2    4   \n"
+			"4 5  4    4    4   \n"
+			"5 4  4    4    4   \n"
+			"2 3  1    6    6   \n"
+			"4 0  1    6    6   \n";
 
 void checkHaoOrlinCompile()
 {
-  typedef int Value;
-  typedef concepts::Digraph Digraph;
+ typedef int Value;
+ typedef concepts::Digraph Digraph;
 
-  typedef Digraph::Node Node;
-  typedef Digraph::Arc Arc;
-  typedef concepts::ReadMap<Arc, Value> CapMap;
-  typedef concepts::WriteMap<Node, bool> CutMap;
+ typedef Digraph::Node Node;
+ typedef Digraph::Arc Arc;
+ typedef concepts::ReadMap< Arc , Value > CapMap;
+ typedef concepts::WriteMap< Node , bool > CutMap;
 
-  Digraph g;
-  Node n;
-  CapMap cap;
-  CutMap cut;
-  Value v;
-  ::lemon::ignore_unused_variable_warning(v);
+ Digraph g;
+ Node n;
+ CapMap cap;
+ CutMap cut;
+ Value v;
+ ::lemon::ignore_unused_variable_warning( v );
 
-  HaoOrlin<Digraph, CapMap> ho_test(g, cap);
-  const HaoOrlin<Digraph, CapMap>&
-    const_ho_test = ho_test;
+ HaoOrlin< Digraph , CapMap > ho_test( g , cap );
+ const HaoOrlin< Digraph , CapMap > & const_ho_test = ho_test;
 
-  ho_test.init();
-  ho_test.init(n);
-  ho_test.calculateOut();
-  ho_test.calculateIn();
-  ho_test.run();
-  ho_test.run(n);
+ ho_test.init();
+ ho_test.init( n );
+ ho_test.calculateOut();
+ ho_test.calculateIn();
+ ho_test.run();
+ ho_test.run( n );
 
-  v = const_ho_test.minCutValue();
-  v = const_ho_test.minCutMap(cut);
-}
+ v = const_ho_test.minCutValue();
+ v = const_ho_test.minCutMap( cut );
+ }
 
-template <typename Graph, typename CapMap, typename CutMap>
-typename CapMap::Value
-  cutValue(const Graph& graph, const CapMap& cap, const CutMap& cut)
+template< typename Graph , typename CapMap , typename CutMap >
+typename CapMap::Value cutValue( const Graph & graph , const CapMap & cap ,
+				 const CutMap & cut )
 {
-  typename CapMap::Value sum = 0;
-  for (typename Graph::ArcIt a(graph); a != INVALID; ++a) {
-    if (cut[graph.source(a)] && !cut[graph.target(a)])
-      sum += cap[a];
+ typename CapMap::Value sum = 0;
+ for( typename Graph::ArcIt a( graph ) ; a != INVALID ; ++a ) {
+  if( cut[ graph.source( a ) ] && ! cut[ graph.target( a ) ] )
+   sum += cap[ a ];
   }
-  return sum;
-}
+ return( sum );
+ }
 
-int main() {
-  SmartDigraph graph;
-  SmartDigraph::ArcMap<int> cap1(graph), cap2(graph), cap3(graph);
-  SmartDigraph::NodeMap<bool> cut(graph);
+int main()
+{
+ SmartDigraph graph;
+ SmartDigraph::ArcMap< int > cap1( graph ) , cap2( graph ) , cap3( graph );
+ SmartDigraph::NodeMap< bool > cut( graph );
 
-  istringstream input(lgf);
-  digraphReader(graph, input)
-    .arcMap("cap1", cap1)
-    .arcMap("cap2", cap2)
-    .arcMap("cap3", cap3)
-    .run();
+ istringstream input( lgf );
+ digraphReader( graph , input )
+   .arcMap( "cap1" , cap1 )
+   .arcMap( "cap2" , cap2 )
+   .arcMap( "cap3" , cap3 )
+   .run();
 
-  {
-    HaoOrlin<SmartDigraph> ho(graph, cap1);
-    ho.run();
-    ho.minCutMap(cut);
+ {
+  HaoOrlin< SmartDigraph > ho( graph , cap1 );
+  ho.run();
+  ho.minCutMap( cut );
 
-    check(ho.minCutValue() == 1, "Wrong cut value");
-    check(ho.minCutValue() == cutValue(graph, cap1, cut), "Wrong cut value");
+  check( ho.minCutValue() == 1 , "Wrong cut value" );
+  check( ho.minCutValue() == cutValue( graph , cap1 , cut ) ,
+	 "Wrong cut value" );
   }
-  {
-    HaoOrlin<SmartDigraph> ho(graph, cap2);
-    ho.run();
-    ho.minCutMap(cut);
+ {
+  HaoOrlin< SmartDigraph > ho( graph , cap2 );
+  ho.run();
+  ho.minCutMap( cut );
 
-    check(ho.minCutValue() == 1, "Wrong cut value");
-    check(ho.minCutValue() == cutValue(graph, cap2, cut), "Wrong cut value");
+  check( ho.minCutValue() == 1 , "Wrong cut value" );
+  check( ho.minCutValue() == cutValue( graph , cap2 , cut ) ,
+	 "Wrong cut value" );
   }
-  {
-    HaoOrlin<SmartDigraph> ho(graph, cap3);
-    ho.run();
-    ho.minCutMap(cut);
+ {
+  HaoOrlin< SmartDigraph > ho( graph , cap3 );
+  ho.run();
+  ho.minCutMap( cut );
 
-    check(ho.minCutValue() == 1, "Wrong cut value");
-    check(ho.minCutValue() == cutValue(graph, cap3, cut), "Wrong cut value");
-  }
-
-  typedef Undirector<SmartDigraph> UGraph;
-  UGraph ugraph(graph);
-
-  {
-    HaoOrlin<UGraph, SmartDigraph::ArcMap<int> > ho(ugraph, cap1);
-    ho.run();
-    ho.minCutMap(cut);
-
-    check(ho.minCutValue() == 2, "Wrong cut value");
-    check(ho.minCutValue() == cutValue(ugraph, cap1, cut), "Wrong cut value");
-  }
-  {
-    HaoOrlin<UGraph, SmartDigraph::ArcMap<int> > ho(ugraph, cap2);
-    ho.run();
-    ho.minCutMap(cut);
-
-    check(ho.minCutValue() == 5, "Wrong cut value");
-    check(ho.minCutValue() == cutValue(ugraph, cap2, cut), "Wrong cut value");
-  }
-  {
-    HaoOrlin<UGraph, SmartDigraph::ArcMap<int> > ho(ugraph, cap3);
-    ho.run();
-    ho.minCutMap(cut);
-
-    check(ho.minCutValue() == 5, "Wrong cut value");
-    check(ho.minCutValue() == cutValue(ugraph, cap3, cut), "Wrong cut value");
+  check( ho.minCutValue() == 1 , "Wrong cut value" );
+  check( ho.minCutValue() == cutValue( graph , cap3 , cut ) ,
+	 "Wrong cut value" );
   }
 
-  return 0;
-}
+ typedef Undirector< SmartDigraph > UGraph;
+ UGraph ugraph( graph );
+
+ {
+  HaoOrlin< UGraph , SmartDigraph::ArcMap< int > > ho( ugraph , cap1 );
+  ho.run();
+  ho.minCutMap( cut );
+
+  check( ho.minCutValue() == 2 , "Wrong cut value" );
+  check( ho.minCutValue() == cutValue( ugraph , cap1 , cut ) ,
+	 "Wrong cut value" );
+  }
+ {
+  HaoOrlin< UGraph , SmartDigraph::ArcMap< int > > ho( ugraph , cap2 );
+  ho.run();
+  ho.minCutMap( cut );
+
+  check( ho.minCutValue() == 5 , "Wrong cut value" );
+  check( ho.minCutValue() == cutValue( ugraph , cap2 , cut ) ,
+	 "Wrong cut value" );
+  }
+ {
+  HaoOrlin< UGraph , SmartDigraph::ArcMap< int > > ho( ugraph , cap3 );
+  ho.run();
+  ho.minCutMap( cut );
+
+  check( ho.minCutValue() == 5 , "Wrong cut value" );
+  check( ho.minCutValue() == cutValue( ugraph , cap3 , cut ) ,
+	 "Wrong cut value" );
+  }
+
+ return( 0 );
+ }

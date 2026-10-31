@@ -17,160 +17,164 @@
  */
 
 #ifndef LEMON_BITS_PATH_DUMP_H
-#define LEMON_BITS_PATH_DUMP_H
+ #define LEMON_BITS_PATH_DUMP_H
 
 #include <lemon/core.h>
 #include <lemon/concept_check.h>
 
-namespace lemon {
+namespace lemon
+{
 
-  template <typename _Digraph, typename _PredMap>
-  class PredMapPath {
+template< typename _Digraph , typename _PredMap >
+class PredMapPath
+{
+ public:
+ typedef True RevPathTag;
+
+ typedef _Digraph Digraph;
+ typedef typename Digraph::Arc Arc;
+ typedef _PredMap PredMap;
+
+ PredMapPath( const Digraph & _digraph , const PredMap & _predMap ,
+	      typename Digraph::Node _target )
+     : digraph( _digraph ) , predMap( _predMap ) , target( _target ) { }
+
+ int length() const {
+  int len = 0;
+  typename Digraph::Node node = target;
+  typename Digraph::Arc arc;
+  while( ( arc = predMap[ node ] ) != INVALID ) {
+   node = digraph.source( arc );
+   ++len;
+   }
+  return( len );
+  }
+
+ bool empty() const { return( predMap[ target ] == INVALID ); }
+
+ class RevArcIt
+ {
   public:
-    typedef True RevPathTag;
+  RevArcIt() { }
+  RevArcIt( Invalid ) : path( 0 ) , current( INVALID ) { }
+  RevArcIt( const PredMapPath & _path )
+      : path( &_path ) , current( _path.target ) {
+   if( path->predMap[ current ] == INVALID )
+    current = INVALID;
+   }
 
-    typedef _Digraph Digraph;
-    typedef typename Digraph::Arc Arc;
-    typedef _PredMap PredMap;
+  operator typename Digraph::Arc() const {
+   return( path->predMap[ current ] );
+   }
 
-    PredMapPath(const Digraph& _digraph, const PredMap& _predMap,
-                typename Digraph::Node _target)
-      : digraph(_digraph), predMap(_predMap), target(_target) {}
+  RevArcIt & operator++() {
+   current = path->digraph.source( path->predMap[ current ] );
+   if( path->predMap[ current ] == INVALID )
+    current = INVALID;
+   return( *this );
+   }
 
-    int length() const {
-      int len = 0;
-      typename Digraph::Node node = target;
-      typename Digraph::Arc arc;
-      while ((arc = predMap[node]) != INVALID) {
-        node = digraph.source(arc);
-        ++len;
-      }
-      return len;
-    }
+  bool operator==( const RevArcIt & e ) const {
+   return( current == e.current );
+   }
 
-    bool empty() const {
-      return predMap[target] == INVALID;
-    }
+  bool operator!=( const RevArcIt & e ) const {
+   return( current != e.current );
+   }
 
-    class RevArcIt {
-    public:
-      RevArcIt() {}
-      RevArcIt(Invalid) : path(0), current(INVALID) {}
-      RevArcIt(const PredMapPath& _path)
-        : path(&_path), current(_path.target) {
-        if (path->predMap[current] == INVALID) current = INVALID;
-      }
-
-      operator typename Digraph::Arc() const {
-        return path->predMap[current];
-      }
-
-      RevArcIt& operator++() {
-        current = path->digraph.source(path->predMap[current]);
-        if (path->predMap[current] == INVALID) current = INVALID;
-        return *this;
-      }
-
-      bool operator==(const RevArcIt& e) const {
-        return current == e.current;
-      }
-
-      bool operator!=(const RevArcIt& e) const {
-        return current != e.current;
-      }
-
-      bool operator<(const RevArcIt& e) const {
-        return current < e.current;
-      }
-
-    private:
-      const PredMapPath* path;
-      typename Digraph::Node current;
-    };
+  bool operator<( const RevArcIt & e ) const {
+   return( current < e.current );
+   }
 
   private:
-    const Digraph& digraph;
-    const PredMap& predMap;
-    typename Digraph::Node target;
+  const PredMapPath * path;
+  typename Digraph::Node current;
   };
 
+ private:
+ const Digraph & digraph;
+ const PredMap & predMap;
+ typename Digraph::Node target;
+ };
 
-  template <typename _Digraph, typename _PredMatrixMap>
-  class PredMatrixMapPath {
+
+template< typename _Digraph , typename _PredMatrixMap >
+class PredMatrixMapPath
+{
+ public:
+ typedef True RevPathTag;
+
+ typedef _Digraph Digraph;
+ typedef typename Digraph::Arc Arc;
+ typedef _PredMatrixMap PredMatrixMap;
+
+ PredMatrixMapPath( const Digraph & _digraph ,
+		    const PredMatrixMap & _predMatrixMap ,
+		    typename Digraph::Node _source ,
+		    typename Digraph::Node _target )
+     : digraph( _digraph ) , predMatrixMap( _predMatrixMap ) ,
+       source( _source ) ,
+       target( _target ) { }
+
+ int length() const {
+  int len = 0;
+  typename Digraph::Node node = target;
+  typename Digraph::Arc arc;
+  while( ( arc = predMatrixMap( source , node ) ) != INVALID ) {
+   node = digraph.source( arc );
+   ++len;
+   }
+  return( len );
+  }
+
+ bool empty() const { return( predMatrixMap( source , target ) == INVALID ); }
+
+ class RevArcIt
+ {
   public:
-    typedef True RevPathTag;
+  RevArcIt() { }
+  RevArcIt( Invalid ) : path( 0 ) , current( INVALID ) { }
+  RevArcIt( const PredMatrixMapPath & _path )
+      : path( &_path ) , current( _path.target ) {
+   if( path->predMatrixMap( path->source , current ) == INVALID )
+    current = INVALID;
+   }
 
-    typedef _Digraph Digraph;
-    typedef typename Digraph::Arc Arc;
-    typedef _PredMatrixMap PredMatrixMap;
+  operator const typename Digraph::Arc() const {
+   return( path->predMatrixMap( path->source , current ) );
+   }
 
-    PredMatrixMapPath(const Digraph& _digraph,
-                      const PredMatrixMap& _predMatrixMap,
-                      typename Digraph::Node _source,
-                      typename Digraph::Node _target)
-      : digraph(_digraph), predMatrixMap(_predMatrixMap),
-        source(_source), target(_target) {}
+  RevArcIt & operator++() {
+   current =
+     path->digraph.source( path->predMatrixMap( path->source , current ) );
+   if( path->predMatrixMap( path->source , current ) == INVALID )
+    current = INVALID;
+   return( *this );
+   }
 
-    int length() const {
-      int len = 0;
-      typename Digraph::Node node = target;
-      typename Digraph::Arc arc;
-      while ((arc = predMatrixMap(source, node)) != INVALID) {
-        node = digraph.source(arc);
-        ++len;
-      }
-      return len;
-    }
+  bool operator==( const RevArcIt & e ) const {
+   return( current == e.current );
+   }
 
-    bool empty() const {
-      return predMatrixMap(source, target) == INVALID;
-    }
+  bool operator!=( const RevArcIt & e ) const {
+   return( current != e.current );
+   }
 
-    class RevArcIt {
-    public:
-      RevArcIt() {}
-      RevArcIt(Invalid) : path(0), current(INVALID) {}
-      RevArcIt(const PredMatrixMapPath& _path)
-        : path(&_path), current(_path.target) {
-        if (path->predMatrixMap(path->source, current) == INVALID)
-          current = INVALID;
-      }
-
-      operator const typename Digraph::Arc() const {
-        return path->predMatrixMap(path->source, current);
-      }
-
-      RevArcIt& operator++() {
-        current =
-          path->digraph.source(path->predMatrixMap(path->source, current));
-        if (path->predMatrixMap(path->source, current) == INVALID)
-          current = INVALID;
-        return *this;
-      }
-
-      bool operator==(const RevArcIt& e) const {
-        return current == e.current;
-      }
-
-      bool operator!=(const RevArcIt& e) const {
-        return current != e.current;
-      }
-
-      bool operator<(const RevArcIt& e) const {
-        return current < e.current;
-      }
-
-    private:
-      const PredMatrixMapPath* path;
-      typename Digraph::Node current;
-    };
+  bool operator<( const RevArcIt & e ) const {
+   return( current < e.current );
+   }
 
   private:
-    const Digraph& digraph;
-    const PredMatrixMap& predMatrixMap;
-    typename Digraph::Node source;
-    typename Digraph::Node target;
+  const PredMatrixMapPath * path;
+  typename Digraph::Node current;
   };
+
+ private:
+ const Digraph & digraph;
+ const PredMatrixMap & predMatrixMap;
+ typename Digraph::Node source;
+ typename Digraph::Node target;
+ };
 
 }
 

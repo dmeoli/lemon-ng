@@ -17,7 +17,7 @@
  */
 
 #ifndef LEMON_TEST_TEST_TOOLS_H
-#define LEMON_TEST_TEST_TOOLS_H
+ #define LEMON_TEST_TEST_TOOLS_H
 
 ///\ingroup misc
 ///\file
@@ -37,14 +37,15 @@
 ///\code check(0==1,"This is obviously false.");\endcode will
 ///print something like this (and then exits).
 ///\verbatim file_name.cc:123: error: This is obviously false. \endverbatim
-#define check(rc, msg)                                                  \
-  {                                                                     \
-    if(!(rc)) {                                                         \
-      std::cerr << __FILE__ ":" << __LINE__ << ": error: "              \
-                << msg << std::endl;                                    \
-      abort();                                                          \
-    } else { }                                                          \
-  }                                                                     \
+#define check( rc, msg )                                                      \
+ {                                                                            \
+  if( ! ( rc ) ) {                                                            \
+   std::cerr << __FILE__ ":" << __LINE__ << ": error: " << msg << std::endl;  \
+   abort();                                                                   \
+  }                                                                           \
+  else {                                                                      \
+  }                                                                           \
+ }
 
 
 #endif

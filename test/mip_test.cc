@@ -39,142 +39,143 @@
 
 using namespace lemon;
 
-void solveAndCheck(MipSolver& mip, MipSolver::ProblemType stat,
-                   double exp_opt) {
-  using std::string;
-
-  mip.solve();
-  //int decimal,sign;
-  std::ostringstream buf;
-  buf << "Type should be: " << int(stat)<<" and it is "<<int(mip.type());
-
-
-  //  itoa(stat,buf1, 10);
-  check(mip.type()==stat, buf.str());
-
-  if (stat ==  MipSolver::OPTIMAL) {
-    std::ostringstream sbuf;
-    sbuf << "Wrong optimal value ("<< mip.solValue()
-         <<" instead of " << exp_opt << ")";
-    check(std::abs(mip.solValue()-exp_opt) < 1e-3, sbuf.str());
-    //+ecvt(exp_opt,2)
-  }
-}
-
-void aTest(MipSolver& mip, bool solve_empty=true)
+void solveAndCheck( MipSolver & mip , MipSolver::ProblemType stat ,
+		    double exp_opt )
 {
-  //The following example is very simple
+ using std::string;
+
+ mip.solve();
+ //int decimal,sign;
+ std::ostringstream buf;
+ buf << "Type should be: " << int( stat ) << " and it is "
+     << int( mip.type() );
 
 
-  typedef MipSolver::Row Row;
-  typedef MipSolver::Col Col;
+ //  itoa(stat,buf1, 10);
+ check( mip.type() == stat , buf.str() );
+
+ if( stat == MipSolver::OPTIMAL ) {
+  std::ostringstream sbuf;
+  sbuf << "Wrong optimal value (" << mip.solValue() << " instead of "
+       << exp_opt << ")";
+  check( std::abs( mip.solValue() - exp_opt ) < 1e-3 , sbuf.str() );
+  //+ecvt(exp_opt,2)
+  }
+ }
+
+void aTest( MipSolver & mip , bool solve_empty = true )
+{
+ //The following example is very simple
 
 
-  Col x1 = mip.addCol();
-  Col x2 = mip.addCol();
+ typedef MipSolver::Row Row;
+ typedef MipSolver::Col Col;
 
 
-  //Objective function
-  mip.obj(x1);
-
-  mip.max();
-
-  //Unconstrained optimization
-  if(solve_empty)
-    mip.solve();
-  //Check it out!
-
-  //Constraints
-  mip.addRow(2 * x1 + x2 <= 2);
-  Row y2 = mip.addRow(x1 - 2 * x2 <= 0);
-
-  //Nonnegativity of the variable x1
-  mip.colLowerBound(x1, 0);
+ Col x1 = mip.addCol();
+ Col x2 = mip.addCol();
 
 
-  //Maximization of x1
-  //over the triangle with vertices (0,0),(4/5,2/5),(0,2)
-  double expected_opt=4.0/5.0;
-  solveAndCheck(mip, MipSolver::OPTIMAL, expected_opt);
+ //Objective function
+ mip.obj( x1 );
+
+ mip.max();
+
+ //Unconstrained optimization
+ if( solve_empty )
+  mip.solve();
+ //Check it out!
+
+ //Constraints
+ mip.addRow( 2 * x1 + x2 <= 2 );
+ Row y2 = mip.addRow( x1 - 2 * x2 <= 0 );
+
+ //Nonnegativity of the variable x1
+ mip.colLowerBound( x1 , 0 );
 
 
-  //Restrict x2 to integer
-  mip.colType(x2,MipSolver::INTEGER);
-  expected_opt=1.0/2.0;
-  solveAndCheck(mip, MipSolver::OPTIMAL, expected_opt);
+ //Maximization of x1
+ //over the triangle with vertices (0,0),(4/5,2/5),(0,2)
+ double expected_opt = 4.0 / 5.0;
+ solveAndCheck( mip , MipSolver::OPTIMAL , expected_opt );
 
 
-  //Restrict both to integer
-  mip.colType(x1,MipSolver::INTEGER);
-  expected_opt=0;
-  solveAndCheck(mip, MipSolver::OPTIMAL, expected_opt);
-
-  //Erase a variable
-  mip.erase(x2);
-  mip.rowUpperBound(y2, 8);
-  expected_opt=1;
-  solveAndCheck(mip, MipSolver::OPTIMAL, expected_opt);
-
-  //An integer x1 of at most 1 and at least 3: infeasible
-  mip.addRow(x1 >= 3);
-  solveAndCheck(mip, MipSolver::INFEASIBLE, 0);
-
-}
+ //Restrict x2 to integer
+ mip.colType( x2 , MipSolver::INTEGER );
+ expected_opt = 1.0 / 2.0;
+ solveAndCheck( mip , MipSolver::OPTIMAL , expected_opt );
 
 
-template<class MIP>
+ //Restrict both to integer
+ mip.colType( x1 , MipSolver::INTEGER );
+ expected_opt = 0;
+ solveAndCheck( mip , MipSolver::OPTIMAL , expected_opt );
+
+ //Erase a variable
+ mip.erase( x2 );
+ mip.rowUpperBound( y2 , 8 );
+ expected_opt = 1;
+ solveAndCheck( mip , MipSolver::OPTIMAL , expected_opt );
+
+ //An integer x1 of at most 1 and at least 3: infeasible
+ mip.addRow( x1 >= 3 );
+ solveAndCheck( mip , MipSolver::INFEASIBLE , 0 );
+ }
+
+
+template< class MIP >
 void cloneTest()
 {
 
-  MIP* mip = new MIP();
-  MIP* mipnew = mip->newSolver();
-  MIP* mipclone = mip->cloneSolver();
-  delete mip;
-  delete mipnew;
-  delete mipclone;
-}
+ MIP * mip = new MIP();
+ MIP * mipnew = mip->newSolver();
+ MIP * mipclone = mip->cloneSolver();
+ delete mip;
+ delete mipnew;
+ delete mipclone;
+ }
 
 int main()
 {
 
 #ifdef LEMON_HAVE_MIP
-  {
-    Mip mip1;
-#if LEMON_DEFAULT_MIP==LEMON_CBC_
-    aTest(mip1, false);
+ {
+  Mip mip1;
+#if LEMON_DEFAULT_MIP == LEMON_CBC_
+  aTest( mip1 , false );
 #else
-    aTest(mip1);
+  aTest( mip1 );
 #endif
-    cloneTest<Mip>();
+  cloneTest< Mip >();
   }
 #endif
 
 #ifdef LEMON_HAVE_GLPK
-  {
-    GlpkMip mip1;
-    aTest(mip1);
-    cloneTest<GlpkMip>();
+ {
+  GlpkMip mip1;
+  aTest( mip1 );
+  cloneTest< GlpkMip >();
   }
 #endif
 
 #ifdef LEMON_HAVE_CPLEX
-  try {
-    CplexMip mip2;
-    aTest(mip2);
-    cloneTest<CplexMip>();
-  } catch (CplexEnv::LicenseError& error) {
-    check(false, error.what());
+ try {
+  CplexMip mip2;
+  aTest( mip2 );
+  cloneTest< CplexMip >();
+  }
+ catch( CplexEnv::LicenseError & error ) {
+  check( false , error.what() );
   }
 #endif
 
 #ifdef LEMON_HAVE_CBC
-  {
-    CbcMip mip1;
-    aTest(mip1, false);
-    cloneTest<CbcMip>();
+ {
+  CbcMip mip1;
+  aTest( mip1 , false );
+  cloneTest< CbcMip >();
   }
 #endif
 
-  return 0;
-
-}
+ return( 0 );
+ }

@@ -20,6 +20,6 @@
 
 int main()
 {
-  check(false, "Don't panic. Failing is the right behaviour here.");
-  return 0;
-}
+ check( false , "Don't panic. Failing is the right behaviour here." );
+ return( 0 );
+ }

@@ -17,7 +17,7 @@
  */
 
 #ifndef LEMON_NETWORK_SIMPLEX_H
-#define LEMON_NETWORK_SIMPLEX_H
+ #define LEMON_NETWORK_SIMPLEX_H
 
 /// \ingroup min_cost_flow_algs
 ///
@@ -31,2005 +31,2059 @@
 #include <lemon/core.h>
 #include <lemon/math.h>
 
-namespace lemon {
+namespace lemon
+{
 
-  /// \addtogroup min_cost_flow_algs
-  /// @{
+/// \addtogroup min_cost_flow_algs
+/// @{
 
-  /// \brief Implementation of the primal Network Simplex algorithm
-  /// for finding a \ref min_cost_flow "minimum cost flow".
-  ///
-  /// \ref NetworkSimplex implements the primal Network Simplex algorithm
-  /// for finding a \ref min_cost_flow "minimum cost flow"
-  /// \cite amo93networkflows, \cite dantzig63linearprog,
-  /// \cite kellyoneill91netsimplex.
-  /// This algorithm is a highly efficient specialized version of the
-  /// linear programming simplex method directly for the minimum cost
-  /// flow problem.
-  ///
-  /// In general, \ref NetworkSimplex and \ref CostScaling are the fastest
-  /// implementations available in LEMON for solving this problem.
-  /// (For more information, see \ref min_cost_flow_algs "the module page".)
-  /// Furthermore, this class supports both directions of the supply/demand
-  /// inequality constraints. For more information, see \ref SupplyType.
-  ///
-  /// Most of the parameters of the problem (except for the digraph)
-  /// can be given using separate functions, and the algorithm can be
-  /// executed using the \ref run() function. If some parameters are not
-  /// specified, then default values will be used.
-  ///
-  /// \tparam GR The digraph type the algorithm runs on.
-  /// \tparam V The number type used for flow amounts, capacity bounds
-  /// and supply values in the algorithm. By default, it is \c int.
-  /// \tparam C The number type used for costs and potentials in the
-  /// algorithm. By default, it is the same as \c V.
-  ///
-  /// \warning Both \c V and \c C must be signed number types.
-  /// \warning With integer types all input data (capacities, supply
-  /// values, and costs) must be integer. With floating-point types they
-  /// need not be: the reduced costs and the flow left on the artificial
-  /// arcs are compared against a tolerance of 10^6 units in the last place
-  /// of the largest cost and of the largest supply, respectively, so that
-  /// rounding errors make neither a degenerate pivot for ever nor a
-  /// feasible problem infeasible.
-  ///
-  /// \note %NetworkSimplex provides five different pivot rule
-  /// implementations, from which the most efficient one is used
-  /// by default. For more information, see \ref PivotRule.
-  template <typename GR, typename V = int, typename C = V>
-  class NetworkSimplex
+/// \brief Implementation of the primal Network Simplex algorithm
+/// for finding a \ref min_cost_flow "minimum cost flow".
+///
+/// \ref NetworkSimplex implements the primal Network Simplex algorithm
+/// for finding a \ref min_cost_flow "minimum cost flow"
+/// \cite amo93networkflows, \cite dantzig63linearprog,
+/// \cite kellyoneill91netsimplex.
+/// This algorithm is a highly efficient specialized version of the
+/// linear programming simplex method directly for the minimum cost
+/// flow problem.
+///
+/// In general, \ref NetworkSimplex and \ref CostScaling are the fastest
+/// implementations available in LEMON for solving this problem.
+/// (For more information, see \ref min_cost_flow_algs "the module page".)
+/// Furthermore, this class supports both directions of the supply/demand
+/// inequality constraints. For more information, see \ref SupplyType.
+///
+/// Most of the parameters of the problem (except for the digraph)
+/// can be given using separate functions, and the algorithm can be
+/// executed using the \ref run() function. If some parameters are not
+/// specified, then default values will be used.
+///
+/// \tparam GR The digraph type the algorithm runs on.
+/// \tparam V The number type used for flow amounts, capacity bounds
+/// and supply values in the algorithm. By default, it is \c int.
+/// \tparam C The number type used for costs and potentials in the
+/// algorithm. By default, it is the same as \c V.
+///
+/// \warning Both \c V and \c C must be signed number types.
+/// \warning With integer types all input data (capacities, supply
+/// values, and costs) must be integer. With floating-point types they
+/// need not be: the reduced costs and the flow left on the artificial
+/// arcs are compared against a tolerance of 10^6 units in the last place
+/// of the largest cost and of the largest supply, respectively, so that
+/// rounding errors make neither a degenerate pivot for ever nor a
+/// feasible problem infeasible.
+///
+/// \note %NetworkSimplex provides five different pivot rule
+/// implementations, from which the most efficient one is used
+/// by default. For more information, see \ref PivotRule.
+template< typename GR , typename V = int , typename C = V >
+class NetworkSimplex
+{
+ public:
+ /// The type of the flow amounts, capacity bounds and supply values
+ typedef V Value;
+ /// The type of the arc costs
+ typedef C Cost;
+
+ public:
+ /// \brief Problem type constants for the \c run() function.
+ ///
+ /// Enum type containing the problem type constants that can be
+ /// returned by the \ref run() function of the algorithm.
+ enum ProblemType {
+  /// The problem has no feasible solution (flow).
+  INFEASIBLE ,
+  /// The problem has optimal solution (i.e. it is feasible and
+  /// bounded), and the algorithm has found optimal flow and node
+  /// potentials (primal and dual solutions).
+  OPTIMAL ,
+  /// The objective function of the problem is unbounded, i.e.
+  /// there is a directed cycle having negative total cost and
+  /// infinite upper bound.
+  UNBOUNDED
+  };
+
+ /// \brief Constants for selecting the type of the supply constraints.
+ ///
+ /// Enum type containing constants for selecting the supply type,
+ /// i.e. the direction of the inequalities in the supply/demand
+ /// constraints of the \ref min_cost_flow "minimum cost flow problem".
+ ///
+ /// The default supply type is \c GEQ, the \c LEQ type can be
+ /// selected using \ref supplyType().
+ /// The equality form is a special case of both supply types.
+ enum SupplyType {
+  /// This option means that there are <em>"greater or equal"</em>
+  /// supply/demand constraints in the definition of the problem.
+  GEQ ,
+  /// This option means that there are <em>"less or equal"</em>
+  /// supply/demand constraints in the definition of the problem.
+  LEQ
+  };
+
+ /// \brief Constants for selecting the pivot rule.
+ ///
+ /// Enum type containing constants for selecting the pivot rule for
+ /// the \ref run() function.
+ ///
+ /// \ref NetworkSimplex provides five different implementations for
+ /// the pivot strategy that significantly affects the running time
+ /// of the algorithm.
+ /// According to experimental tests conducted on various problem
+ /// instances, \ref BLOCK_SEARCH "Block Search" and
+ /// \ref ALTERING_LIST "Altering Candidate List" rules turned out
+ /// to be the most efficient.
+ /// Since \ref BLOCK_SEARCH "Block Search" is a simpler strategy that
+ /// seemed to be slightly more robust, it is used by default.
+ /// However, another pivot rule can easily be selected using the
+ /// \ref run() function with the proper parameter.
+ enum PivotRule {
+
+  /// The \e First \e Eligible pivot rule.
+  /// The next eligible arc is selected in a wraparound fashion
+  /// in every iteration.
+  FIRST_ELIGIBLE ,
+
+  /// The \e Best \e Eligible pivot rule.
+  /// The best eligible arc is selected in every iteration.
+  BEST_ELIGIBLE ,
+
+  /// The \e Block \e Search pivot rule.
+  /// A specified number of arcs are examined in every iteration
+  /// in a wraparound fashion and the best eligible arc is selected
+  /// from this block.
+  BLOCK_SEARCH ,
+
+  /// The \e Candidate \e List pivot rule.
+  /// In a major iteration a candidate list is built from eligible arcs
+  /// in a wraparound fashion and in the following minor iterations
+  /// the best eligible arc is selected from this list.
+  CANDIDATE_LIST ,
+
+  /// The \e Altering \e Candidate \e List pivot rule.
+  /// It is a modified version of the Candidate List method.
+  /// It keeps only a few of the best eligible arcs from the former
+  /// candidate list and extends this list in every iteration.
+  ALTERING_LIST
+  };
+
+ private:
+ TEMPLATE_DIGRAPH_TYPEDEFS( GR );
+
+ typedef std::vector< int > IntVector;
+ typedef std::vector< Value > ValueVector;
+ typedef std::vector< Cost > CostVector;
+ typedef std::vector< signed char > CharVector;
+ // Note: vector<signed char> is used instead of vector<ArcState> and
+ // vector<ArcDirection> for efficiency reasons
+
+ // State constants for arcs
+ enum ArcState { STATE_UPPER = -1 , STATE_TREE = 0 , STATE_LOWER = 1 };
+
+ // Direction constants for tree arcs
+ enum ArcDirection { DIR_DOWN = -1 , DIR_UP = 1 };
+
+ private:
+ // Data related to the underlying digraph
+ const GR & _graph;
+ int _node_num;
+ int _arc_num;
+ int _all_arc_num;
+ int _search_arc_num;
+
+ // Parameters of the problem
+ bool _has_lower;
+ SupplyType _stype;
+ Value _sum_supply;
+
+ // Data structures for storing the digraph
+ IntNodeMap _node_id;
+ IntArcMap _arc_id;
+ IntVector _source;
+ IntVector _target;
+ bool _arc_mixing;
+
+ // Node and arc data
+ ValueVector _lower;
+ ValueVector _upper;
+ ValueVector _cap;
+ CostVector _cost;
+ ValueVector _supply;
+ ValueVector _flow;
+ CostVector _pi;
+ // How far the potential of the root may move from zero [see
+ // updatePotential()]
+ Cost _pi_lim;
+
+ // Data for storing the spanning tree structure
+ IntVector _parent;
+ IntVector _pred;
+ IntVector _thread;
+ IntVector _rev_thread;
+ IntVector _succ_num;
+ IntVector _last_succ;
+ CharVector _pred_dir;
+ CharVector _state;
+ IntVector _dirty_revs;
+ int _root;
+
+ // The basis of the last run is there for runWarm() to start from, and
+ // it has to be made primal feasible first [see repairBasis()]
+ bool _warm , _repair;
+ // The entering arc of the pivot that proved the problem unbounded
+ int _unb_arc;
+
+ // Temporary data used in the current pivot iteration
+ int in_arc , join , u_in , v_in , u_out , v_out;
+ Value delta;
+
+ const Value MAX_VALUE;
+
+ public:
+ /// \brief Constant for infinite upper bounds (capacities).
+ ///
+ /// Constant for infinite upper bounds (capacities).
+ /// It is \c std::numeric_limits<Value>::infinity() if available,
+ /// \c (std::numeric_limits<Value>::max)() otherwise.
+ const Value INF;
+
+ private:
+ // The tolerance of the pivot rules on the reduced costs: zero for an
+ // exact cost type, otherwise relative to the largest of the n costs.
+ static Cost pivotTolerance( const CostVector & cost , int n ) {
+  if( std::numeric_limits< Cost >::is_exact )
+   return( 0 );
+  Cost m = 1;
+  for( int i = 0 ; i != n ; ++i ) {
+   if( cost[ i ] > m )
+    m = cost[ i ];
+   else if( -cost[ i ] > m )
+    m = -cost[ i ];
+   }
+  return( m * std::numeric_limits< Cost >::epsilon() * 1e6 );
+  }
+
+ // The tolerance on the flow left on the artificial arcs: zero for an
+ // exact flow type, otherwise relative to the largest of the n supplies.
+ static Value flowTolerance( const ValueVector & supply , int n ) {
+  if( std::numeric_limits< Value >::is_exact )
+   return( 0 );
+  Value m = 1;
+  for( int i = 0 ; i != n ; ++i ) {
+   if( supply[ i ] > m )
+    m = supply[ i ];
+   else if( -supply[ i ] > m )
+    m = -supply[ i ];
+   }
+  return( m * std::numeric_limits< Value >::epsilon() * 1e6 );
+  }
+
+ // Implementation of the First Eligible pivot rule
+ class FirstEligiblePivotRule
+ {
+  private:
+  // References to the NetworkSimplex class
+  const IntVector & _source;
+  const IntVector & _target;
+  const CostVector & _cost;
+  const CharVector & _state;
+  const CostVector & _pi;
+  int & _in_arc;
+  int _search_arc_num;
+  Cost _eps;
+
+  // Pivot rule data
+  int _next_arc;
+
+  public:
+  // Constructor
+  FirstEligiblePivotRule( NetworkSimplex & ns )
+      : _source( ns._source ) , _target( ns._target ) , _cost( ns._cost ) ,
+	_state( ns._state ) , _pi( ns._pi ) , _in_arc( ns.in_arc ) ,
+	_search_arc_num( ns._search_arc_num ) ,
+	_eps( pivotTolerance( ns._cost , ns._arc_num ) ) , _next_arc( 0 ) { }
+
+  // Find next entering arc
+  bool findEnteringArc() {
+   Cost c;
+   for( int e = _next_arc ; e != _search_arc_num ; ++e ) {
+    c =
+      _state[ e ] * ( _cost[ e ] + _pi[ _source[ e ] ] - _pi[ _target[ e ] ] );
+    if( c < -_eps ) {
+     _in_arc = e;
+     _next_arc = e + 1;
+     return( true );
+     }
+    }
+   for( int e = 0 ; e != _next_arc ; ++e ) {
+    c =
+      _state[ e ] * ( _cost[ e ] + _pi[ _source[ e ] ] - _pi[ _target[ e ] ] );
+    if( c < -_eps ) {
+     _in_arc = e;
+     _next_arc = e + 1;
+     return( true );
+     }
+    }
+   return( false );
+   }
+
+  };  //class FirstEligiblePivotRule
+
+
+ // Implementation of the Best Eligible pivot rule
+ class BestEligiblePivotRule
+ {
+  private:
+  // References to the NetworkSimplex class
+  const IntVector & _source;
+  const IntVector & _target;
+  const CostVector & _cost;
+  const CharVector & _state;
+  const CostVector & _pi;
+  int & _in_arc;
+  int _search_arc_num;
+  Cost _eps;
+
+  public:
+  // Constructor
+  BestEligiblePivotRule( NetworkSimplex & ns )
+      : _source( ns._source ) , _target( ns._target ) , _cost( ns._cost ) ,
+	_state( ns._state ) , _pi( ns._pi ) , _in_arc( ns.in_arc ) ,
+	_search_arc_num( ns._search_arc_num ) ,
+	_eps( pivotTolerance( ns._cost , ns._arc_num ) ) { }
+
+  // Find next entering arc
+  bool findEnteringArc() {
+   Cost c , min = 0;
+   for( int e = 0 ; e != _search_arc_num ; ++e ) {
+    c =
+      _state[ e ] * ( _cost[ e ] + _pi[ _source[ e ] ] - _pi[ _target[ e ] ] );
+    if( c < min ) {
+     min = c;
+     _in_arc = e;
+     }
+    }
+   return( min < -_eps );
+   }
+
+  };  //class BestEligiblePivotRule
+
+
+ // Implementation of the Block Search pivot rule
+ class BlockSearchPivotRule
+ {
+  private:
+  // References to the NetworkSimplex class
+  const IntVector & _source;
+  const IntVector & _target;
+  const CostVector & _cost;
+  const CharVector & _state;
+  const CostVector & _pi;
+  int & _in_arc;
+  int _search_arc_num;
+  Cost _eps;
+
+  // Pivot rule data
+  int _block_size;
+  int _next_arc;
+
+  public:
+  // Constructor
+  BlockSearchPivotRule( NetworkSimplex & ns )
+      : _source( ns._source ) , _target( ns._target ) , _cost( ns._cost ) ,
+	_state( ns._state ) , _pi( ns._pi ) , _in_arc( ns.in_arc ) ,
+	_search_arc_num( ns._search_arc_num ) ,
+	_eps( pivotTolerance( ns._cost , ns._arc_num ) ) , _next_arc( 0 ) {
+   // The main parameters of the pivot rule
+   const double BLOCK_SIZE_FACTOR = 1.0;
+   const int MIN_BLOCK_SIZE = 10;
+
+   _block_size = ( std::max )( int( BLOCK_SIZE_FACTOR *
+				    std::sqrt( double( _search_arc_num ) ) ) ,
+			       MIN_BLOCK_SIZE );
+   }
+
+  // Find next entering arc
+  bool findEnteringArc() {
+   Cost c , min = 0;
+   int cnt = _block_size;
+   int e;
+   for( e = _next_arc ; e != _search_arc_num ; ++e ) {
+    c =
+      _state[ e ] * ( _cost[ e ] + _pi[ _source[ e ] ] - _pi[ _target[ e ] ] );
+    if( c < min ) {
+     min = c;
+     _in_arc = e;
+     }
+    if( --cnt == 0 ) {
+     if( min < -_eps )
+      goto search_end;
+     cnt = _block_size;
+     }
+    }
+   for( e = 0 ; e != _next_arc ; ++e ) {
+    c =
+      _state[ e ] * ( _cost[ e ] + _pi[ _source[ e ] ] - _pi[ _target[ e ] ] );
+    if( c < min ) {
+     min = c;
+     _in_arc = e;
+     }
+    if( --cnt == 0 ) {
+     if( min < -_eps )
+      goto search_end;
+     cnt = _block_size;
+     }
+    }
+   if( min >= -_eps )
+    return( false );
+
+  search_end:
+   _next_arc = e;
+   return( true );
+   }
+
+  };  //class BlockSearchPivotRule
+
+
+ // Implementation of the Candidate List pivot rule
+ class CandidateListPivotRule
+ {
+  private:
+  // References to the NetworkSimplex class
+  const IntVector & _source;
+  const IntVector & _target;
+  const CostVector & _cost;
+  const CharVector & _state;
+  const CostVector & _pi;
+  int & _in_arc;
+  int _search_arc_num;
+  Cost _eps;
+
+  // Pivot rule data
+  IntVector _candidates;
+  int _list_length , _minor_limit;
+  int _curr_length , _minor_count;
+  int _next_arc;
+
+  public:
+  /// Constructor
+  CandidateListPivotRule( NetworkSimplex & ns )
+      : _source( ns._source ) , _target( ns._target ) , _cost( ns._cost ) ,
+	_state( ns._state ) , _pi( ns._pi ) , _in_arc( ns.in_arc ) ,
+	_search_arc_num( ns._search_arc_num ) ,
+	_eps( pivotTolerance( ns._cost , ns._arc_num ) ) , _next_arc( 0 ) {
+   // The main parameters of the pivot rule
+   const double LIST_LENGTH_FACTOR = 0.25;
+   const int MIN_LIST_LENGTH = 10;
+   const double MINOR_LIMIT_FACTOR = 0.1;
+   const int MIN_MINOR_LIMIT = 3;
+
+   _list_length = ( std::max )( int( LIST_LENGTH_FACTOR *
+				     std::sqrt( double( _search_arc_num ) ) ) ,
+				MIN_LIST_LENGTH );
+   _minor_limit =
+     ( std::max )( int( MINOR_LIMIT_FACTOR * _list_length ) ,
+		   MIN_MINOR_LIMIT );
+   _curr_length = _minor_count = 0;
+   _candidates.resize( _list_length );
+   }
+
+  /// Find next entering arc
+  bool findEnteringArc() {
+   Cost min , c;
+   int e;
+   if( _curr_length > 0 && _minor_count < _minor_limit ) {
+    // Minor iteration: select the best eligible arc from the
+    // current candidate list
+    ++_minor_count;
+    min = 0;
+    for( int i = 0 ; i < _curr_length ; ++i ) {
+     e = _candidates[ i ];
+     c = _state[ e ] *
+	 ( _cost[ e ] + _pi[ _source[ e ] ] - _pi[ _target[ e ] ] );
+     if( c < min ) {
+      min = c;
+      _in_arc = e;
+      }
+     else if( c >= -_eps ) {
+      _candidates[ i-- ] = _candidates[ --_curr_length ];
+      }
+     }
+    if( min < -_eps )
+     return( true );
+    }
+
+   // Major iteration: build a new candidate list
+   min = 0;
+   _curr_length = 0;
+   for( e = _next_arc ; e != _search_arc_num ; ++e ) {
+    c =
+      _state[ e ] * ( _cost[ e ] + _pi[ _source[ e ] ] - _pi[ _target[ e ] ] );
+    if( c < -_eps ) {
+     _candidates[ _curr_length++ ] = e;
+     if( c < min ) {
+      min = c;
+      _in_arc = e;
+      }
+     if( _curr_length == _list_length )
+      goto search_end;
+     }
+    }
+   for( e = 0 ; e != _next_arc ; ++e ) {
+    c =
+      _state[ e ] * ( _cost[ e ] + _pi[ _source[ e ] ] - _pi[ _target[ e ] ] );
+    if( c < -_eps ) {
+     _candidates[ _curr_length++ ] = e;
+     if( c < min ) {
+      min = c;
+      _in_arc = e;
+      }
+     if( _curr_length == _list_length )
+      goto search_end;
+     }
+    }
+   if( _curr_length == 0 )
+    return( false );
+
+  search_end:
+   _minor_count = 1;
+   _next_arc = e;
+   return( true );
+   }
+
+  };  //class CandidateListPivotRule
+
+
+ // Implementation of the Altering Candidate List pivot rule
+ class AlteringListPivotRule
+ {
+  private:
+  // References to the NetworkSimplex class
+  const IntVector & _source;
+  const IntVector & _target;
+  const CostVector & _cost;
+  const CharVector & _state;
+  const CostVector & _pi;
+  int & _in_arc;
+  int _search_arc_num;
+  Cost _eps;
+
+  // Pivot rule data
+  int _block_size , _head_length , _curr_length;
+  int _next_arc;
+  IntVector _candidates;
+  CostVector _cand_cost;
+
+  // Functor class to compare arcs during sort of the candidate list
+  class SortFunc
   {
-  public:
+   private:
+   const CostVector & _map;
 
-    /// The type of the flow amounts, capacity bounds and supply values
-    typedef V Value;
-    /// The type of the arc costs
-    typedef C Cost;
+   public:
+   SortFunc( const CostVector & map ) : _map( map ) { }
+   bool operator()( int left , int right ) {
+    return( _map[ left ] < _map[ right ] );
+    }
+   };
 
-  public:
-
-    /// \brief Problem type constants for the \c run() function.
-    ///
-    /// Enum type containing the problem type constants that can be
-    /// returned by the \ref run() function of the algorithm.
-    enum ProblemType {
-      /// The problem has no feasible solution (flow).
-      INFEASIBLE,
-      /// The problem has optimal solution (i.e. it is feasible and
-      /// bounded), and the algorithm has found optimal flow and node
-      /// potentials (primal and dual solutions).
-      OPTIMAL,
-      /// The objective function of the problem is unbounded, i.e.
-      /// there is a directed cycle having negative total cost and
-      /// infinite upper bound.
-      UNBOUNDED
-    };
-
-    /// \brief Constants for selecting the type of the supply constraints.
-    ///
-    /// Enum type containing constants for selecting the supply type,
-    /// i.e. the direction of the inequalities in the supply/demand
-    /// constraints of the \ref min_cost_flow "minimum cost flow problem".
-    ///
-    /// The default supply type is \c GEQ, the \c LEQ type can be
-    /// selected using \ref supplyType().
-    /// The equality form is a special case of both supply types.
-    enum SupplyType {
-      /// This option means that there are <em>"greater or equal"</em>
-      /// supply/demand constraints in the definition of the problem.
-      GEQ,
-      /// This option means that there are <em>"less or equal"</em>
-      /// supply/demand constraints in the definition of the problem.
-      LEQ
-    };
-
-    /// \brief Constants for selecting the pivot rule.
-    ///
-    /// Enum type containing constants for selecting the pivot rule for
-    /// the \ref run() function.
-    ///
-    /// \ref NetworkSimplex provides five different implementations for
-    /// the pivot strategy that significantly affects the running time
-    /// of the algorithm.
-    /// According to experimental tests conducted on various problem
-    /// instances, \ref BLOCK_SEARCH "Block Search" and
-    /// \ref ALTERING_LIST "Altering Candidate List" rules turned out
-    /// to be the most efficient.
-    /// Since \ref BLOCK_SEARCH "Block Search" is a simpler strategy that
-    /// seemed to be slightly more robust, it is used by default.
-    /// However, another pivot rule can easily be selected using the
-    /// \ref run() function with the proper parameter.
-    enum PivotRule {
-
-      /// The \e First \e Eligible pivot rule.
-      /// The next eligible arc is selected in a wraparound fashion
-      /// in every iteration.
-      FIRST_ELIGIBLE,
-
-      /// The \e Best \e Eligible pivot rule.
-      /// The best eligible arc is selected in every iteration.
-      BEST_ELIGIBLE,
-
-      /// The \e Block \e Search pivot rule.
-      /// A specified number of arcs are examined in every iteration
-      /// in a wraparound fashion and the best eligible arc is selected
-      /// from this block.
-      BLOCK_SEARCH,
-
-      /// The \e Candidate \e List pivot rule.
-      /// In a major iteration a candidate list is built from eligible arcs
-      /// in a wraparound fashion and in the following minor iterations
-      /// the best eligible arc is selected from this list.
-      CANDIDATE_LIST,
-
-      /// The \e Altering \e Candidate \e List pivot rule.
-      /// It is a modified version of the Candidate List method.
-      /// It keeps only a few of the best eligible arcs from the former
-      /// candidate list and extends this list in every iteration.
-      ALTERING_LIST
-    };
-
-  private:
-
-    TEMPLATE_DIGRAPH_TYPEDEFS(GR);
-
-    typedef std::vector<int> IntVector;
-    typedef std::vector<Value> ValueVector;
-    typedef std::vector<Cost> CostVector;
-    typedef std::vector<signed char> CharVector;
-    // Note: vector<signed char> is used instead of vector<ArcState> and
-    // vector<ArcDirection> for efficiency reasons
-
-    // State constants for arcs
-    enum ArcState {
-      STATE_UPPER = -1,
-      STATE_TREE  =  0,
-      STATE_LOWER =  1
-    };
-
-    // Direction constants for tree arcs
-    enum ArcDirection {
-      DIR_DOWN = -1,
-      DIR_UP   =  1
-    };
-
-  private:
-
-    // Data related to the underlying digraph
-    const GR &_graph;
-    int _node_num;
-    int _arc_num;
-    int _all_arc_num;
-    int _search_arc_num;
-
-    // Parameters of the problem
-    bool _has_lower;
-    SupplyType _stype;
-    Value _sum_supply;
-
-    // Data structures for storing the digraph
-    IntNodeMap _node_id;
-    IntArcMap _arc_id;
-    IntVector _source;
-    IntVector _target;
-    bool _arc_mixing;
-
-    // Node and arc data
-    ValueVector _lower;
-    ValueVector _upper;
-    ValueVector _cap;
-    CostVector _cost;
-    ValueVector _supply;
-    ValueVector _flow;
-    CostVector _pi;
-    // How far the potential of the root may move from zero [see
-    // updatePotential()]
-    Cost _pi_lim;
-
-    // Data for storing the spanning tree structure
-    IntVector _parent;
-    IntVector _pred;
-    IntVector _thread;
-    IntVector _rev_thread;
-    IntVector _succ_num;
-    IntVector _last_succ;
-    CharVector _pred_dir;
-    CharVector _state;
-    IntVector _dirty_revs;
-    int _root;
-
-    // The basis of the last run is there for runWarm() to start from, and
-    // it has to be made primal feasible first [see repairBasis()]
-    bool _warm, _repair;
-    // The entering arc of the pivot that proved the problem unbounded
-    int _unb_arc;
-
-    // Temporary data used in the current pivot iteration
-    int in_arc, join, u_in, v_in, u_out, v_out;
-    Value delta;
-
-    const Value MAX_VALUE;
+  SortFunc _sort_func;
 
   public:
+  // Constructor
+  AlteringListPivotRule( NetworkSimplex & ns )
+      : _source( ns._source ) , _target( ns._target ) , _cost( ns._cost ) ,
+	_state( ns._state ) , _pi( ns._pi ) , _in_arc( ns.in_arc ) ,
+	_search_arc_num( ns._search_arc_num ) ,
+	_eps( pivotTolerance( ns._cost , ns._arc_num ) ) , _next_arc( 0 ) ,
+	_cand_cost( ns._search_arc_num ) , _sort_func( _cand_cost ) {
+   // The main parameters of the pivot rule
+   const double BLOCK_SIZE_FACTOR = 1.0;
+   const int MIN_BLOCK_SIZE = 10;
+   const double HEAD_LENGTH_FACTOR = 0.01;
+   const int MIN_HEAD_LENGTH = 3;
 
-    /// \brief Constant for infinite upper bounds (capacities).
-    ///
-    /// Constant for infinite upper bounds (capacities).
-    /// It is \c std::numeric_limits<Value>::infinity() if available,
-    /// \c (std::numeric_limits<Value>::max)() otherwise.
-    const Value INF;
+   _block_size = ( std::max )( int( BLOCK_SIZE_FACTOR *
+				    std::sqrt( double( _search_arc_num ) ) ) ,
+			       MIN_BLOCK_SIZE );
+   _head_length =
+     ( std::max )( int( HEAD_LENGTH_FACTOR * _block_size ) , MIN_HEAD_LENGTH );
+   _candidates.resize( _head_length + _block_size );
+   _curr_length = 0;
+   }
 
-  private:
-
-    // The tolerance of the pivot rules on the reduced costs: zero for an
-    // exact cost type, otherwise relative to the largest of the n costs.
-    static Cost pivotTolerance(const CostVector& cost, int n) {
-      if (std::numeric_limits<Cost>::is_exact) return 0;
-      Cost m = 1;
-      for (int i = 0; i != n; ++i) {
-        if (cost[i] > m) m = cost[i];
-        else if (-cost[i] > m) m = -cost[i];
-      }
-      return m * std::numeric_limits<Cost>::epsilon() * 1e6;
+  // Find next entering arc
+  bool findEnteringArc() {
+   // Check the current candidate list
+   int e;
+   Cost c;
+   for( int i = 0 ; i != _curr_length ; ++i ) {
+    e = _candidates[ i ];
+    c =
+      _state[ e ] * ( _cost[ e ] + _pi[ _source[ e ] ] - _pi[ _target[ e ] ] );
+    if( c < -_eps ) {
+     _cand_cost[ e ] = c;
+     }
+    else {
+     _candidates[ i-- ] = _candidates[ --_curr_length ];
+     }
     }
 
-    // The tolerance on the flow left on the artificial arcs: zero for an
-    // exact flow type, otherwise relative to the largest of the n supplies.
-    static Value flowTolerance(const ValueVector& supply, int n) {
-      if (std::numeric_limits<Value>::is_exact) return 0;
-      Value m = 1;
-      for (int i = 0; i != n; ++i) {
-        if (supply[i] > m) m = supply[i];
-        else if (-supply[i] > m) m = -supply[i];
-      }
-      return m * std::numeric_limits<Value>::epsilon() * 1e6;
+   // Extend the list
+   int cnt = _block_size;
+   int limit = _head_length;
+
+   for( e = _next_arc ; e != _search_arc_num ; ++e ) {
+    c =
+      _state[ e ] * ( _cost[ e ] + _pi[ _source[ e ] ] - _pi[ _target[ e ] ] );
+    if( c < -_eps ) {
+     _cand_cost[ e ] = c;
+     _candidates[ _curr_length++ ] = e;
+     }
+    if( --cnt == 0 ) {
+     if( _curr_length > limit )
+      goto search_end;
+     limit = 0;
+     cnt = _block_size;
+     }
     }
-
-    // Implementation of the First Eligible pivot rule
-    class FirstEligiblePivotRule
-    {
-    private:
-
-      // References to the NetworkSimplex class
-      const IntVector  &_source;
-      const IntVector  &_target;
-      const CostVector &_cost;
-      const CharVector &_state;
-      const CostVector &_pi;
-      int &_in_arc;
-      int _search_arc_num;
-      Cost _eps;
-
-      // Pivot rule data
-      int _next_arc;
-
-    public:
-
-      // Constructor
-      FirstEligiblePivotRule(NetworkSimplex &ns) :
-        _source(ns._source), _target(ns._target),
-        _cost(ns._cost), _state(ns._state), _pi(ns._pi),
-        _in_arc(ns.in_arc), _search_arc_num(ns._search_arc_num),
-        _eps(pivotTolerance(ns._cost, ns._arc_num)),
-        _next_arc(0)
-      {}
-
-      // Find next entering arc
-      bool findEnteringArc() {
-        Cost c;
-        for (int e = _next_arc; e != _search_arc_num; ++e) {
-          c = _state[e] * (_cost[e] + _pi[_source[e]] - _pi[_target[e]]);
-          if (c < -_eps) {
-            _in_arc = e;
-            _next_arc = e + 1;
-            return true;
-          }
-        }
-        for (int e = 0; e != _next_arc; ++e) {
-          c = _state[e] * (_cost[e] + _pi[_source[e]] - _pi[_target[e]]);
-          if (c < -_eps) {
-            _in_arc = e;
-            _next_arc = e + 1;
-            return true;
-          }
-        }
-        return false;
-      }
-
-    }; //class FirstEligiblePivotRule
-
-
-    // Implementation of the Best Eligible pivot rule
-    class BestEligiblePivotRule
-    {
-    private:
-
-      // References to the NetworkSimplex class
-      const IntVector  &_source;
-      const IntVector  &_target;
-      const CostVector &_cost;
-      const CharVector &_state;
-      const CostVector &_pi;
-      int &_in_arc;
-      int _search_arc_num;
-      Cost _eps;
-
-    public:
-
-      // Constructor
-      BestEligiblePivotRule(NetworkSimplex &ns) :
-        _source(ns._source), _target(ns._target),
-        _cost(ns._cost), _state(ns._state), _pi(ns._pi),
-        _in_arc(ns.in_arc), _search_arc_num(ns._search_arc_num),
-        _eps(pivotTolerance(ns._cost, ns._arc_num))
-      {}
-
-      // Find next entering arc
-      bool findEnteringArc() {
-        Cost c, min = 0;
-        for (int e = 0; e != _search_arc_num; ++e) {
-          c = _state[e] * (_cost[e] + _pi[_source[e]] - _pi[_target[e]]);
-          if (c < min) {
-            min = c;
-            _in_arc = e;
-          }
-        }
-        return min < -_eps;
-      }
-
-    }; //class BestEligiblePivotRule
-
-
-    // Implementation of the Block Search pivot rule
-    class BlockSearchPivotRule
-    {
-    private:
-
-      // References to the NetworkSimplex class
-      const IntVector  &_source;
-      const IntVector  &_target;
-      const CostVector &_cost;
-      const CharVector &_state;
-      const CostVector &_pi;
-      int &_in_arc;
-      int _search_arc_num;
-      Cost _eps;
-
-      // Pivot rule data
-      int _block_size;
-      int _next_arc;
-
-    public:
-
-      // Constructor
-      BlockSearchPivotRule(NetworkSimplex &ns) :
-        _source(ns._source), _target(ns._target),
-        _cost(ns._cost), _state(ns._state), _pi(ns._pi),
-        _in_arc(ns.in_arc), _search_arc_num(ns._search_arc_num),
-        _eps(pivotTolerance(ns._cost, ns._arc_num)),
-        _next_arc(0)
-      {
-        // The main parameters of the pivot rule
-        const double BLOCK_SIZE_FACTOR = 1.0;
-        const int MIN_BLOCK_SIZE = 10;
-
-        _block_size = (std::max)( int(BLOCK_SIZE_FACTOR *
-                                    std::sqrt(double(_search_arc_num))),
-                                MIN_BLOCK_SIZE );
-      }
-
-      // Find next entering arc
-      bool findEnteringArc() {
-        Cost c, min = 0;
-        int cnt = _block_size;
-        int e;
-        for (e = _next_arc; e != _search_arc_num; ++e) {
-          c = _state[e] * (_cost[e] + _pi[_source[e]] - _pi[_target[e]]);
-          if (c < min) {
-            min = c;
-            _in_arc = e;
-          }
-          if (--cnt == 0) {
-            if (min < -_eps) goto search_end;
-            cnt = _block_size;
-          }
-        }
-        for (e = 0; e != _next_arc; ++e) {
-          c = _state[e] * (_cost[e] + _pi[_source[e]] - _pi[_target[e]]);
-          if (c < min) {
-            min = c;
-            _in_arc = e;
-          }
-          if (--cnt == 0) {
-            if (min < -_eps) goto search_end;
-            cnt = _block_size;
-          }
-        }
-        if (min >= -_eps) return false;
-
-      search_end:
-        _next_arc = e;
-        return true;
-      }
-
-    }; //class BlockSearchPivotRule
-
-
-    // Implementation of the Candidate List pivot rule
-    class CandidateListPivotRule
-    {
-    private:
-
-      // References to the NetworkSimplex class
-      const IntVector  &_source;
-      const IntVector  &_target;
-      const CostVector &_cost;
-      const CharVector &_state;
-      const CostVector &_pi;
-      int &_in_arc;
-      int _search_arc_num;
-      Cost _eps;
-
-      // Pivot rule data
-      IntVector _candidates;
-      int _list_length, _minor_limit;
-      int _curr_length, _minor_count;
-      int _next_arc;
-
-    public:
-
-      /// Constructor
-      CandidateListPivotRule(NetworkSimplex &ns) :
-        _source(ns._source), _target(ns._target),
-        _cost(ns._cost), _state(ns._state), _pi(ns._pi),
-        _in_arc(ns.in_arc), _search_arc_num(ns._search_arc_num),
-        _eps(pivotTolerance(ns._cost, ns._arc_num)),
-        _next_arc(0)
-      {
-        // The main parameters of the pivot rule
-        const double LIST_LENGTH_FACTOR = 0.25;
-        const int MIN_LIST_LENGTH = 10;
-        const double MINOR_LIMIT_FACTOR = 0.1;
-        const int MIN_MINOR_LIMIT = 3;
-
-        _list_length = (std::max)( int(LIST_LENGTH_FACTOR *
-                                     std::sqrt(double(_search_arc_num))),
-                                 MIN_LIST_LENGTH );
-        _minor_limit = (std::max)( int(MINOR_LIMIT_FACTOR * _list_length),
-                                 MIN_MINOR_LIMIT );
-        _curr_length = _minor_count = 0;
-        _candidates.resize(_list_length);
-      }
-
-      /// Find next entering arc
-      bool findEnteringArc() {
-        Cost min, c;
-        int e;
-        if (_curr_length > 0 && _minor_count < _minor_limit) {
-          // Minor iteration: select the best eligible arc from the
-          // current candidate list
-          ++_minor_count;
-          min = 0;
-          for (int i = 0; i < _curr_length; ++i) {
-            e = _candidates[i];
-            c = _state[e] * (_cost[e] + _pi[_source[e]] - _pi[_target[e]]);
-            if (c < min) {
-              min = c;
-              _in_arc = e;
-            }
-            else if (c >= -_eps) {
-              _candidates[i--] = _candidates[--_curr_length];
-            }
-          }
-          if (min < -_eps) return true;
-        }
-
-        // Major iteration: build a new candidate list
-        min = 0;
-        _curr_length = 0;
-        for (e = _next_arc; e != _search_arc_num; ++e) {
-          c = _state[e] * (_cost[e] + _pi[_source[e]] - _pi[_target[e]]);
-          if (c < -_eps) {
-            _candidates[_curr_length++] = e;
-            if (c < min) {
-              min = c;
-              _in_arc = e;
-            }
-            if (_curr_length == _list_length) goto search_end;
-          }
-        }
-        for (e = 0; e != _next_arc; ++e) {
-          c = _state[e] * (_cost[e] + _pi[_source[e]] - _pi[_target[e]]);
-          if (c < -_eps) {
-            _candidates[_curr_length++] = e;
-            if (c < min) {
-              min = c;
-              _in_arc = e;
-            }
-            if (_curr_length == _list_length) goto search_end;
-          }
-        }
-        if (_curr_length == 0) return false;
-
-      search_end:
-        _minor_count = 1;
-        _next_arc = e;
-        return true;
-      }
-
-    }; //class CandidateListPivotRule
-
-
-    // Implementation of the Altering Candidate List pivot rule
-    class AlteringListPivotRule
-    {
-    private:
-
-      // References to the NetworkSimplex class
-      const IntVector  &_source;
-      const IntVector  &_target;
-      const CostVector &_cost;
-      const CharVector &_state;
-      const CostVector &_pi;
-      int &_in_arc;
-      int _search_arc_num;
-      Cost _eps;
-
-      // Pivot rule data
-      int _block_size, _head_length, _curr_length;
-      int _next_arc;
-      IntVector _candidates;
-      CostVector _cand_cost;
-
-      // Functor class to compare arcs during sort of the candidate list
-      class SortFunc
-      {
-      private:
-        const CostVector &_map;
-      public:
-        SortFunc(const CostVector &map) : _map(map) {}
-        bool operator()(int left, int right) {
-          return _map[left] < _map[right];
-        }
-      };
-
-      SortFunc _sort_func;
-
-    public:
-
-      // Constructor
-      AlteringListPivotRule(NetworkSimplex &ns) :
-        _source(ns._source), _target(ns._target),
-        _cost(ns._cost), _state(ns._state), _pi(ns._pi),
-        _in_arc(ns.in_arc), _search_arc_num(ns._search_arc_num),
-        _eps(pivotTolerance(ns._cost, ns._arc_num)),
-        _next_arc(0), _cand_cost(ns._search_arc_num), _sort_func(_cand_cost)
-      {
-        // The main parameters of the pivot rule
-        const double BLOCK_SIZE_FACTOR = 1.0;
-        const int MIN_BLOCK_SIZE = 10;
-        const double HEAD_LENGTH_FACTOR = 0.01;
-        const int MIN_HEAD_LENGTH = 3;
-
-        _block_size = (std::max)( int(BLOCK_SIZE_FACTOR *
-                                    std::sqrt(double(_search_arc_num))),
-                                MIN_BLOCK_SIZE );
-        _head_length = (std::max)( int(HEAD_LENGTH_FACTOR * _block_size),
-                                 MIN_HEAD_LENGTH );
-        _candidates.resize(_head_length + _block_size);
-        _curr_length = 0;
-      }
-
-      // Find next entering arc
-      bool findEnteringArc() {
-        // Check the current candidate list
-        int e;
-        Cost c;
-        for (int i = 0; i != _curr_length; ++i) {
-          e = _candidates[i];
-          c = _state[e] * (_cost[e] + _pi[_source[e]] - _pi[_target[e]]);
-          if (c < -_eps) {
-            _cand_cost[e] = c;
-          } else {
-            _candidates[i--] = _candidates[--_curr_length];
-          }
-        }
-
-        // Extend the list
-        int cnt = _block_size;
-        int limit = _head_length;
-
-        for (e = _next_arc; e != _search_arc_num; ++e) {
-          c = _state[e] * (_cost[e] + _pi[_source[e]] - _pi[_target[e]]);
-          if (c < -_eps) {
-            _cand_cost[e] = c;
-            _candidates[_curr_length++] = e;
-          }
-          if (--cnt == 0) {
-            if (_curr_length > limit) goto search_end;
-            limit = 0;
-            cnt = _block_size;
-          }
-        }
-        for (e = 0; e != _next_arc; ++e) {
-          c = _state[e] * (_cost[e] + _pi[_source[e]] - _pi[_target[e]]);
-          if (c < -_eps) {
-            _cand_cost[e] = c;
-            _candidates[_curr_length++] = e;
-          }
-          if (--cnt == 0) {
-            if (_curr_length > limit) goto search_end;
-            limit = 0;
-            cnt = _block_size;
-          }
-        }
-        if (_curr_length == 0) return false;
-
-      search_end:
-
-        // Perform partial sort operation on the candidate list
-        int new_length = (std::min)(_head_length + 1, _curr_length);
-        std::partial_sort(_candidates.begin(), _candidates.begin() + new_length,
-                          _candidates.begin() + _curr_length, _sort_func);
-
-        // Select the entering arc and remove it from the list
-        _in_arc = _candidates[0];
-        _next_arc = e;
-        _candidates[0] = _candidates[new_length - 1];
-        _curr_length = new_length - 1;
-        return true;
-      }
-
-    }; //class AlteringListPivotRule
-
-  public:
-
-    /// \brief Constructor.
-    ///
-    /// The constructor of the class.
-    ///
-    /// \param graph The digraph the algorithm runs on.
-    /// \param arc_mixing Indicate if the arcs will be stored in a
-    /// mixed order in the internal data structure.
-    /// In general, it leads to similar performance as using the original
-    /// arc order, but it makes the algorithm more robust and in special
-    /// cases, even significantly faster. Therefore, it is enabled by default.
-    NetworkSimplex(const GR& graph, bool arc_mixing = true) :
-      _graph(graph), _node_id(graph), _arc_id(graph),
-      _arc_mixing(arc_mixing),
-      MAX_VALUE((std::numeric_limits<Value>::max)()),
-      INF(std::numeric_limits<Value>::has_infinity ?
-          std::numeric_limits<Value>::infinity() : MAX_VALUE)
-    {
-      // Check the number types
-      LEMON_ASSERT(std::numeric_limits<Value>::is_signed,
-        "The flow type of NetworkSimplex must be signed");
-      LEMON_ASSERT(std::numeric_limits<Cost>::is_signed,
-        "The cost type of NetworkSimplex must be signed");
-
-      // Reset data structures
-      _warm = _repair = false;
-      _unb_arc = -1;
-      reset();
+   for( e = 0 ; e != _next_arc ; ++e ) {
+    c =
+      _state[ e ] * ( _cost[ e ] + _pi[ _source[ e ] ] - _pi[ _target[ e ] ] );
+    if( c < -_eps ) {
+     _cand_cost[ e ] = c;
+     _candidates[ _curr_length++ ] = e;
+     }
+    if( --cnt == 0 ) {
+     if( _curr_length > limit )
+      goto search_end;
+     limit = 0;
+     cnt = _block_size;
+     }
     }
+   if( _curr_length == 0 )
+    return( false );
 
-    /// \name Parameters
-    /// The parameters of the algorithm can be specified using these
-    /// functions.
+  search_end:
 
-    /// @{
+   // Perform partial sort operation on the candidate list
+   int new_length = ( std::min )( _head_length + 1 , _curr_length );
+   std::partial_sort( _candidates.begin() , _candidates.begin() + new_length ,
+		      _candidates.begin() + _curr_length , _sort_func );
 
-    /// \brief Set the lower bounds on the arcs.
-    ///
-    /// This function sets the lower bounds on the arcs.
-    /// If it is not used before calling \ref run(), the lower bounds
-    /// will be set to zero on all arcs.
-    ///
-    /// \param map An arc map storing the lower bounds.
-    /// Its \c Value type must be convertible to the \c Value type
-    /// of the algorithm.
-    ///
-    /// \return <tt>(*this)</tt>
-    template <typename LowerMap>
-    NetworkSimplex& lowerMap(const LowerMap& map) {
-      _warm = false;
-      _has_lower = true;
-      for (ArcIt a(_graph); a != INVALID; ++a) {
-        _lower[_arc_id[a]] = map[a];
-      }
-      return *this;
+   // Select the entering arc and remove it from the list
+   _in_arc = _candidates[ 0 ];
+   _next_arc = e;
+   _candidates[ 0 ] = _candidates[ new_length - 1 ];
+   _curr_length = new_length - 1;
+   return( true );
+   }
+
+  };  //class AlteringListPivotRule
+
+ public:
+ /// \brief Constructor.
+ ///
+ /// The constructor of the class.
+ ///
+ /// \param graph The digraph the algorithm runs on.
+ /// \param arc_mixing Indicate if the arcs will be stored in a
+ /// mixed order in the internal data structure.
+ /// In general, it leads to similar performance as using the original
+ /// arc order, but it makes the algorithm more robust and in special
+ /// cases, even significantly faster. Therefore, it is enabled by default.
+ NetworkSimplex( const GR & graph , bool arc_mixing = true )
+     : _graph( graph ) , _node_id( graph ) , _arc_id( graph ) ,
+       _arc_mixing( arc_mixing ) ,
+       MAX_VALUE( ( std::numeric_limits< Value >::max )() ) ,
+       INF( std::numeric_limits< Value >::has_infinity
+	      ? std::numeric_limits< Value >::infinity()
+	      : MAX_VALUE ) {
+  // Check the number types
+  LEMON_ASSERT( std::numeric_limits< Value >::is_signed ,
+		"The flow type of NetworkSimplex must be signed" );
+  LEMON_ASSERT( std::numeric_limits< Cost >::is_signed ,
+		"The cost type of NetworkSimplex must be signed" );
+
+  // Reset data structures
+  _warm = _repair = false;
+  _unb_arc = -1;
+  reset();
+  }
+
+ /// \name Parameters
+ /// The parameters of the algorithm can be specified using these
+ /// functions.
+
+ /// @{
+
+ /// \brief Set the lower bounds on the arcs.
+ ///
+ /// This function sets the lower bounds on the arcs.
+ /// If it is not used before calling \ref run(), the lower bounds
+ /// will be set to zero on all arcs.
+ ///
+ /// \param map An arc map storing the lower bounds.
+ /// Its \c Value type must be convertible to the \c Value type
+ /// of the algorithm.
+ ///
+ /// \return <tt>(*this)</tt>
+ template< typename LowerMap >
+ NetworkSimplex & lowerMap( const LowerMap & map ) {
+  _warm = false;
+  _has_lower = true;
+  for( ArcIt a( _graph ) ; a != INVALID ; ++a ) {
+   _lower[ _arc_id[ a ] ] = map[ a ];
+   }
+  return( *this );
+  }
+
+ /// \brief Set the upper bounds (capacities) on the arcs.
+ ///
+ /// This function sets the upper bounds (capacities) on the arcs.
+ /// If it is not used before calling \ref run(), the upper bounds
+ /// will be set to \ref INF on all arcs (i.e. the flow value will be
+ /// unbounded from above).
+ ///
+ /// \param map An arc map storing the upper bounds.
+ /// Its \c Value type must be convertible to the \c Value type
+ /// of the algorithm.
+ ///
+ /// \return <tt>(*this)</tt>
+ template< typename UpperMap >
+ NetworkSimplex & upperMap( const UpperMap & map ) {
+  for( ArcIt a( _graph ) ; a != INVALID ; ++a ) {
+   warmUpper( _arc_id[ a ] , map[ a ] );
+   }
+  return( *this );
+  }
+
+ /// \brief Set the costs of the arcs.
+ ///
+ /// This function sets the costs of the arcs.
+ /// If it is not used before calling \ref run(), the costs
+ /// will be set to \c 1 on all arcs.
+ ///
+ /// \param map An arc map storing the costs.
+ /// Its \c Value type must be convertible to the \c Cost type
+ /// of the algorithm.
+ ///
+ /// \return <tt>(*this)</tt>
+ template< typename CostMap >
+ NetworkSimplex & costMap( const CostMap & map ) {
+  for( ArcIt a( _graph ) ; a != INVALID ; ++a ) {
+   _cost[ _arc_id[ a ] ] = map[ a ];
+   }
+  return( *this );
+  }
+
+ /// \brief Set the supply values of the nodes.
+ ///
+ /// This function sets the supply values of the nodes.
+ /// If neither this function nor \ref stSupply() is used before
+ /// calling \ref run(), the supply of each node will be set to zero.
+ ///
+ /// \param map A node map storing the supply values.
+ /// Its \c Value type must be convertible to the \c Value type
+ /// of the algorithm.
+ ///
+ /// \return <tt>(*this)</tt>
+ ///
+ /// \sa supplyType()
+ template< typename SupplyMap >
+ NetworkSimplex & supplyMap( const SupplyMap & map ) {
+  for( NodeIt n( _graph ) ; n != INVALID ; ++n ) {
+   warmSupply( _node_id[ n ] , map[ n ] );
+   }
+  return( *this );
+  }
+
+ /// \brief Set single source and target nodes and a supply value.
+ ///
+ /// This function sets a single source node and a single target node
+ /// and the required flow value.
+ /// If neither this function nor \ref supplyMap() is used before
+ /// calling \ref run(), the supply of each node will be set to zero.
+ ///
+ /// Using this function has the same effect as using \ref supplyMap()
+ /// with a map in which \c k is assigned to \c s, \c -k is
+ /// assigned to \c t and all other nodes have zero supply value.
+ ///
+ /// \param s The source node.
+ /// \param t The target node.
+ /// \param k The required amount of flow from node \c s to node \c t
+ /// (i.e. the supply of \c s and the demand of \c t).
+ ///
+ /// \return <tt>(*this)</tt>
+ NetworkSimplex & stSupply( const Node & s , const Node & t , Value k ) {
+  _warm = false;
+  for( int i = 0 ; i != _node_num ; ++i ) {
+   _supply[ i ] = 0;
+   }
+  _supply[ _node_id[ s ] ] = k;
+  _supply[ _node_id[ t ] ] = -k;
+  return( *this );
+  }
+
+ /// \brief Set the type of the supply constraints.
+ ///
+ /// This function sets the type of the supply/demand constraints.
+ /// If it is not used before calling \ref run(), the \ref GEQ supply
+ /// type will be used.
+ ///
+ /// For more information, see \ref SupplyType.
+ ///
+ /// \return <tt>(*this)</tt>
+ NetworkSimplex & supplyType( SupplyType supply_type ) {
+  _warm = false;
+  _stype = supply_type;
+  return( *this );
+  }
+
+ /// @}
+
+ /// \name Execution Control
+ /// The algorithm can be executed using \ref run().
+
+ /// @{
+
+ /// \brief Run the algorithm.
+ ///
+ /// This function runs the algorithm.
+ /// The paramters can be specified using functions \ref lowerMap(),
+ /// \ref upperMap(), \ref costMap(), \ref supplyMap(), \ref stSupply(),
+ /// \ref supplyType().
+ /// For example,
+ /// \code
+ ///   NetworkSimplex<ListDigraph> ns(graph);
+ ///   ns.lowerMap(lower).upperMap(upper).costMap(cost)
+ ///     .supplyMap(sup).run();
+ /// \endcode
+ ///
+ /// This function can be called more than once. All the given parameters
+ /// are kept for the next call, unless \ref resetParams() or \ref reset()
+ /// is used, thus only the modified parameters have to be set again.
+ /// If the underlying digraph was also modified after the construction
+ /// of the class (or the last \ref reset() call), then the \ref reset()
+ /// function must be called.
+ ///
+ /// \param pivot_rule The pivot rule that will be used during the
+ /// algorithm. For more information, see \ref PivotRule.
+ ///
+ /// \return \c INFEASIBLE if no feasible flow exists,
+ /// \n \c OPTIMAL if the problem has optimal solution
+ /// (i.e. it is feasible and bounded), and the algorithm has found
+ /// optimal flow and node potentials (primal and dual solutions),
+ /// \n \c UNBOUNDED if the objective function of the problem is
+ /// unbounded, i.e. there is a directed cycle having negative total
+ /// cost and infinite upper bound.
+ ///
+ /// \see ProblemType, PivotRule
+ /// \see resetParams(), reset()
+ ProblemType run( PivotRule pivot_rule = BLOCK_SEARCH ) {
+  _unb_arc = -1;
+  _warm = _repair = false;
+  // A problem without nodes has the empty flow, which is optimal
+  if( _node_num == 0 )
+   return( OPTIMAL );
+  if( ! init() )
+   return( INFEASIBLE );
+  return( finish( start( pivot_rule ) ) );
+  }
+
+ /// \brief Run the algorithm again from the basis of the last run.
+ ///
+ /// This function runs the algorithm again after a change of the
+ /// costs, of the upper bounds or of the supplies, starting from the
+ /// basis that the last run ended at rather than from the artificial
+ /// one, which re-optimizes the problem with far fewer pivots when the
+ /// change is small.
+ ///
+ /// After a change of the costs alone the basis is still primal
+ /// feasible: its potentials are computed anew and the simplex goes on
+ /// from there. After a change of the upper bounds or of the supplies
+ /// the flow of its tree is computed anew, and the subtree below an arc
+ /// whose flow falls outside its bounds is hung from the root by an
+ /// artificial arc, as the artificial basis hangs every node, so that
+ /// the basis is primal feasible again and the artificial arcs are
+ /// driven out by their cost. A basis is kept from a run that ended
+ /// with \ref OPTIMAL or, without lower bounds, \ref INFEASIBLE; a
+ /// change of the digraph, of the lower bounds, of the supply type,
+ /// \ref stSupply(), \ref resetParams(), \ref reset(), or supplies
+ /// that do not sum to zero drop it, and then this function does what
+ /// \ref run() does.
+ ///
+ /// \param pivot_rule The pivot rule that will be used during the
+ /// algorithm. For more information, see \ref PivotRule.
+ ///
+ /// \return The same as \ref run().
+ ProblemType runWarm( PivotRule pivot_rule = BLOCK_SEARCH ) {
+  if( ! _warm )
+   return( run( pivot_rule ) );
+  _unb_arc = -1;
+  if( _repair ) {
+   if( ! repairBasis() )
+    return( run( pivot_rule ) );
+   _repair = false;
+   }
+
+  // The artificial arcs keep a cost larger than that of any path, which
+  // the change may have made larger than it was
+  const Cost art = initArtificialCost();
+  for( int e = _arc_num ; e != _all_arc_num ; ++e ) {
+   if( _cost[ e ] != 0 )
+    _cost[ e ] = art;
+   }
+
+  // The potentials of the tree of the basis, in the order of the
+  // thread, which gives every node after its father
+  _pi[ _root ] = 0;
+  for( int u = _thread[ _root ] ; u != _root ; u = _thread[ u ] ) {
+   int e = _pred[ u ];
+   _pi[ u ] = _pred_dir[ u ] == DIR_UP ? _pi[ _parent[ u ] ] - _cost[ e ]
+				       : _pi[ _parent[ u ] ] + _cost[ e ];
+   }
+  return( finish( start( pivot_rule ) ) );
+  }
+
+ /// \brief The cycle that proves the problem unbounded.
+ ///
+ /// This function gives the directed cycle of negative cost and
+ /// infinite capacity that proves the problem unbounded, which the
+ /// algorithm has at hand when it says so: the cycle of the pivot it
+ /// cannot perform, i.e., the entering arc and the path of the tree of
+ /// the basis between its two ends, every arc of which the flow
+ /// traverses forward. The arcs are given in the direction of the flow.
+ /// The cycle is empty if the last run did not end with
+ /// \ref UNBOUNDED, or if it goes through an artificial arc, which is
+ /// no cycle of the problem.
+ std::vector< Arc > unboundedCycle() const {
+  std::vector< Arc > cycle;
+  if( _unb_arc < 0 )
+   return( cycle );
+
+  std::vector< int > ids;
+  ids.push_back( _unb_arc );
+  // The entering arc goes from v_in to u_in, as findLeavingArc() sets
+  // them when no arc leaves; the flow goes on from u_in up to join, and
+  // then from join down to v_in, i.e., along the path from v_in to join
+  // taken backwards
+  for( int u = u_in ; u != join ; u = _parent[ u ] )
+   ids.push_back( _pred[ u ] );
+  std::vector< int > down;
+  for( int u = v_in ; u != join ; u = _parent[ u ] )
+   down.push_back( _pred[ u ] );
+  ids.insert( ids.end() , down.rbegin() , down.rend() );
+
+  for( std::size_t i = 0 ; i != ids.size() ; ++i ) {
+   if( ids[ i ] >= _arc_num )
+    return( std::vector< Arc >() );
+   }
+
+  // The inverse of the numbering of the arcs, taken once here
+  std::vector< Arc > arc_of( _arc_num , INVALID );
+  for( ArcIt a( _graph ) ; a != INVALID ; ++a )
+   arc_of[ _arc_id[ a ] ] = a;
+  for( std::size_t i = 0 ; i != ids.size() ; ++i ) {
+   if( arc_of[ ids[ i ] ] == INVALID )
+    return( std::vector< Arc >() );
+   cycle.push_back( arc_of[ ids[ i ] ] );
+   }
+  return( cycle );
+  }
+
+ /// \brief Reset all the parameters that have been given before.
+ ///
+ /// This function resets all the paramaters that have been given
+ /// before using functions \ref lowerMap(), \ref upperMap(),
+ /// \ref costMap(), \ref supplyMap(), \ref stSupply(), \ref supplyType().
+ ///
+ /// It is useful for multiple \ref run() calls. Basically, all the given
+ /// parameters are kept for the next \ref run() call, unless
+ /// \ref resetParams() or \ref reset() is used.
+ /// If the underlying digraph was also modified after the construction
+ /// of the class or the last \ref reset() call, then the \ref reset()
+ /// function must be used, otherwise \ref resetParams() is sufficient.
+ ///
+ /// For example,
+ /// \code
+ ///   NetworkSimplex<ListDigraph> ns(graph);
+ ///
+ ///   // First run
+ ///   ns.lowerMap(lower).upperMap(upper).costMap(cost)
+ ///     .supplyMap(sup).run();
+ ///
+ ///   // Run again with modified cost map (resetParams() is not called,
+ ///   // so only the cost map have to be set again)
+ ///   cost[e] += 100;
+ ///   ns.costMap(cost).run();
+ ///
+ ///   // Run again from scratch using resetParams()
+ ///   // (the lower bounds will be set to zero on all arcs)
+ ///   ns.resetParams();
+ ///   ns.upperMap(capacity).costMap(cost)
+ ///     .supplyMap(sup).run();
+ /// \endcode
+ ///
+ /// \return <tt>(*this)</tt>
+ ///
+ /// \see reset(), run()
+ NetworkSimplex & resetParams() {
+  _warm = false;
+  for( int i = 0 ; i != _node_num ; ++i ) {
+   _supply[ i ] = 0;
+   }
+  for( int i = 0 ; i != _arc_num ; ++i ) {
+   _lower[ i ] = 0;
+   _upper[ i ] = INF;
+   _cost[ i ] = 1;
+   }
+  _has_lower = false;
+  _stype = GEQ;
+  return( *this );
+  }
+
+ /// \brief Reset the internal data structures and all the parameters
+ /// that have been given before.
+ ///
+ /// This function resets the internal data structures and all the
+ /// paramaters that have been given before using functions \ref lowerMap(),
+ /// \ref upperMap(), \ref costMap(), \ref supplyMap(), \ref stSupply(),
+ /// \ref supplyType().
+ ///
+ /// It is useful for multiple \ref run() calls. Basically, all the given
+ /// parameters are kept for the next \ref run() call, unless
+ /// \ref resetParams() or \ref reset() is used.
+ /// If the underlying digraph was also modified after the construction
+ /// of the class or the last \ref reset() call, then the \ref reset()
+ /// function must be used, otherwise \ref resetParams() is sufficient.
+ ///
+ /// See \ref resetParams() for examples.
+ ///
+ /// \return <tt>(*this)</tt>
+ ///
+ /// \see resetParams(), run()
+ NetworkSimplex & reset() {
+  _warm = false;
+  // Resize vectors
+  _node_num = countNodes( _graph );
+  _arc_num = countArcs( _graph );
+  int all_node_num = _node_num + 1;
+  int max_arc_num = _arc_num + 2 * _node_num;
+
+  _source.resize( max_arc_num );
+  _target.resize( max_arc_num );
+
+  _lower.resize( _arc_num );
+  _upper.resize( _arc_num );
+  _cap.resize( max_arc_num );
+  _cost.resize( max_arc_num );
+  _supply.resize( all_node_num );
+  _flow.resize( max_arc_num );
+  _pi.resize( all_node_num );
+
+  _parent.resize( all_node_num );
+  _pred.resize( all_node_num );
+  _pred_dir.resize( all_node_num );
+  _thread.resize( all_node_num );
+  _rev_thread.resize( all_node_num );
+  _succ_num.resize( all_node_num );
+  _last_succ.resize( all_node_num );
+  _state.resize( max_arc_num );
+
+  // Copy the graph
+  int i = 0;
+  for( NodeIt n( _graph ) ; n != INVALID ; ++n , ++i ) {
+   _node_id[ n ] = i;
+   }
+  if( _arc_mixing && _node_num > 1 ) {
+   // Store the arcs in a mixed order
+   const int skip = ( std::max )( _arc_num / _node_num , 3 );
+   int i = 0 , j = 0;
+   for( ArcIt a( _graph ) ; a != INVALID ; ++a ) {
+    _arc_id[ a ] = i;
+    _source[ i ] = _node_id[ _graph.source( a ) ];
+    _target[ i ] = _node_id[ _graph.target( a ) ];
+    if( ( i += skip ) >= _arc_num )
+     i = ++j;
     }
-
-    /// \brief Set the upper bounds (capacities) on the arcs.
-    ///
-    /// This function sets the upper bounds (capacities) on the arcs.
-    /// If it is not used before calling \ref run(), the upper bounds
-    /// will be set to \ref INF on all arcs (i.e. the flow value will be
-    /// unbounded from above).
-    ///
-    /// \param map An arc map storing the upper bounds.
-    /// Its \c Value type must be convertible to the \c Value type
-    /// of the algorithm.
-    ///
-    /// \return <tt>(*this)</tt>
-    template<typename UpperMap>
-    NetworkSimplex& upperMap(const UpperMap& map) {
-      for (ArcIt a(_graph); a != INVALID; ++a) {
-        warmUpper(_arc_id[a], map[a]);
-      }
-      return *this;
+   }
+  else {
+   // Store the arcs in the original order
+   int i = 0;
+   for( ArcIt a( _graph ) ; a != INVALID ; ++a , ++i ) {
+    _arc_id[ a ] = i;
+    _source[ i ] = _node_id[ _graph.source( a ) ];
+    _target[ i ] = _node_id[ _graph.target( a ) ];
     }
+   }
 
-    /// \brief Set the costs of the arcs.
-    ///
-    /// This function sets the costs of the arcs.
-    /// If it is not used before calling \ref run(), the costs
-    /// will be set to \c 1 on all arcs.
-    ///
-    /// \param map An arc map storing the costs.
-    /// Its \c Value type must be convertible to the \c Cost type
-    /// of the algorithm.
-    ///
-    /// \return <tt>(*this)</tt>
-    template<typename CostMap>
-    NetworkSimplex& costMap(const CostMap& map) {
-      for (ArcIt a(_graph); a != INVALID; ++a) {
-        _cost[_arc_id[a]] = map[a];
-      }
-      return *this;
-    }
+  // Reset parameters
+  resetParams();
+  return( *this );
+  }
 
-    /// \brief Set the supply values of the nodes.
-    ///
-    /// This function sets the supply values of the nodes.
-    /// If neither this function nor \ref stSupply() is used before
-    /// calling \ref run(), the supply of each node will be set to zero.
-    ///
-    /// \param map A node map storing the supply values.
-    /// Its \c Value type must be convertible to the \c Value type
-    /// of the algorithm.
-    ///
-    /// \return <tt>(*this)</tt>
-    ///
-    /// \sa supplyType()
-    template<typename SupplyMap>
-    NetworkSimplex& supplyMap(const SupplyMap& map) {
-      for (NodeIt n(_graph); n != INVALID; ++n) {
-        warmSupply(_node_id[n], map[n]);
-      }
-      return *this;
-    }
+ /// @}
 
-    /// \brief Set single source and target nodes and a supply value.
-    ///
-    /// This function sets a single source node and a single target node
-    /// and the required flow value.
-    /// If neither this function nor \ref supplyMap() is used before
-    /// calling \ref run(), the supply of each node will be set to zero.
-    ///
-    /// Using this function has the same effect as using \ref supplyMap()
-    /// with a map in which \c k is assigned to \c s, \c -k is
-    /// assigned to \c t and all other nodes have zero supply value.
-    ///
-    /// \param s The source node.
-    /// \param t The target node.
-    /// \param k The required amount of flow from node \c s to node \c t
-    /// (i.e. the supply of \c s and the demand of \c t).
-    ///
-    /// \return <tt>(*this)</tt>
-    NetworkSimplex& stSupply(const Node& s, const Node& t, Value k) {
-      _warm = false;
-      for (int i = 0; i != _node_num; ++i) {
-        _supply[i] = 0;
-      }
-      _supply[_node_id[s]] =  k;
-      _supply[_node_id[t]] = -k;
-      return *this;
-    }
+ /// \name Query Functions
+ /// The results of the algorithm can be obtained using these
+ /// functions.\n
+ /// The \ref run() function must be called before using them.
 
-    /// \brief Set the type of the supply constraints.
-    ///
-    /// This function sets the type of the supply/demand constraints.
-    /// If it is not used before calling \ref run(), the \ref GEQ supply
-    /// type will be used.
-    ///
-    /// For more information, see \ref SupplyType.
-    ///
-    /// \return <tt>(*this)</tt>
-    NetworkSimplex& supplyType(SupplyType supply_type) {
-      _warm = false;
-      _stype = supply_type;
-      return *this;
-    }
+ /// @{
 
-    /// @}
-
-    /// \name Execution Control
-    /// The algorithm can be executed using \ref run().
-
-    /// @{
-
-    /// \brief Run the algorithm.
-    ///
-    /// This function runs the algorithm.
-    /// The paramters can be specified using functions \ref lowerMap(),
-    /// \ref upperMap(), \ref costMap(), \ref supplyMap(), \ref stSupply(),
-    /// \ref supplyType().
-    /// For example,
-    /// \code
-    ///   NetworkSimplex<ListDigraph> ns(graph);
-    ///   ns.lowerMap(lower).upperMap(upper).costMap(cost)
-    ///     .supplyMap(sup).run();
-    /// \endcode
-    ///
-    /// This function can be called more than once. All the given parameters
-    /// are kept for the next call, unless \ref resetParams() or \ref reset()
-    /// is used, thus only the modified parameters have to be set again.
-    /// If the underlying digraph was also modified after the construction
-    /// of the class (or the last \ref reset() call), then the \ref reset()
-    /// function must be called.
-    ///
-    /// \param pivot_rule The pivot rule that will be used during the
-    /// algorithm. For more information, see \ref PivotRule.
-    ///
-    /// \return \c INFEASIBLE if no feasible flow exists,
-    /// \n \c OPTIMAL if the problem has optimal solution
-    /// (i.e. it is feasible and bounded), and the algorithm has found
-    /// optimal flow and node potentials (primal and dual solutions),
-    /// \n \c UNBOUNDED if the objective function of the problem is
-    /// unbounded, i.e. there is a directed cycle having negative total
-    /// cost and infinite upper bound.
-    ///
-    /// \see ProblemType, PivotRule
-    /// \see resetParams(), reset()
-    ProblemType run(PivotRule pivot_rule = BLOCK_SEARCH) {
-      _unb_arc = -1;
-      _warm = _repair = false;
-      // A problem without nodes has the empty flow, which is optimal
-      if (_node_num == 0) return OPTIMAL;
-      if (!init()) return INFEASIBLE;
-      return finish(start(pivot_rule));
-    }
-
-    /// \brief Run the algorithm again from the basis of the last run.
-    ///
-    /// This function runs the algorithm again after a change of the
-    /// costs, of the upper bounds or of the supplies, starting from the
-    /// basis that the last run ended at rather than from the artificial
-    /// one, which re-optimizes the problem with far fewer pivots when the
-    /// change is small.
-    ///
-    /// After a change of the costs alone the basis is still primal
-    /// feasible: its potentials are computed anew and the simplex goes on
-    /// from there. After a change of the upper bounds or of the supplies
-    /// the flow of its tree is computed anew, and the subtree below an arc
-    /// whose flow falls outside its bounds is hung from the root by an
-    /// artificial arc, as the artificial basis hangs every node, so that
-    /// the basis is primal feasible again and the artificial arcs are
-    /// driven out by their cost. A basis is kept from a run that ended
-    /// with \ref OPTIMAL or, without lower bounds, \ref INFEASIBLE; a
-    /// change of the digraph, of the lower bounds, of the supply type,
-    /// \ref stSupply(), \ref resetParams(), \ref reset(), or supplies
-    /// that do not sum to zero drop it, and then this function does what
-    /// \ref run() does.
-    ///
-    /// \param pivot_rule The pivot rule that will be used during the
-    /// algorithm. For more information, see \ref PivotRule.
-    ///
-    /// \return The same as \ref run().
-    ProblemType runWarm(PivotRule pivot_rule = BLOCK_SEARCH) {
-      if (!_warm) return run(pivot_rule);
-      _unb_arc = -1;
-      if (_repair) {
-        if (!repairBasis()) return run(pivot_rule);
-        _repair = false;
-      }
-
-      // The artificial arcs keep a cost larger than that of any path, which
-      // the change may have made larger than it was
-      const Cost art = initArtificialCost();
-      for (int e = _arc_num; e != _all_arc_num; ++e) {
-        if (_cost[e] != 0) _cost[e] = art;
-      }
-
-      // The potentials of the tree of the basis, in the order of the
-      // thread, which gives every node after its father
-      _pi[_root] = 0;
-      for (int u = _thread[_root]; u != _root; u = _thread[u]) {
-        int e = _pred[u];
-        _pi[u] = _pred_dir[u] == DIR_UP ? _pi[_parent[u]] - _cost[e]
-                                        : _pi[_parent[u]] + _cost[e];
-      }
-      return finish(start(pivot_rule));
-    }
-
-    /// \brief The cycle that proves the problem unbounded.
-    ///
-    /// This function gives the directed cycle of negative cost and
-    /// infinite capacity that proves the problem unbounded, which the
-    /// algorithm has at hand when it says so: the cycle of the pivot it
-    /// cannot perform, i.e., the entering arc and the path of the tree of
-    /// the basis between its two ends, every arc of which the flow
-    /// traverses forward. The arcs are given in the direction of the flow.
-    /// The cycle is empty if the last run did not end with
-    /// \ref UNBOUNDED, or if it goes through an artificial arc, which is
-    /// no cycle of the problem.
-    std::vector<Arc> unboundedCycle() const {
-      std::vector<Arc> cycle;
-      if (_unb_arc < 0) return cycle;
-
-      std::vector<int> ids;
-      ids.push_back(_unb_arc);
-      // The entering arc goes from v_in to u_in, as findLeavingArc() sets
-      // them when no arc leaves; the flow goes on from u_in up to join, and
-      // then from join down to v_in, i.e., along the path from v_in to join
-      // taken backwards
-      for (int u = u_in; u != join; u = _parent[u]) ids.push_back(_pred[u]);
-      std::vector<int> down;
-      for (int u = v_in; u != join; u = _parent[u]) down.push_back(_pred[u]);
-      ids.insert(ids.end(), down.rbegin(), down.rend());
-
-      for (std::size_t i = 0; i != ids.size(); ++i) {
-        if (ids[i] >= _arc_num) return std::vector<Arc>();
-      }
-
-      // The inverse of the numbering of the arcs, taken once here
-      std::vector<Arc> arc_of(_arc_num, INVALID);
-      for (ArcIt a(_graph); a != INVALID; ++a) arc_of[_arc_id[a]] = a;
-      for (std::size_t i = 0; i != ids.size(); ++i) {
-        if (arc_of[ids[i]] == INVALID) return std::vector<Arc>();
-        cycle.push_back(arc_of[ids[i]]);
-      }
-      return cycle;
-    }
-
-    /// \brief Reset all the parameters that have been given before.
-    ///
-    /// This function resets all the paramaters that have been given
-    /// before using functions \ref lowerMap(), \ref upperMap(),
-    /// \ref costMap(), \ref supplyMap(), \ref stSupply(), \ref supplyType().
-    ///
-    /// It is useful for multiple \ref run() calls. Basically, all the given
-    /// parameters are kept for the next \ref run() call, unless
-    /// \ref resetParams() or \ref reset() is used.
-    /// If the underlying digraph was also modified after the construction
-    /// of the class or the last \ref reset() call, then the \ref reset()
-    /// function must be used, otherwise \ref resetParams() is sufficient.
-    ///
-    /// For example,
-    /// \code
-    ///   NetworkSimplex<ListDigraph> ns(graph);
-    ///
-    ///   // First run
-    ///   ns.lowerMap(lower).upperMap(upper).costMap(cost)
-    ///     .supplyMap(sup).run();
-    ///
-    ///   // Run again with modified cost map (resetParams() is not called,
-    ///   // so only the cost map have to be set again)
-    ///   cost[e] += 100;
-    ///   ns.costMap(cost).run();
-    ///
-    ///   // Run again from scratch using resetParams()
-    ///   // (the lower bounds will be set to zero on all arcs)
-    ///   ns.resetParams();
-    ///   ns.upperMap(capacity).costMap(cost)
-    ///     .supplyMap(sup).run();
-    /// \endcode
-    ///
-    /// \return <tt>(*this)</tt>
-    ///
-    /// \see reset(), run()
-    NetworkSimplex& resetParams() {
-      _warm = false;
-      for (int i = 0; i != _node_num; ++i) {
-        _supply[i] = 0;
-      }
-      for (int i = 0; i != _arc_num; ++i) {
-        _lower[i] = 0;
-        _upper[i] = INF;
-        _cost[i] = 1;
-      }
-      _has_lower = false;
-      _stype = GEQ;
-      return *this;
-    }
-
-    /// \brief Reset the internal data structures and all the parameters
-    /// that have been given before.
-    ///
-    /// This function resets the internal data structures and all the
-    /// paramaters that have been given before using functions \ref lowerMap(),
-    /// \ref upperMap(), \ref costMap(), \ref supplyMap(), \ref stSupply(),
-    /// \ref supplyType().
-    ///
-    /// It is useful for multiple \ref run() calls. Basically, all the given
-    /// parameters are kept for the next \ref run() call, unless
-    /// \ref resetParams() or \ref reset() is used.
-    /// If the underlying digraph was also modified after the construction
-    /// of the class or the last \ref reset() call, then the \ref reset()
-    /// function must be used, otherwise \ref resetParams() is sufficient.
-    ///
-    /// See \ref resetParams() for examples.
-    ///
-    /// \return <tt>(*this)</tt>
-    ///
-    /// \see resetParams(), run()
-    NetworkSimplex& reset() {
-      _warm = false;
-      // Resize vectors
-      _node_num = countNodes(_graph);
-      _arc_num = countArcs(_graph);
-      int all_node_num = _node_num + 1;
-      int max_arc_num = _arc_num + 2 * _node_num;
-
-      _source.resize(max_arc_num);
-      _target.resize(max_arc_num);
-
-      _lower.resize(_arc_num);
-      _upper.resize(_arc_num);
-      _cap.resize(max_arc_num);
-      _cost.resize(max_arc_num);
-      _supply.resize(all_node_num);
-      _flow.resize(max_arc_num);
-      _pi.resize(all_node_num);
-
-      _parent.resize(all_node_num);
-      _pred.resize(all_node_num);
-      _pred_dir.resize(all_node_num);
-      _thread.resize(all_node_num);
-      _rev_thread.resize(all_node_num);
-      _succ_num.resize(all_node_num);
-      _last_succ.resize(all_node_num);
-      _state.resize(max_arc_num);
-
-      // Copy the graph
-      int i = 0;
-      for (NodeIt n(_graph); n != INVALID; ++n, ++i) {
-        _node_id[n] = i;
-      }
-      if (_arc_mixing && _node_num > 1) {
-        // Store the arcs in a mixed order
-        const int skip = (std::max)(_arc_num / _node_num, 3);
-        int i = 0, j = 0;
-        for (ArcIt a(_graph); a != INVALID; ++a) {
-          _arc_id[a] = i;
-          _source[i] = _node_id[_graph.source(a)];
-          _target[i] = _node_id[_graph.target(a)];
-          if ((i += skip) >= _arc_num) i = ++j;
-        }
-      } else {
-        // Store the arcs in the original order
-        int i = 0;
-        for (ArcIt a(_graph); a != INVALID; ++a, ++i) {
-          _arc_id[a] = i;
-          _source[i] = _node_id[_graph.source(a)];
-          _target[i] = _node_id[_graph.target(a)];
-        }
-      }
-
-      // Reset parameters
-      resetParams();
-      return *this;
-    }
-
-    /// @}
-
-    /// \name Query Functions
-    /// The results of the algorithm can be obtained using these
-    /// functions.\n
-    /// The \ref run() function must be called before using them.
-
-    /// @{
-
-    /// \brief Return the total cost of the found flow.
-    ///
-    /// This function returns the total cost of the found flow.
-    /// Its complexity is O(m).
-    ///
-    /// \note The return type of the function can be specified as a
-    /// template parameter. For example,
-    /// \code
-    ///   ns.totalCost<double>();
-    /// \endcode
-    /// It is useful if the total cost cannot be stored in the \c Cost
-    /// type of the algorithm, which is the default return type of the
-    /// function.
-    ///
-    /// \pre \ref run() must be called before using this function.
-    template <typename Number>
-    Number totalCost() const {
-      Number c = 0;
-      for (ArcIt a(_graph); a != INVALID; ++a) {
-        int i = _arc_id[a];
-        c += Number(_flow[i]) * Number(_cost[i]);
-      }
-      return c;
-    }
+ /// \brief Return the total cost of the found flow.
+ ///
+ /// This function returns the total cost of the found flow.
+ /// Its complexity is O(m).
+ ///
+ /// \note The return type of the function can be specified as a
+ /// template parameter. For example,
+ /// \code
+ ///   ns.totalCost<double>();
+ /// \endcode
+ /// It is useful if the total cost cannot be stored in the \c Cost
+ /// type of the algorithm, which is the default return type of the
+ /// function.
+ ///
+ /// \pre \ref run() must be called before using this function.
+ template< typename Number >
+ Number totalCost() const {
+  Number c = 0;
+  for( ArcIt a( _graph ) ; a != INVALID ; ++a ) {
+   int i = _arc_id[ a ];
+   c += Number( _flow[ i ] ) * Number( _cost[ i ] );
+   }
+  return( c );
+  }
 
 #ifndef DOXYGEN
-    Cost totalCost() const {
-      return totalCost<Cost>();
-    }
+ Cost totalCost() const { return( totalCost< Cost >() ); }
 #endif
 
-    /// \brief Return the flow on the given arc.
-    ///
-    /// This function returns the flow on the given arc.
-    ///
-    /// \pre \ref run() must be called before using this function.
-    Value flow(const Arc& a) const {
-      return _flow[_arc_id[a]];
+ /// \brief Return the flow on the given arc.
+ ///
+ /// This function returns the flow on the given arc.
+ ///
+ /// \pre \ref run() must be called before using this function.
+ Value flow( const Arc & a ) const { return( _flow[ _arc_id[ a ] ] ); }
+
+ /// \brief Copy the flow values (the primal solution) into the
+ /// given map.
+ ///
+ /// This function copies the flow value on each arc into the given
+ /// map. The \c Value type of the algorithm must be convertible to
+ /// the \c Value type of the map.
+ ///
+ /// \pre \ref run() must be called before using this function.
+ template< typename FlowMap >
+ void flowMap( FlowMap & map ) const {
+  for( ArcIt a( _graph ) ; a != INVALID ; ++a ) {
+   map.set( a , _flow[ _arc_id[ a ] ] );
+   }
+  }
+
+ /// \brief Return the potential (dual value) of the given node.
+ ///
+ /// This function returns the potential (dual value) of the
+ /// given node.
+ ///
+ /// \pre \ref run() must be called before using this function.
+ Cost potential( const Node & n ) const { return( _pi[ _node_id[ n ] ] ); }
+
+ /// \brief Copy the potential values (the dual solution) into the
+ /// given map.
+ ///
+ /// This function copies the potential (dual value) of each node
+ /// into the given map.
+ /// The \c Cost type of the algorithm must be convertible to the
+ /// \c Value type of the map.
+ ///
+ /// \pre \ref run() must be called before using this function.
+ template< typename PotentialMap >
+ void potentialMap( PotentialMap & map ) const {
+  for( NodeIt n( _graph ) ; n != INVALID ; ++n ) {
+   map.set( n , _pi[ _node_id[ n ] ] );
+   }
+  }
+
+ /// @}
+
+ private:
+ // Initialize internal data structures
+ bool init() {
+  if( _node_num == 0 )
+   return( false );
+
+  // Check the sum of supply values
+  _sum_supply = 0;
+  for( int i = 0 ; i != _node_num ; ++i ) {
+   _sum_supply += _supply[ i ];
+   }
+  // A sum within the tolerance on the flow is zero: supplies that sum to
+  // zero sum, in floating point, to a few units in the last place of
+  // either sign, which would make a balanced problem infeasible.
+  const Value feps = flowTolerance( _supply , _node_num );
+  if( _sum_supply <= feps && _sum_supply >= -feps )
+   _sum_supply = 0;
+  if( ! ( ( _stype == GEQ && _sum_supply <= 0 ) ||
+	  ( _stype == LEQ && _sum_supply >= 0 ) ) )
+   return( false );
+
+  // Check lower and upper bounds
+  LEMON_DEBUG( checkBoundMaps() ,
+	       "Upper bounds must be greater or equal to the lower bounds" );
+
+  // Remove non-zero lower bounds
+  if( _has_lower ) {
+   for( int i = 0 ; i != _arc_num ; ++i ) {
+    Value c = _lower[ i ];
+    if( c >= 0 ) {
+     _cap[ i ] = _upper[ i ] < MAX_VALUE ? _upper[ i ] - c : INF;
+     }
+    else {
+     _cap[ i ] = _upper[ i ] < MAX_VALUE + c ? _upper[ i ] - c : INF;
+     }
+    _supply[ _source[ i ] ] -= c;
+    _supply[ _target[ i ] ] += c;
+    }
+   }
+  else {
+   for( int i = 0 ; i != _arc_num ; ++i ) {
+    _cap[ i ] = _upper[ i ];
+    }
+   }
+
+  // Initialize artifical cost
+  const Cost ART_COST = initArtificialCost();
+
+  // Initialize arc maps
+  for( int i = 0 ; i != _arc_num ; ++i ) {
+   _flow[ i ] = 0;
+   _state[ i ] = STATE_LOWER;
+   }
+
+  // Set data for the artificial root node
+  _root = _node_num;
+  _parent[ _root ] = -1;
+  _pred[ _root ] = -1;
+  _thread[ _root ] = 0;
+  _rev_thread[ 0 ] = _root;
+  _succ_num[ _root ] = _node_num + 1;
+  _last_succ[ _root ] = _root - 1;
+  _supply[ _root ] = -_sum_supply;
+  _pi[ _root ] = 0;
+
+  // Add artificial arcs and initialize the spanning tree data structure
+  if( _sum_supply == 0 ) {
+   // EQ supply constraints
+   _search_arc_num = _arc_num;
+   _all_arc_num = _arc_num + _node_num;
+   for( int u = 0 , e = _arc_num ; u != _node_num ; ++u , ++e ) {
+    _parent[ u ] = _root;
+    _pred[ u ] = e;
+    _thread[ u ] = u + 1;
+    _rev_thread[ u + 1 ] = u;
+    _succ_num[ u ] = 1;
+    _last_succ[ u ] = u;
+    _cap[ e ] = INF;
+    _state[ e ] = STATE_TREE;
+    if( _supply[ u ] >= 0 ) {
+     _pred_dir[ u ] = DIR_UP;
+     _pi[ u ] = 0;
+     _source[ e ] = u;
+     _target[ e ] = _root;
+     _flow[ e ] = _supply[ u ];
+     _cost[ e ] = 0;
+     }
+    else {
+     _pred_dir[ u ] = DIR_DOWN;
+     _pi[ u ] = ART_COST;
+     _source[ e ] = _root;
+     _target[ e ] = u;
+     _flow[ e ] = -_supply[ u ];
+     _cost[ e ] = ART_COST;
+     }
+    }
+   }
+  else if( _sum_supply > 0 ) {
+   // LEQ supply constraints
+   _search_arc_num = _arc_num + _node_num;
+   int f = _arc_num + _node_num;
+   for( int u = 0 , e = _arc_num ; u != _node_num ; ++u , ++e ) {
+    _parent[ u ] = _root;
+    _thread[ u ] = u + 1;
+    _rev_thread[ u + 1 ] = u;
+    _succ_num[ u ] = 1;
+    _last_succ[ u ] = u;
+    if( _supply[ u ] >= 0 ) {
+     _pred_dir[ u ] = DIR_UP;
+     _pi[ u ] = 0;
+     _pred[ u ] = e;
+     _source[ e ] = u;
+     _target[ e ] = _root;
+     _cap[ e ] = INF;
+     _flow[ e ] = _supply[ u ];
+     _cost[ e ] = 0;
+     _state[ e ] = STATE_TREE;
+     }
+    else {
+     _pred_dir[ u ] = DIR_DOWN;
+     _pi[ u ] = ART_COST;
+     _pred[ u ] = f;
+     _source[ f ] = _root;
+     _target[ f ] = u;
+     _cap[ f ] = INF;
+     _flow[ f ] = -_supply[ u ];
+     _cost[ f ] = ART_COST;
+     _state[ f ] = STATE_TREE;
+     _source[ e ] = u;
+     _target[ e ] = _root;
+     _cap[ e ] = INF;
+     _flow[ e ] = 0;
+     _cost[ e ] = 0;
+     _state[ e ] = STATE_LOWER;
+     ++f;
+     }
+    }
+   _all_arc_num = f;
+   }
+  else {
+   // GEQ supply constraints
+   _search_arc_num = _arc_num + _node_num;
+   int f = _arc_num + _node_num;
+   for( int u = 0 , e = _arc_num ; u != _node_num ; ++u , ++e ) {
+    _parent[ u ] = _root;
+    _thread[ u ] = u + 1;
+    _rev_thread[ u + 1 ] = u;
+    _succ_num[ u ] = 1;
+    _last_succ[ u ] = u;
+    if( _supply[ u ] <= 0 ) {
+     _pred_dir[ u ] = DIR_DOWN;
+     _pi[ u ] = 0;
+     _pred[ u ] = e;
+     _source[ e ] = _root;
+     _target[ e ] = u;
+     _cap[ e ] = INF;
+     _flow[ e ] = -_supply[ u ];
+     _cost[ e ] = 0;
+     _state[ e ] = STATE_TREE;
+     }
+    else {
+     _pred_dir[ u ] = DIR_UP;
+     _pi[ u ] = -ART_COST;
+     _pred[ u ] = f;
+     _source[ f ] = u;
+     _target[ f ] = _root;
+     _cap[ f ] = INF;
+     _flow[ f ] = _supply[ u ];
+     _state[ f ] = STATE_TREE;
+     _cost[ f ] = ART_COST;
+     _source[ e ] = _root;
+     _target[ e ] = u;
+     _cap[ e ] = INF;
+     _flow[ e ] = 0;
+     _cost[ e ] = 0;
+     _state[ e ] = STATE_LOWER;
+     ++f;
+     }
+    }
+   _all_arc_num = f;
+   }
+
+  return( true );
+  }
+
+ // Check if the upper bound is greater than or equal to the lower bound
+ // on each arc.
+ bool checkBoundMaps() {
+  for( int j = 0 ; j != _arc_num ; ++j ) {
+   if( _upper[ j ] < _lower[ j ] )
+    return( false );
+   }
+  return( true );
+  }
+
+ // Find the join node
+ void findJoinNode() {
+  int u = _source[ in_arc ];
+  int v = _target[ in_arc ];
+  while( u != v ) {
+   if( _succ_num[ u ] < _succ_num[ v ] ) {
+    u = _parent[ u ];
+    }
+   else {
+    v = _parent[ v ];
+    }
+   }
+  join = u;
+  }
+
+ // Find the leaving arc of the cycle and returns true if the
+ // leaving arc is not the same as the entering arc
+ bool findLeavingArc() {
+  // Initialize first and second nodes according to the direction
+  // of the cycle
+  int first , second;
+  if( _state[ in_arc ] == STATE_LOWER ) {
+   first = _source[ in_arc ];
+   second = _target[ in_arc ];
+   }
+  else {
+   first = _target[ in_arc ];
+   second = _source[ in_arc ];
+   }
+  delta = _cap[ in_arc ];
+  int result = 0;
+  Value c , d;
+  int e;
+
+  // Search the cycle form the first node to the join node
+  for( int u = first ; u != join ; u = _parent[ u ] ) {
+   e = _pred[ u ];
+   d = _flow[ e ];
+   if( _pred_dir[ u ] == DIR_DOWN ) {
+    c = _cap[ e ];
+    d = c >= MAX_VALUE ? INF : c - d;
+    }
+   if( d < delta ) {
+    delta = d;
+    u_out = u;
+    result = 1;
+    }
+   }
+
+  // Search the cycle form the second node to the join node
+  for( int u = second ; u != join ; u = _parent[ u ] ) {
+   e = _pred[ u ];
+   d = _flow[ e ];
+   if( _pred_dir[ u ] == DIR_UP ) {
+    c = _cap[ e ];
+    d = c >= MAX_VALUE ? INF : c - d;
+    }
+   if( d <= delta ) {
+    delta = d;
+    u_out = u;
+    result = 2;
+    }
+   }
+
+  if( result == 1 ) {
+   u_in = first;
+   v_in = second;
+   }
+  else {
+   u_in = second;
+   v_in = first;
+   }
+  return( result != 0 );
+  }
+
+ // Change _flow and _state vectors
+ void changeFlow( bool change ) {
+  // Augment along the cycle
+  if( delta > 0 ) {
+   Value val = _state[ in_arc ] * delta;
+   _flow[ in_arc ] += val;
+   for( int u = _source[ in_arc ] ; u != join ; u = _parent[ u ] ) {
+    _flow[ _pred[ u ] ] -= _pred_dir[ u ] * val;
+    }
+   for( int u = _target[ in_arc ] ; u != join ; u = _parent[ u ] ) {
+    _flow[ _pred[ u ] ] += _pred_dir[ u ] * val;
+    }
+   }
+  // Update the state of the entering and leaving arcs
+  if( change ) {
+   _state[ in_arc ] = STATE_TREE;
+   _state[ _pred[ u_out ] ] =
+     ( _flow[ _pred[ u_out ] ] == 0 ) ? STATE_LOWER : STATE_UPPER;
+   }
+  else {
+   _state[ in_arc ] = -_state[ in_arc ];
+   }
+  }
+
+ // Update the tree structure
+ void updateTreeStructure() {
+  int old_rev_thread = _rev_thread[ u_out ];
+  int old_succ_num = _succ_num[ u_out ];
+  int old_last_succ = _last_succ[ u_out ];
+  v_out = _parent[ u_out ];
+
+  // Check if u_in and u_out coincide
+  if( u_in == u_out ) {
+   // Update _parent, _pred, _pred_dir
+   _parent[ u_in ] = v_in;
+   _pred[ u_in ] = in_arc;
+   _pred_dir[ u_in ] = u_in == _source[ in_arc ] ? DIR_UP : DIR_DOWN;
+
+   // Update _thread and _rev_thread
+   if( _thread[ v_in ] != u_out ) {
+    int after = _thread[ old_last_succ ];
+    _thread[ old_rev_thread ] = after;
+    _rev_thread[ after ] = old_rev_thread;
+    after = _thread[ v_in ];
+    _thread[ v_in ] = u_out;
+    _rev_thread[ u_out ] = v_in;
+    _thread[ old_last_succ ] = after;
+    _rev_thread[ after ] = old_last_succ;
+    }
+   }
+  else {
+   // Handle the case when old_rev_thread equals to v_in
+   // (it also means that join and v_out coincide)
+   int thread_continue =
+     old_rev_thread == v_in ? _thread[ old_last_succ ] : _thread[ v_in ];
+
+   // Update _thread and _parent along the stem nodes (i.e. the nodes
+   // between u_in and u_out, whose parent have to be changed)
+   int stem = u_in;                // the current stem node
+   int par_stem = v_in;            // the new parent of stem
+   int next_stem;                  // the next stem node
+   int last = _last_succ[ u_in ];  // the last successor of stem
+   int before , after = _thread[ last ];
+   _thread[ v_in ] = u_in;
+   _dirty_revs.clear();
+   _dirty_revs.push_back( v_in );
+   while( stem != u_out ) {
+    // Insert the next stem node into the thread list
+    next_stem = _parent[ stem ];
+    _thread[ last ] = next_stem;
+    _dirty_revs.push_back( last );
+
+    // Remove the subtree of stem from the thread list
+    before = _rev_thread[ stem ];
+    _thread[ before ] = after;
+    _rev_thread[ after ] = before;
+
+    // Change the parent node and shift stem nodes
+    _parent[ stem ] = par_stem;
+    par_stem = stem;
+    stem = next_stem;
+
+    // Update last and after
+    last = _last_succ[ stem ] == _last_succ[ par_stem ]
+	     ? _rev_thread[ par_stem ]
+	     : _last_succ[ stem ];
+    after = _thread[ last ];
+    }
+   _parent[ u_out ] = par_stem;
+   _thread[ last ] = thread_continue;
+   _rev_thread[ thread_continue ] = last;
+   _last_succ[ u_out ] = last;
+
+   // Remove the subtree of u_out from the thread list except for
+   // the case when old_rev_thread equals to v_in
+   if( old_rev_thread != v_in ) {
+    _thread[ old_rev_thread ] = after;
+    _rev_thread[ after ] = old_rev_thread;
     }
 
-    /// \brief Copy the flow values (the primal solution) into the
-    /// given map.
-    ///
-    /// This function copies the flow value on each arc into the given
-    /// map. The \c Value type of the algorithm must be convertible to
-    /// the \c Value type of the map.
-    ///
-    /// \pre \ref run() must be called before using this function.
-    template <typename FlowMap>
-    void flowMap(FlowMap &map) const {
-      for (ArcIt a(_graph); a != INVALID; ++a) {
-        map.set(a, _flow[_arc_id[a]]);
-      }
+   // Update _rev_thread using the new _thread values
+   for( int i = 0 ; i != int( _dirty_revs.size() ) ; ++i ) {
+    int u = _dirty_revs[ i ];
+    _rev_thread[ _thread[ u ] ] = u;
     }
 
-    /// \brief Return the potential (dual value) of the given node.
-    ///
-    /// This function returns the potential (dual value) of the
-    /// given node.
-    ///
-    /// \pre \ref run() must be called before using this function.
-    Cost potential(const Node& n) const {
-      return _pi[_node_id[n]];
+   // Update _pred, _pred_dir, _last_succ and _succ_num for the
+   // stem nodes from u_out to u_in
+   int tmp_sc = 0 , tmp_ls = _last_succ[ u_out ];
+   for( int u = u_out , p = _parent[ u ] ; u != u_in ; u = p ,
+	p = _parent[ u ] ) {
+    _pred[ u ] = _pred[ p ];
+    _pred_dir[ u ] = -_pred_dir[ p ];
+    tmp_sc += _succ_num[ u ] - _succ_num[ p ];
+    _succ_num[ u ] = tmp_sc;
+    _last_succ[ p ] = tmp_ls;
     }
+   _pred[ u_in ] = in_arc;
+   _pred_dir[ u_in ] = u_in == _source[ in_arc ] ? DIR_UP : DIR_DOWN;
+   _succ_num[ u_in ] = old_succ_num;
+   }
 
-    /// \brief Copy the potential values (the dual solution) into the
-    /// given map.
-    ///
-    /// This function copies the potential (dual value) of each node
-    /// into the given map.
-    /// The \c Cost type of the algorithm must be convertible to the
-    /// \c Value type of the map.
-    ///
-    /// \pre \ref run() must be called before using this function.
-    template <typename PotentialMap>
-    void potentialMap(PotentialMap &map) const {
-      for (NodeIt n(_graph); n != INVALID; ++n) {
-        map.set(n, _pi[_node_id[n]]);
-      }
+  // Update _last_succ from v_in towards the root
+  int up_limit_out = _last_succ[ join ] == v_in ? join : -1;
+  int last_succ_out = _last_succ[ u_out ];
+  for( int u = v_in ; u != -1 && _last_succ[ u ] == v_in ; u = _parent[ u ] ) {
+   _last_succ[ u ] = last_succ_out;
+   }
+
+  // Update _last_succ from v_out towards the root
+  if( join != old_rev_thread && v_in != old_rev_thread ) {
+   for( int u = v_out ; u != up_limit_out && _last_succ[ u ] == old_last_succ ;
+	u = _parent[ u ] ) {
+    _last_succ[ u ] = old_rev_thread;
     }
-
-    /// @}
-
-  private:
-
-    // Initialize internal data structures
-    bool init() {
-      if (_node_num == 0) return false;
-
-      // Check the sum of supply values
-      _sum_supply = 0;
-      for (int i = 0; i != _node_num; ++i) {
-        _sum_supply += _supply[i];
-      }
-      // A sum within the tolerance on the flow is zero: supplies that sum to
-      // zero sum, in floating point, to a few units in the last place of
-      // either sign, which would make a balanced problem infeasible.
-      const Value feps = flowTolerance(_supply, _node_num);
-      if (_sum_supply <= feps && _sum_supply >= -feps) _sum_supply = 0;
-      if ( !((_stype == GEQ && _sum_supply <= 0) ||
-             (_stype == LEQ && _sum_supply >= 0)) ) return false;
-
-      // Check lower and upper bounds
-      LEMON_DEBUG(checkBoundMaps(),
-          "Upper bounds must be greater or equal to the lower bounds");
-
-      // Remove non-zero lower bounds
-      if (_has_lower) {
-        for (int i = 0; i != _arc_num; ++i) {
-          Value c = _lower[i];
-          if (c >= 0) {
-            _cap[i] = _upper[i] < MAX_VALUE ? _upper[i] - c : INF;
-          } else {
-            _cap[i] = _upper[i] < MAX_VALUE + c ? _upper[i] - c : INF;
-          }
-          _supply[_source[i]] -= c;
-          _supply[_target[i]] += c;
-        }
-      } else {
-        for (int i = 0; i != _arc_num; ++i) {
-          _cap[i] = _upper[i];
-        }
-      }
-
-      // Initialize artifical cost
-      const Cost ART_COST = initArtificialCost();
-
-      // Initialize arc maps
-      for (int i = 0; i != _arc_num; ++i) {
-        _flow[i] = 0;
-        _state[i] = STATE_LOWER;
-      }
-
-      // Set data for the artificial root node
-      _root = _node_num;
-      _parent[_root] = -1;
-      _pred[_root] = -1;
-      _thread[_root] = 0;
-      _rev_thread[0] = _root;
-      _succ_num[_root] = _node_num + 1;
-      _last_succ[_root] = _root - 1;
-      _supply[_root] = -_sum_supply;
-      _pi[_root] = 0;
-
-      // Add artificial arcs and initialize the spanning tree data structure
-      if (_sum_supply == 0) {
-        // EQ supply constraints
-        _search_arc_num = _arc_num;
-        _all_arc_num = _arc_num + _node_num;
-        for (int u = 0, e = _arc_num; u != _node_num; ++u, ++e) {
-          _parent[u] = _root;
-          _pred[u] = e;
-          _thread[u] = u + 1;
-          _rev_thread[u + 1] = u;
-          _succ_num[u] = 1;
-          _last_succ[u] = u;
-          _cap[e] = INF;
-          _state[e] = STATE_TREE;
-          if (_supply[u] >= 0) {
-            _pred_dir[u] = DIR_UP;
-            _pi[u] = 0;
-            _source[e] = u;
-            _target[e] = _root;
-            _flow[e] = _supply[u];
-            _cost[e] = 0;
-          } else {
-            _pred_dir[u] = DIR_DOWN;
-            _pi[u] = ART_COST;
-            _source[e] = _root;
-            _target[e] = u;
-            _flow[e] = -_supply[u];
-            _cost[e] = ART_COST;
-          }
-        }
-      }
-      else if (_sum_supply > 0) {
-        // LEQ supply constraints
-        _search_arc_num = _arc_num + _node_num;
-        int f = _arc_num + _node_num;
-        for (int u = 0, e = _arc_num; u != _node_num; ++u, ++e) {
-          _parent[u] = _root;
-          _thread[u] = u + 1;
-          _rev_thread[u + 1] = u;
-          _succ_num[u] = 1;
-          _last_succ[u] = u;
-          if (_supply[u] >= 0) {
-            _pred_dir[u] = DIR_UP;
-            _pi[u] = 0;
-            _pred[u] = e;
-            _source[e] = u;
-            _target[e] = _root;
-            _cap[e] = INF;
-            _flow[e] = _supply[u];
-            _cost[e] = 0;
-            _state[e] = STATE_TREE;
-          } else {
-            _pred_dir[u] = DIR_DOWN;
-            _pi[u] = ART_COST;
-            _pred[u] = f;
-            _source[f] = _root;
-            _target[f] = u;
-            _cap[f] = INF;
-            _flow[f] = -_supply[u];
-            _cost[f] = ART_COST;
-            _state[f] = STATE_TREE;
-            _source[e] = u;
-            _target[e] = _root;
-            _cap[e] = INF;
-            _flow[e] = 0;
-            _cost[e] = 0;
-            _state[e] = STATE_LOWER;
-            ++f;
-          }
-        }
-        _all_arc_num = f;
-      }
-      else {
-        // GEQ supply constraints
-        _search_arc_num = _arc_num + _node_num;
-        int f = _arc_num + _node_num;
-        for (int u = 0, e = _arc_num; u != _node_num; ++u, ++e) {
-          _parent[u] = _root;
-          _thread[u] = u + 1;
-          _rev_thread[u + 1] = u;
-          _succ_num[u] = 1;
-          _last_succ[u] = u;
-          if (_supply[u] <= 0) {
-            _pred_dir[u] = DIR_DOWN;
-            _pi[u] = 0;
-            _pred[u] = e;
-            _source[e] = _root;
-            _target[e] = u;
-            _cap[e] = INF;
-            _flow[e] = -_supply[u];
-            _cost[e] = 0;
-            _state[e] = STATE_TREE;
-          } else {
-            _pred_dir[u] = DIR_UP;
-            _pi[u] = -ART_COST;
-            _pred[u] = f;
-            _source[f] = u;
-            _target[f] = _root;
-            _cap[f] = INF;
-            _flow[f] = _supply[u];
-            _state[f] = STATE_TREE;
-            _cost[f] = ART_COST;
-            _source[e] = _root;
-            _target[e] = u;
-            _cap[e] = INF;
-            _flow[e] = 0;
-            _cost[e] = 0;
-            _state[e] = STATE_LOWER;
-            ++f;
-          }
-        }
-        _all_arc_num = f;
-      }
-
-      return true;
+   }
+  else if( last_succ_out != old_last_succ ) {
+   for( int u = v_out ; u != up_limit_out && _last_succ[ u ] == old_last_succ ;
+	u = _parent[ u ] ) {
+    _last_succ[ u ] = last_succ_out;
     }
+   }
 
-    // Check if the upper bound is greater than or equal to the lower bound
-    // on each arc.
-    bool checkBoundMaps() {
-      for (int j = 0; j != _arc_num; ++j) {
-        if (_upper[j] < _lower[j]) return false;
-      }
-      return true;
+  // Update _succ_num from v_in to join
+  for( int u = v_in ; u != join ; u = _parent[ u ] ) {
+   _succ_num[ u ] += old_succ_num;
+   }
+  // Update _succ_num from v_out to join
+  for( int u = v_out ; u != join ; u = _parent[ u ] ) {
+   _succ_num[ u ] -= old_succ_num;
+   }
+  }
+
+ // Update potentials in the subtree that has been moved, or in the rest
+ // of the tree if that is the smaller part: the rest follows the subtree
+ // in the thread, up to the first node of the subtree, and its potentials
+ // go the other way, which leaves every reduced cost as it is and moves
+ // the potential of the root away from zero, by no more than _pi_lim,
+ // the potentials being shifted back at the end of start()
+ void updatePotential() {
+  Cost sigma = _pi[ v_in ] - _pi[ u_in ] - _pred_dir[ u_in ] * _cost[ in_arc ];
+  int beg = u_in , end = _thread[ _last_succ[ u_in ] ];
+  if( 2 * _succ_num[ u_in ] > _node_num + 1 ) {
+   const Cost r = _pi[ _root ];
+   if( sigma >= r - _pi_lim && sigma <= r + _pi_lim ) {
+    beg = end;
+    end = u_in;
+    sigma = -sigma;
     }
+   }
+  for( int u = beg ; u != end ; u = _thread[ u ] ) {
+   _pi[ u ] += sigma;
+   }
+  }
 
-    // Find the join node
-    void findJoinNode() {
-      int u = _source[in_arc];
-      int v = _target[in_arc];
-      while (u != v) {
-        if (_succ_num[u] < _succ_num[v]) {
-          u = _parent[u];
-        } else {
-          v = _parent[v];
-        }
-      }
-      join = u;
+ // The cost of the artificial arcs, larger than the absolute value of
+ // the cost of any path, and how far the potential of the root may move
+ // from zero [see updatePotential()]: half of that cost for an exact
+ // type, which keeps the sums of the pivot rules within the range of the
+ // type, the cost itself otherwise, which costs the potentials no more
+ // than one bit of precision
+ Cost initArtificialCost() {
+  Cost art = 0;
+  if( std::numeric_limits< Cost >::is_exact ) {
+   art = ( std::numeric_limits< Cost >::max )() / 2 + 1;
+   }
+  else {
+   for( int i = 0 ; i != _arc_num ; ++i ) {
+    if( _cost[ i ] > art )
+     art = _cost[ i ];
+    else if( -_cost[ i ] > art )
+     art = -_cost[ i ];
     }
+   art = ( art + 1 ) * _node_num;
+   }
+  _pi_lim = std::numeric_limits< Cost >::is_exact ? art / 2 : art;
+  return( art );
+  }
 
-    // Find the leaving arc of the cycle and returns true if the
-    // leaving arc is not the same as the entering arc
-    bool findLeavingArc() {
-      // Initialize first and second nodes according to the direction
-      // of the cycle
-      int first, second;
-      if (_state[in_arc] == STATE_LOWER) {
-        first  = _source[in_arc];
-        second = _target[in_arc];
-      } else {
-        first  = _target[in_arc];
-        second = _source[in_arc];
-      }
-      delta = _cap[in_arc];
-      int result = 0;
-      Value c, d;
-      int e;
+ // Take in the new upper bound of the arc of index i, keeping the basis
+ // of the last run as it is if the flow of the arc stays within the new
+ // bound, the arc does not sit at its upper bound and, if it is in the
+ // tree, the tree stays strongly feasible (i.e., the arc is not directed
+ // towards the root with its flow at the new bound), as for an arc out of
+ // the tree that is closed while it carries no flow and for one that is
+ // opened again; otherwise the flow of the tree has to be recomputed,
+ // which runWarm() does [see repairBasis()]. With lower bounds the basis
+ // is dropped instead.
+ void warmUpper( int i , Value up ) {
+  if( up == _upper[ i ] )
+   return;
+  _upper[ i ] = up;
+  if( ! _warm )
+   return;
 
-      // Search the cycle form the first node to the join node
-      for (int u = first; u != join; u = _parent[u]) {
-        e = _pred[u];
-        d = _flow[e];
-        if (_pred_dir[u] == DIR_DOWN) {
-          c = _cap[e];
-          d = c >= MAX_VALUE ? INF : c - d;
-        }
-        if (d < delta) {
-          delta = d;
-          u_out = u;
-          result = 1;
-        }
-      }
-
-      // Search the cycle form the second node to the join node
-      for (int u = second; u != join; u = _parent[u]) {
-        e = _pred[u];
-        d = _flow[e];
-        if (_pred_dir[u] == DIR_UP) {
-          c = _cap[e];
-          d = c >= MAX_VALUE ? INF : c - d;
-        }
-        if (d <= delta) {
-          delta = d;
-          u_out = u;
-          result = 2;
-        }
-      }
-
-      if (result == 1) {
-        u_in = first;
-        v_in = second;
-      } else {
-        u_in = second;
-        v_in = first;
-      }
-      return result != 0;
+  Value cap;
+  if( _has_lower ) {
+   Value c = _lower[ i ];
+   if( c >= 0 ) {
+    cap = up < MAX_VALUE ? up - c : INF;
     }
-
-    // Change _flow and _state vectors
-    void changeFlow(bool change) {
-      // Augment along the cycle
-      if (delta > 0) {
-        Value val = _state[in_arc] * delta;
-        _flow[in_arc] += val;
-        for (int u = _source[in_arc]; u != join; u = _parent[u]) {
-          _flow[_pred[u]] -= _pred_dir[u] * val;
-        }
-        for (int u = _target[in_arc]; u != join; u = _parent[u]) {
-          _flow[_pred[u]] += _pred_dir[u] * val;
-        }
-      }
-      // Update the state of the entering and leaving arcs
-      if (change) {
-        _state[in_arc] = STATE_TREE;
-        _state[_pred[u_out]] =
-          (_flow[_pred[u_out]] == 0) ? STATE_LOWER : STATE_UPPER;
-      } else {
-        _state[in_arc] = -_state[in_arc];
-      }
+   else {
+    cap = up < MAX_VALUE + c ? up - c : INF;
     }
+   }
+  else {
+   cap = up;
+   }
 
-    // Update the tree structure
-    void updateTreeStructure() {
-      int old_rev_thread = _rev_thread[u_out];
-      int old_succ_num = _succ_num[u_out];
-      int old_last_succ = _last_succ[u_out];
-      v_out = _parent[u_out];
+  bool moves = _state[ i ] == STATE_UPPER || _flow[ i ] > cap;
+  if( ! moves && _state[ i ] == STATE_TREE && _flow[ i ] >= cap ) {
+   const int u = _pred[ _source[ i ] ] == i ? _source[ i ] : _target[ i ];
+   moves = _pred_dir[ u ] == DIR_UP;
+   }
+  if( moves && _has_lower ) {
+   _warm = false;
+   return;
+   }
+  _cap[ i ] = cap;
+  if( moves )
+   _repair = true;
+  }
 
-      // Check if u_in and u_out coincide
-      if (u_in == u_out) {
-        // Update _parent, _pred, _pred_dir
-        _parent[u_in] = v_in;
-        _pred[u_in] = in_arc;
-        _pred_dir[u_in] = u_in == _source[in_arc] ? DIR_UP : DIR_DOWN;
+ // Take in the new supply of the node of index i, keeping the basis of
+ // the last run, whose flow runWarm() recomputes [see repairBasis()]
+ void warmSupply( int i , Value s ) {
+  if( s == _supply[ i ] )
+   return;
+  _supply[ i ] = s;
+  if( _warm )
+   _repair = true;
+  }
 
-        // Update _thread and _rev_thread
-        if (_thread[v_in] != u_out) {
-          int after = _thread[old_last_succ];
-          _thread[old_rev_thread] = after;
-          _rev_thread[after] = old_rev_thread;
-          after = _thread[v_in];
-          _thread[v_in] = u_out;
-          _rev_thread[u_out] = v_in;
-          _thread[old_last_succ] = after;
-          _rev_thread[after] = old_last_succ;
-        }
-      } else {
-        // Handle the case when old_rev_thread equals to v_in
-        // (it also means that join and v_out coincide)
-        int thread_continue = old_rev_thread == v_in ?
-          _thread[old_last_succ] : _thread[v_in];
+ // Make the basis of the last run primal feasible again after a change
+ // of the upper bounds or of the supplies, keeping its tree: every arc
+ // out of the tree is put at the bound it sits at, and the flow of the
+ // arcs of the tree is recomputed from the leaves up, each carrying what
+ // the subtree below it has to send. An arc whose flow falls outside its
+ // bounds, or sits at the bound that would leave the tree not strongly
+ // feasible (i.e., at its capacity if directed towards the root, at zero
+ // if directed away from it), on which the rule of the leaving arc
+ // relies against cycling, leaves the tree at that bound, and the
+ // subtree below it is hung from the root by the artificial arc of its
+ // top node, directed as the flow it has to carry and with the cost that
+ // init() would give it, i.e., zero towards the root and larger than any
+ // real one from it, so that the simplex drives it out as it does from
+ // the artificial basis. The thread and the sizes of the subtrees are
+ // then rebuilt from the fathers by a depth-first visit. It returns
+ // false, the basis having to be dropped, if there are lower bounds or
+ // if the supplies of the last run or the new ones do not sum to zero,
+ // the artificial arcs being built differently then.
+ bool repairBasis() {
+  if( _has_lower || _sum_supply != 0 )
+   return( false );
+  Value sum = 0;
+  for( int u = 0 ; u != _node_num ; ++u )
+   sum += _supply[ u ];
+  const Value feps = flowTolerance( _supply , _node_num );
+  if( sum > feps || sum < -feps )
+   return( false );
 
-        // Update _thread and _parent along the stem nodes (i.e. the nodes
-        // between u_in and u_out, whose parent have to be changed)
-        int stem = u_in;              // the current stem node
-        int par_stem = v_in;          // the new parent of stem
-        int next_stem;                // the next stem node
-        int last = _last_succ[u_in];  // the last successor of stem
-        int before, after = _thread[last];
-        _thread[v_in] = u_in;
-        _dirty_revs.clear();
-        _dirty_revs.push_back(v_in);
-        while (stem != u_out) {
-          // Insert the next stem node into the thread list
-          next_stem = _parent[stem];
-          _thread[last] = next_stem;
-          _dirty_revs.push_back(last);
-
-          // Remove the subtree of stem from the thread list
-          before = _rev_thread[stem];
-          _thread[before] = after;
-          _rev_thread[after] = before;
-
-          // Change the parent node and shift stem nodes
-          _parent[stem] = par_stem;
-          par_stem = stem;
-          stem = next_stem;
-
-          // Update last and after
-          last = _last_succ[stem] == _last_succ[par_stem] ?
-            _rev_thread[par_stem] : _last_succ[stem];
-          after = _thread[last];
-        }
-        _parent[u_out] = par_stem;
-        _thread[last] = thread_continue;
-        _rev_thread[thread_continue] = last;
-        _last_succ[u_out] = last;
-
-        // Remove the subtree of u_out from the thread list except for
-        // the case when old_rev_thread equals to v_in
-        if (old_rev_thread != v_in) {
-          _thread[old_rev_thread] = after;
-          _rev_thread[after] = old_rev_thread;
-        }
-
-        // Update _rev_thread using the new _thread values
-        for (int i = 0; i != int(_dirty_revs.size()); ++i) {
-          int u = _dirty_revs[i];
-          _rev_thread[_thread[u]] = u;
-        }
-
-        // Update _pred, _pred_dir, _last_succ and _succ_num for the
-        // stem nodes from u_out to u_in
-        int tmp_sc = 0, tmp_ls = _last_succ[u_out];
-        for (int u = u_out, p = _parent[u]; u != u_in; u = p, p = _parent[u]) {
-          _pred[u] = _pred[p];
-          _pred_dir[u] = -_pred_dir[p];
-          tmp_sc += _succ_num[u] - _succ_num[p];
-          _succ_num[u] = tmp_sc;
-          _last_succ[p] = tmp_ls;
-        }
-        _pred[u_in] = in_arc;
-        _pred_dir[u_in] = u_in == _source[in_arc] ? DIR_UP : DIR_DOWN;
-        _succ_num[u_in] = old_succ_num;
-      }
-
-      // Update _last_succ from v_in towards the root
-      int up_limit_out = _last_succ[join] == v_in ? join : -1;
-      int last_succ_out = _last_succ[u_out];
-      for (int u = v_in; u != -1 && _last_succ[u] == v_in; u = _parent[u]) {
-        _last_succ[u] = last_succ_out;
-      }
-
-      // Update _last_succ from v_out towards the root
-      if (join != old_rev_thread && v_in != old_rev_thread) {
-        for (int u = v_out; u != up_limit_out && _last_succ[u] == old_last_succ;
-             u = _parent[u]) {
-          _last_succ[u] = old_rev_thread;
-        }
-      }
-      else if (last_succ_out != old_last_succ) {
-        for (int u = v_out; u != up_limit_out && _last_succ[u] == old_last_succ;
-             u = _parent[u]) {
-          _last_succ[u] = last_succ_out;
-        }
-      }
-
-      // Update _succ_num from v_in to join
-      for (int u = v_in; u != join; u = _parent[u]) {
-        _succ_num[u] += old_succ_num;
-      }
-      // Update _succ_num from v_out to join
-      for (int u = v_out; u != join; u = _parent[u]) {
-        _succ_num[u] -= old_succ_num;
-      }
+  // What each node has to send along the tree: its supply, net of the
+  // flow of the arcs out of the tree, each at the bound it sits at
+  std::vector< Value > net( _node_num + 1 , 0 );
+  for( int u = 0 ; u != _node_num ; ++u )
+   net[ u ] = _supply[ u ];
+  for( int e = 0 ; e != _arc_num ; ++e ) {
+   if( _state[ e ] == STATE_TREE )
+    continue;
+   if( _state[ e ] == STATE_UPPER && _cap[ e ] >= MAX_VALUE ) {
+    _state[ e ] = STATE_LOWER;  // an upper bound no longer there
     }
+   _flow[ e ] = _state[ e ] == STATE_UPPER ? _cap[ e ] : 0;
+   net[ _source[ e ] ] -= _flow[ e ];
+   net[ _target[ e ] ] += _flow[ e ];
+   }
+  for( int e = _arc_num ; e != _all_arc_num ; ++e ) {
+   if( _state[ e ] != STATE_TREE )
+    _flow[ e ] = 0;
+   }
 
-    // Update potentials in the subtree that has been moved, or in the rest
-    // of the tree if that is the smaller part: the rest follows the subtree
-    // in the thread, up to the first node of the subtree, and its potentials
-    // go the other way, which leaves every reduced cost as it is and moves
-    // the potential of the root away from zero, by no more than _pi_lim,
-    // the potentials being shifted back at the end of start()
-    void updatePotential() {
-      Cost sigma = _pi[v_in] - _pi[u_in] -
-                   _pred_dir[u_in] * _cost[in_arc];
-      int beg = u_in, end = _thread[_last_succ[u_in]];
-      if (2 * _succ_num[u_in] > _node_num + 1) {
-        const Cost r = _pi[_root];
-        if (sigma >= r - _pi_lim && sigma <= r + _pi_lim) {
-          beg = end;
-          end = u_in;
-          sigma = -sigma;
-        }
-      }
-      for (int u = beg; u != end; u = _thread[u]) {
-        _pi[u] += sigma;
-      }
+  // The flow of the arcs of the tree, from the leaves up, i.e., in the
+  // reverse order of the thread, which gives every node after its
+  // subtree
+  for( int u = _rev_thread[ _root ] ; u != _root ; u = _rev_thread[ u ] ) {
+   int e = _pred[ u ];
+   Value n = net[ u ];
+   if( e < _arc_num ) {
+    const int p = _parent[ u ];
+    const Value f = _pred_dir[ u ] == DIR_UP ? n : -n;
+    // Strongly feasible: flow can still be sent from u to the root
+    if( _pred_dir[ u ] == DIR_UP ? f >= 0 && f < _cap[ e ]
+				 : f > 0 && f <= _cap[ e ] ) {
+     _flow[ e ] = f;
+     net[ p ] += n;
+     continue;
+     }
+    // The arc leaves the tree at the bound it violates, or at the one
+    // it is degenerate at, and what it carries there goes from u to p
+    _state[ e ] = f <= 0 ? STATE_LOWER : STATE_UPPER;
+    _flow[ e ] = f <= 0 ? 0 : _cap[ e ];
+    const Value s = _pred_dir[ u ] == DIR_UP ? _flow[ e ] : -_flow[ e ];
+    n -= s;
+    net[ p ] += s;
+    e = _arc_num + u;
+    _state[ e ] = STATE_TREE;
+    _parent[ u ] = _root;
+    _pred[ u ] = e;
     }
-
-    // The cost of the artificial arcs, larger than the absolute value of
-    // the cost of any path, and how far the potential of the root may move
-    // from zero [see updatePotential()]: half of that cost for an exact
-    // type, which keeps the sums of the pivot rules within the range of the
-    // type, the cost itself otherwise, which costs the potentials no more
-    // than one bit of precision
-    Cost initArtificialCost() {
-      Cost art = 0;
-      if (std::numeric_limits<Cost>::is_exact) {
-        art = (std::numeric_limits<Cost>::max)() / 2 + 1;
-      } else {
-        for (int i = 0; i != _arc_num; ++i) {
-          if (_cost[i] > art) art = _cost[i];
-          else if (-_cost[i] > art) art = -_cost[i];
-        }
-        art = (art + 1) * _node_num;
-      }
-      _pi_lim = std::numeric_limits<Cost>::is_exact ? art / 2 : art;
-      return art;
+   // u hangs from the root by its artificial arc, directed as n says
+   if( n >= 0 ) {
+    _pred_dir[ u ] = DIR_UP;
+    _source[ e ] = u;
+    _target[ e ] = _root;
+    _flow[ e ] = n;
+    _cost[ e ] = 0;
     }
-
-    // Take in the new upper bound of the arc of index i, keeping the basis
-    // of the last run as it is if the flow of the arc stays within the new
-    // bound, the arc does not sit at its upper bound and, if it is in the
-    // tree, the tree stays strongly feasible (i.e., the arc is not directed
-    // towards the root with its flow at the new bound), as for an arc out of
-    // the tree that is closed while it carries no flow and for one that is
-    // opened again; otherwise the flow of the tree has to be recomputed,
-    // which runWarm() does [see repairBasis()]. With lower bounds the basis
-    // is dropped instead.
-    void warmUpper(int i, Value up) {
-      if (up == _upper[i]) return;
-      _upper[i] = up;
-      if (!_warm) return;
-
-      Value cap;
-      if (_has_lower) {
-        Value c = _lower[i];
-        if (c >= 0) {
-          cap = up < MAX_VALUE ? up - c : INF;
-        } else {
-          cap = up < MAX_VALUE + c ? up - c : INF;
-        }
-      } else {
-        cap = up;
-      }
-
-      bool moves = _state[i] == STATE_UPPER || _flow[i] > cap;
-      if (!moves && _state[i] == STATE_TREE && _flow[i] >= cap) {
-        const int u = _pred[_source[i]] == i ? _source[i] : _target[i];
-        moves = _pred_dir[u] == DIR_UP;
-      }
-      if (moves && _has_lower) {
-        _warm = false;
-        return;
-      }
-      _cap[i] = cap;
-      if (moves) _repair = true;
+   else {
+    _pred_dir[ u ] = DIR_DOWN;
+    _source[ e ] = _root;
+    _target[ e ] = u;
+    _flow[ e ] = -n;
+    _cost[ e ] = 1;  // nonzero: runWarm() gives it the artificial cost
     }
+   net[ _root ] += n;
+   }
 
-    // Take in the new supply of the node of index i, keeping the basis of
-    // the last run, whose flow runWarm() recomputes [see repairBasis()]
-    void warmSupply(int i, Value s) {
-      if (s == _supply[i]) return;
-      _supply[i] = s;
-      if (_warm) _repair = true;
+  // The thread and its reverse, the sizes of the subtrees and their
+  // last nodes, from the fathers, by a depth-first visit from the root
+  std::vector< int > child( _node_num + 1 , -1 ) , sibling( _node_num + 1 ,
+							    -1 );
+  for( int u = _node_num - 1 ; u >= 0 ; --u ) {
+   sibling[ u ] = child[ _parent[ u ] ];
+   child[ _parent[ u ] ] = u;
+   }
+  std::vector< int > order , stack( 1 , _root );
+  order.reserve( _node_num + 1 );
+  while( ! stack.empty() ) {
+   const int u = stack.back();
+   stack.pop_back();
+   order.push_back( u );
+   for( int v = child[ u ] ; v != -1 ; v = sibling[ v ] )
+    stack.push_back( v );
+   }
+  const int k = static_cast< int >( order.size() );
+  if( k != _node_num + 1 )
+   return( false );  // not a tree: cannot happen
+
+  for( int i = 0 ; i != k ; ++i ) {
+   const int u = order[ i ] , v = order[ ( i + 1 ) % k ];
+   _thread[ u ] = v;
+   _rev_thread[ v ] = u;
+   _succ_num[ u ] = 1;
+   }
+  for( int i = k - 1 ; i > 0 ; --i ) {
+   _succ_num[ _parent[ order[ i ] ] ] += _succ_num[ order[ i ] ];
+   }
+  for( int i = 0 ; i != k ; ++i ) {
+   _last_succ[ order[ i ] ] = order[ i + _succ_num[ order[ i ] ] - 1 ];
+   }
+  return( true );
+  }
+
+ // The end of a run: a basis is there to reuse if the run has ended at
+ // an optimal one, or at one that proves the problem infeasible, which
+ // is optimal for the problem with the artificial arcs and as good a
+ // start after a change as any; not with lower bounds, which start()
+ // does not put back in the supplies when it answers INFEASIBLE
+ ProblemType finish( ProblemType pt ) {
+  _warm = pt == OPTIMAL || ( pt == INFEASIBLE && ! _has_lower );
+  return( pt );
+  }
+
+ // Shift the potentials so that the one of the root is zero again
+ void alignPotential() {
+  const Cost r = _pi[ _root ];
+  if( r == 0 )
+   return;
+  for( int u = 0 ; u != _node_num ; ++u ) {
+   _pi[ u ] -= r;
+   }
+  _pi[ _root ] = 0;
+  }
+
+ // Heuristic initial pivots
+ bool initialPivots() {
+  Value curr , total = 0;
+  std::vector< Node > supply_nodes , demand_nodes;
+  for( NodeIt u( _graph ) ; u != INVALID ; ++u ) {
+   curr = _supply[ _node_id[ u ] ];
+   if( curr > 0 ) {
+    total += curr;
+    supply_nodes.push_back( u );
     }
-
-    // Make the basis of the last run primal feasible again after a change
-    // of the upper bounds or of the supplies, keeping its tree: every arc
-    // out of the tree is put at the bound it sits at, and the flow of the
-    // arcs of the tree is recomputed from the leaves up, each carrying what
-    // the subtree below it has to send. An arc whose flow falls outside its
-    // bounds, or sits at the bound that would leave the tree not strongly
-    // feasible (i.e., at its capacity if directed towards the root, at zero
-    // if directed away from it), on which the rule of the leaving arc
-    // relies against cycling, leaves the tree at that bound, and the
-    // subtree below it is hung from the root by the artificial arc of its
-    // top node, directed as the flow it has to carry and with the cost that
-    // init() would give it, i.e., zero towards the root and larger than any
-    // real one from it, so that the simplex drives it out as it does from
-    // the artificial basis. The thread and the sizes of the subtrees are
-    // then rebuilt from the fathers by a depth-first visit. It returns
-    // false, the basis having to be dropped, if there are lower bounds or
-    // if the supplies of the last run or the new ones do not sum to zero,
-    // the artificial arcs being built differently then.
-    bool repairBasis() {
-      if (_has_lower || _sum_supply != 0) return false;
-      Value sum = 0;
-      for (int u = 0; u != _node_num; ++u) sum += _supply[u];
-      const Value feps = flowTolerance(_supply, _node_num);
-      if (sum > feps || sum < -feps) return false;
-
-      // What each node has to send along the tree: its supply, net of the
-      // flow of the arcs out of the tree, each at the bound it sits at
-      std::vector<Value> net(_node_num + 1, 0);
-      for (int u = 0; u != _node_num; ++u) net[u] = _supply[u];
-      for (int e = 0; e != _arc_num; ++e) {
-        if (_state[e] == STATE_TREE) continue;
-        if (_state[e] == STATE_UPPER && _cap[e] >= MAX_VALUE) {
-          _state[e] = STATE_LOWER;  // an upper bound no longer there
-        }
-        _flow[e] = _state[e] == STATE_UPPER ? _cap[e] : 0;
-        net[_source[e]] -= _flow[e];
-        net[_target[e]] += _flow[e];
-      }
-      for (int e = _arc_num; e != _all_arc_num; ++e) {
-        if (_state[e] != STATE_TREE) _flow[e] = 0;
-      }
-
-      // The flow of the arcs of the tree, from the leaves up, i.e., in the
-      // reverse order of the thread, which gives every node after its
-      // subtree
-      for (int u = _rev_thread[_root]; u != _root; u = _rev_thread[u]) {
-        int e = _pred[u];
-        Value n = net[u];
-        if (e < _arc_num) {
-          const int p = _parent[u];
-          const Value f = _pred_dir[u] == DIR_UP ? n : -n;
-          // Strongly feasible: flow can still be sent from u to the root
-          if (_pred_dir[u] == DIR_UP ? f >= 0 && f < _cap[e]
-                                     : f > 0 && f <= _cap[e]) {
-            _flow[e] = f;
-            net[p] += n;
-            continue;
-          }
-          // The arc leaves the tree at the bound it violates, or at the one
-          // it is degenerate at, and what it carries there goes from u to p
-          _state[e] = f <= 0 ? STATE_LOWER : STATE_UPPER;
-          _flow[e] = f <= 0 ? 0 : _cap[e];
-          const Value s = _pred_dir[u] == DIR_UP ? _flow[e] : -_flow[e];
-          n -= s;
-          net[p] += s;
-          e = _arc_num + u;
-          _state[e] = STATE_TREE;
-          _parent[u] = _root;
-          _pred[u] = e;
-        }
-        // u hangs from the root by its artificial arc, directed as n says
-        if (n >= 0) {
-          _pred_dir[u] = DIR_UP;
-          _source[e] = u;
-          _target[e] = _root;
-          _flow[e] = n;
-          _cost[e] = 0;
-        } else {
-          _pred_dir[u] = DIR_DOWN;
-          _source[e] = _root;
-          _target[e] = u;
-          _flow[e] = -n;
-          _cost[e] = 1;  // nonzero: runWarm() gives it the artificial cost
-        }
-        net[_root] += n;
-      }
-
-      // The thread and its reverse, the sizes of the subtrees and their
-      // last nodes, from the fathers, by a depth-first visit from the root
-      std::vector<int> child(_node_num + 1, -1), sibling(_node_num + 1, -1);
-      for (int u = _node_num - 1; u >= 0; --u) {
-        sibling[u] = child[_parent[u]];
-        child[_parent[u]] = u;
-      }
-      std::vector<int> order, stack(1, _root);
-      order.reserve(_node_num + 1);
-      while (!stack.empty()) {
-        const int u = stack.back();
-        stack.pop_back();
-        order.push_back(u);
-        for (int v = child[u]; v != -1; v = sibling[v]) stack.push_back(v);
-      }
-      const int k = static_cast<int>(order.size());
-      if (k != _node_num + 1) return false;  // not a tree: cannot happen
-
-      for (int i = 0; i != k; ++i) {
-        const int u = order[i], v = order[(i + 1) % k];
-        _thread[u] = v;
-        _rev_thread[v] = u;
-        _succ_num[u] = 1;
-      }
-      for (int i = k - 1; i > 0; --i) {
-        _succ_num[_parent[order[i]]] += _succ_num[order[i]];
-      }
-      for (int i = 0; i != k; ++i) {
-        _last_succ[order[i]] = order[i + _succ_num[order[i]] - 1];
-      }
-      return true;
+   else if( curr < 0 ) {
+    demand_nodes.push_back( u );
     }
+   }
+  if( _sum_supply > 0 )
+   total -= _sum_supply;
+  if( total <= 0 )
+   return( true );
 
-    // The end of a run: a basis is there to reuse if the run has ended at
-    // an optimal one, or at one that proves the problem infeasible, which
-    // is optimal for the problem with the artificial arcs and as good a
-    // start after a change as any; not with lower bounds, which start()
-    // does not put back in the supplies when it answers INFEASIBLE
-    ProblemType finish(ProblemType pt) {
-      _warm = pt == OPTIMAL || (pt == INFEASIBLE && !_has_lower);
-      return pt;
+  IntVector arc_vector;
+  if( _sum_supply >= 0 ) {
+   if( supply_nodes.size() == 1 && demand_nodes.size() == 1 ) {
+    // Perform a reverse graph search from the sink to the source
+    typename GR::template NodeMap< bool > reached( _graph , false );
+    Node s = supply_nodes[ 0 ] , t = demand_nodes[ 0 ];
+    std::vector< Node > stack;
+    reached[ t ] = true;
+    stack.push_back( t );
+    while( ! stack.empty() ) {
+     Node u , v = stack.back();
+     stack.pop_back();
+     if( v == s )
+      break;
+     for( InArcIt a( _graph , v ) ; a != INVALID ; ++a ) {
+      if( reached[ u = _graph.source( a ) ] )
+       continue;
+      int j = _arc_id[ a ];
+      if( _cap[ j ] >= total ) {
+       arc_vector.push_back( j );
+       reached[ u ] = true;
+       stack.push_back( u );
+       }
+      }
+     }
     }
-
-    // Shift the potentials so that the one of the root is zero again
-    void alignPotential() {
-      const Cost r = _pi[_root];
-      if (r == 0) return;
-      for (int u = 0; u != _node_num; ++u) {
-        _pi[u] -= r;
+   else {
+    // Find the min. cost incoming arc for each demand node
+    for( int i = 0 ; i != int( demand_nodes.size() ) ; ++i ) {
+     Node v = demand_nodes[ i ];
+     Cost c , min_cost = ( std::numeric_limits< Cost >::max )();
+     Arc min_arc = INVALID;
+     for( InArcIt a( _graph , v ) ; a != INVALID ; ++a ) {
+      c = _cost[ _arc_id[ a ] ];
+      if( c < min_cost ) {
+       min_cost = c;
+       min_arc = a;
+       }
       }
-      _pi[_root] = 0;
+     if( min_arc != INVALID ) {
+      arc_vector.push_back( _arc_id[ min_arc ] );
+      }
+     }
     }
-
-    // Heuristic initial pivots
-    bool initialPivots() {
-      Value curr, total = 0;
-      std::vector<Node> supply_nodes, demand_nodes;
-      for (NodeIt u(_graph); u != INVALID; ++u) {
-        curr = _supply[_node_id[u]];
-        if (curr > 0) {
-          total += curr;
-          supply_nodes.push_back(u);
-        }
-        else if (curr < 0) {
-          demand_nodes.push_back(u);
-        }
+   }
+  else {
+   // Find the min. cost outgoing arc for each supply node
+   for( int i = 0 ; i != int( supply_nodes.size() ) ; ++i ) {
+    Node u = supply_nodes[ i ];
+    Cost c , min_cost = ( std::numeric_limits< Cost >::max )();
+    Arc min_arc = INVALID;
+    for( OutArcIt a( _graph , u ) ; a != INVALID ; ++a ) {
+     c = _cost[ _arc_id[ a ] ];
+     if( c < min_cost ) {
+      min_cost = c;
+      min_arc = a;
       }
-      if (_sum_supply > 0) total -= _sum_supply;
-      if (total <= 0) return true;
-
-      IntVector arc_vector;
-      if (_sum_supply >= 0) {
-        if (supply_nodes.size() == 1 && demand_nodes.size() == 1) {
-          // Perform a reverse graph search from the sink to the source
-          typename GR::template NodeMap<bool> reached(_graph, false);
-          Node s = supply_nodes[0], t = demand_nodes[0];
-          std::vector<Node> stack;
-          reached[t] = true;
-          stack.push_back(t);
-          while (!stack.empty()) {
-            Node u, v = stack.back();
-            stack.pop_back();
-            if (v == s) break;
-            for (InArcIt a(_graph, v); a != INVALID; ++a) {
-              if (reached[u = _graph.source(a)]) continue;
-              int j = _arc_id[a];
-              if (_cap[j] >= total) {
-                arc_vector.push_back(j);
-                reached[u] = true;
-                stack.push_back(u);
-              }
-            }
-          }
-        } else {
-          // Find the min. cost incoming arc for each demand node
-          for (int i = 0; i != int(demand_nodes.size()); ++i) {
-            Node v = demand_nodes[i];
-            Cost c, min_cost = (std::numeric_limits<Cost>::max)();
-            Arc min_arc = INVALID;
-            for (InArcIt a(_graph, v); a != INVALID; ++a) {
-              c = _cost[_arc_id[a]];
-              if (c < min_cost) {
-                min_cost = c;
-                min_arc = a;
-              }
-            }
-            if (min_arc != INVALID) {
-              arc_vector.push_back(_arc_id[min_arc]);
-            }
-          }
-        }
-      } else {
-        // Find the min. cost outgoing arc for each supply node
-        for (int i = 0; i != int(supply_nodes.size()); ++i) {
-          Node u = supply_nodes[i];
-          Cost c, min_cost = (std::numeric_limits<Cost>::max)();
-          Arc min_arc = INVALID;
-          for (OutArcIt a(_graph, u); a != INVALID; ++a) {
-            c = _cost[_arc_id[a]];
-            if (c < min_cost) {
-              min_cost = c;
-              min_arc = a;
-            }
-          }
-          if (min_arc != INVALID) {
-            arc_vector.push_back(_arc_id[min_arc]);
-          }
-        }
-      }
-
-      // Perform heuristic initial pivots
-      for (int i = 0; i != int(arc_vector.size()); ++i) {
-        in_arc = arc_vector[i];
-        if (_state[in_arc] * (_cost[in_arc] + _pi[_source[in_arc]] -
-            _pi[_target[in_arc]]) >= 0) continue;
-        findJoinNode();
-        bool change = findLeavingArc();
-        if (delta >= MAX_VALUE) return false;
-        changeFlow(change);
-        if (change) {
-          updateTreeStructure();
-          updatePotential();
-        }
-      }
-      return true;
+     }
+    if( min_arc != INVALID ) {
+     arc_vector.push_back( _arc_id[ min_arc ] );
+     }
     }
+   }
 
-    // Execute the algorithm
-    ProblemType start(PivotRule pivot_rule) {
-      // Select the pivot rule implementation
-      switch (pivot_rule) {
-        case FIRST_ELIGIBLE:
-          return start<FirstEligiblePivotRule>();
-        case BEST_ELIGIBLE:
-          return start<BestEligiblePivotRule>();
-        case BLOCK_SEARCH:
-          return start<BlockSearchPivotRule>();
-        case CANDIDATE_LIST:
-          return start<CandidateListPivotRule>();
-        case ALTERING_LIST:
-          return start<AlteringListPivotRule>();
-      }
-      return INFEASIBLE; // avoid warning
+  // Perform heuristic initial pivots
+  for( int i = 0 ; i != int( arc_vector.size() ) ; ++i ) {
+   in_arc = arc_vector[ i ];
+   if( _state[ in_arc ] * ( _cost[ in_arc ] + _pi[ _source[ in_arc ] ] -
+			    _pi[ _target[ in_arc ] ] ) >=
+       0 )
+    continue;
+   findJoinNode();
+   bool change = findLeavingArc();
+   if( delta >= MAX_VALUE )
+    return( false );
+   changeFlow( change );
+   if( change ) {
+    updateTreeStructure();
+    updatePotential();
     }
+   }
+  return( true );
+  }
 
-    template <typename PivotRuleImpl>
-    ProblemType start() {
-      PivotRuleImpl pivot(*this);
+ // Execute the algorithm
+ ProblemType start( PivotRule pivot_rule ) {
+  // Select the pivot rule implementation
+  switch( pivot_rule ) {
+   case FIRST_ELIGIBLE:
+    return( start< FirstEligiblePivotRule >() );
+   case BEST_ELIGIBLE:
+    return( start< BestEligiblePivotRule >() );
+   case BLOCK_SEARCH:
+    return( start< BlockSearchPivotRule >() );
+   case CANDIDATE_LIST:
+    return( start< CandidateListPivotRule >() );
+   case ALTERING_LIST:
+    return( start< AlteringListPivotRule >() );
+   }
+  return( INFEASIBLE );  // avoid warning
+  }
 
-      // Perform heuristic initial pivots
-      if (!initialPivots()) {
-        _unb_arc = in_arc;
-        return UNBOUNDED;
-      }
+ template< typename PivotRuleImpl >
+ ProblemType start() {
+  PivotRuleImpl pivot( *this );
 
-      // Execute the Network Simplex algorithm
-      while (pivot.findEnteringArc()) {
-        findJoinNode();
-        bool change = findLeavingArc();
-        if (delta >= MAX_VALUE) {
-          _unb_arc = in_arc;
-          return UNBOUNDED;
-        }
-        changeFlow(change);
-        if (change) {
-          updateTreeStructure();
-          updatePotential();
-        }
-      }
-      alignPotential();
+  // Perform heuristic initial pivots
+  if( ! initialPivots() ) {
+   _unb_arc = in_arc;
+   return( UNBOUNDED );
+   }
 
-      // Check feasibility, up to the tolerance on the artificial arcs
-      const Value feps = flowTolerance(_supply, _node_num);
-      for (int e = _search_arc_num; e != _all_arc_num; ++e) {
-        if (_flow[e] > feps || _flow[e] < -feps) return INFEASIBLE;
-      }
-
-      // Transform the solution and the supply map to the original form
-      if (_has_lower) {
-        for (int i = 0; i != _arc_num; ++i) {
-          Value c = _lower[i];
-          if (c != 0) {
-            _flow[i] += c;
-            _supply[_source[i]] += c;
-            _supply[_target[i]] -= c;
-          }
-        }
-      }
-
-      // Shift potentials to meet the requirements of the GEQ/LEQ type
-      // optimality conditions
-      if (_sum_supply == 0) {
-        if (_stype == GEQ) {
-          Cost max_pot = -(std::numeric_limits<Cost>::max)();
-          for (int i = 0; i != _node_num; ++i) {
-            if (_pi[i] > max_pot) max_pot = _pi[i];
-          }
-          if (max_pot > 0) {
-            for (int i = 0; i != _node_num; ++i)
-              _pi[i] -= max_pot;
-          }
-        } else {
-          Cost min_pot = (std::numeric_limits<Cost>::max)();
-          for (int i = 0; i != _node_num; ++i) {
-            if (_pi[i] < min_pot) min_pot = _pi[i];
-          }
-          if (min_pot < 0) {
-            for (int i = 0; i != _node_num; ++i)
-              _pi[i] -= min_pot;
-          }
-        }
-      }
-
-      return OPTIMAL;
+  // Execute the Network Simplex algorithm
+  while( pivot.findEnteringArc() ) {
+   findJoinNode();
+   bool change = findLeavingArc();
+   if( delta >= MAX_VALUE ) {
+    _unb_arc = in_arc;
+    return( UNBOUNDED );
     }
+   changeFlow( change );
+   if( change ) {
+    updateTreeStructure();
+    updatePotential();
+    }
+   }
+  alignPotential();
 
-  }; //class NetworkSimplex
+  // Check feasibility, up to the tolerance on the artificial arcs
+  const Value feps = flowTolerance( _supply , _node_num );
+  for( int e = _search_arc_num ; e != _all_arc_num ; ++e ) {
+   if( _flow[ e ] > feps || _flow[ e ] < -feps )
+    return( INFEASIBLE );
+   }
 
-  ///@}
+  // Transform the solution and the supply map to the original form
+  if( _has_lower ) {
+   for( int i = 0 ; i != _arc_num ; ++i ) {
+    Value c = _lower[ i ];
+    if( c != 0 ) {
+     _flow[ i ] += c;
+     _supply[ _source[ i ] ] += c;
+     _supply[ _target[ i ] ] -= c;
+     }
+    }
+   }
 
-} //namespace lemon
+  // Shift potentials to meet the requirements of the GEQ/LEQ type
+  // optimality conditions
+  if( _sum_supply == 0 ) {
+   if( _stype == GEQ ) {
+    Cost max_pot = -( std::numeric_limits< Cost >::max )();
+    for( int i = 0 ; i != _node_num ; ++i ) {
+     if( _pi[ i ] > max_pot )
+      max_pot = _pi[ i ];
+     }
+    if( max_pot > 0 ) {
+     for( int i = 0 ; i != _node_num ; ++i )
+      _pi[ i ] -= max_pot;
+     }
+    }
+   else {
+    Cost min_pot = ( std::numeric_limits< Cost >::max )();
+    for( int i = 0 ; i != _node_num ; ++i ) {
+     if( _pi[ i ] < min_pot )
+      min_pot = _pi[ i ];
+     }
+    if( min_pot < 0 ) {
+     for( int i = 0 ; i != _node_num ; ++i )
+      _pi[ i ] -= min_pot;
+     }
+    }
+   }
 
-#endif //LEMON_NETWORK_SIMPLEX_H
+  return( OPTIMAL );
+  }
+
+ };  //class NetworkSimplex
+
+///@}
+
+}  //namespace lemon
+
+#endif  //LEMON_NETWORK_SIMPLEX_H

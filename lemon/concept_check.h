@@ -24,48 +24,52 @@
 ///
 
 #ifndef LEMON_CONCEPT_CHECK_H
-#define LEMON_CONCEPT_CHECK_H
+ #define LEMON_CONCEPT_CHECK_H
 
-namespace lemon {
+namespace lemon
+{
 
-  namespace _concept_bits {
+namespace _concept_bits
+{
 
-    // A function object rather than overloaded functions, so that the
-    // unqualified calls that other libraries (e.g., Boost) make to their own
-    // function of the same name do not find this one by argument-dependent
-    // lookup on the types of LEMON and become ambiguous
-    struct IgnoreUnusedVariableWarning {
-      template <typename... T>
-      void operator()(const T&...) const {}
-    };
+// A function object rather than overloaded functions, so that the
+// unqualified calls that other libraries (e.g., Boost) make to their own
+// function of the same name do not find this one by argument-dependent
+// lookup on the types of LEMON and become ambiguous
+struct IgnoreUnusedVariableWarning
+{
+ template< typename... T >
+ void operator()( const T &... ) const { }
+ };
 
-  }
+}
 
-  ///\e
-  const _concept_bits::IgnoreUnusedVariableWarning
-    ignore_unused_variable_warning =
-      _concept_bits::IgnoreUnusedVariableWarning();
+///\e
+const _concept_bits::IgnoreUnusedVariableWarning
+  ignore_unused_variable_warning =
+    _concept_bits::IgnoreUnusedVariableWarning();
 
-  ///\e
-  template <class Concept>
-  inline void function_requires()
-  {
-#if !defined(NDEBUG)
-    void (Concept::*x)() = & Concept::constraints;
-    ::lemon::ignore_unused_variable_warning(x);
+///\e
+template< class Concept >
+inline void function_requires()
+{
+#if ! defined( NDEBUG )
+ void ( Concept::*x )() = &Concept::constraints;
+ ::lemon::ignore_unused_variable_warning( x );
 #endif
-  }
+ }
 
-  ///\e
-  template <typename Concept, typename Type>
-  inline void checkConcept() {
-#if !defined(NDEBUG)
-    typedef typename Concept::template Constraints<Type> ConceptCheck;
-    void (ConceptCheck::*x)() = & ConceptCheck::constraints;
-    ::lemon::ignore_unused_variable_warning(x);
+///\e
+template< typename Concept , typename Type >
+inline void checkConcept()
+{
+#if ! defined( NDEBUG )
+ typedef typename Concept::template Constraints< Type > ConceptCheck;
+ void ( ConceptCheck::*x )() = &ConceptCheck::constraints;
+ ::lemon::ignore_unused_variable_warning( x );
 #endif
-  }
+ }
 
-} // namespace lemon
+}  // namespace lemon
 
-#endif // LEMON_CONCEPT_CHECK_H
+#endif  // LEMON_CONCEPT_CHECK_H

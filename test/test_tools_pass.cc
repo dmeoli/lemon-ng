@@ -20,6 +20,6 @@
 
 int main()
 {
-  check(true, "It should pass.");
-  return 0;
-}
+ check( true , "It should pass." );
+ return( 0 );
+ }

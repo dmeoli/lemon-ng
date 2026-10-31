@@ -20,11 +20,12 @@
 ///\brief The implementation of the LP solver interface.
 
 #include <lemon/lp_base.h>
-namespace lemon {
+namespace lemon
+{
 
-  const LpBase::Value LpBase::INF =
-    std::numeric_limits<LpBase::Value>::infinity();
-  const LpBase::Value LpBase::NaN =
-    std::numeric_limits<LpBase::Value>::quiet_NaN();
+const LpBase::Value LpBase::INF =
+  std::numeric_limits< LpBase::Value >::infinity();
+const LpBase::Value LpBase::NaN =
+  std::numeric_limits< LpBase::Value >::quiet_NaN();
 
-} //namespace lemon
+}  //namespace lemon

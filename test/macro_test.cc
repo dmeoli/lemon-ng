@@ -45,10 +45,10 @@
 #include <utility>
 #include <vector>
 
-#define min(a, b) (((a) < (b)) ? (a) : (b))
-#define max(a, b) (((a) > (b)) ? (a) : (b))
-#define MIN(a, b) (((a) < (b)) ? (a) : (b))
-#define MAX(a, b) (((a) > (b)) ? (a) : (b))
+#define min( a, b ) ( ( ( a ) < ( b ) ) ? ( a ) : ( b ) )
+#define max( a, b ) ( ( ( a ) > ( b ) ) ? ( a ) : ( b ) )
+#define MIN( a, b ) ( ( ( a ) < ( b ) ) ? ( a ) : ( b ) )
+#define MAX( a, b ) ( ( ( a ) > ( b ) ) ? ( a ) : ( b ) )
 
 #include <lemon/adaptors.h>
 #include <lemon/arg_parser.h>
@@ -129,25 +129,27 @@
 
 using namespace lemon;
 
-template <typename MCF>
-void checkMcf() {
-  SmartDigraph g;
-  SmartDigraph::Node a = g.addNode(), b = g.addNode();
-  g.addArc(a, b);
-  SmartDigraph::ArcMap<int> cost(g, 2);
-  SmartDigraph::NodeMap<int> sup(g, 0);
-  sup[a] = 3;
-  sup[b] = -3;
-  MCF mcf(g);
-  mcf.costMap(cost).supplyMap(sup);
-  check(mcf.run() == MCF::OPTIMAL && mcf.totalCost() == 6,
-        "Wrong result with the macros min, max, MIN and MAX defined");
-}
+template< typename MCF >
+void checkMcf()
+{
+ SmartDigraph g;
+ SmartDigraph::Node a = g.addNode() , b = g.addNode();
+ g.addArc( a , b );
+ SmartDigraph::ArcMap< int > cost( g , 2 );
+ SmartDigraph::NodeMap< int > sup( g , 0 );
+ sup[ a ] = 3;
+ sup[ b ] = -3;
+ MCF mcf( g );
+ mcf.costMap( cost ).supplyMap( sup );
+ check( mcf.run() == MCF::OPTIMAL && mcf.totalCost() == 6 ,
+	"Wrong result with the macros min, max, MIN and MAX defined" );
+ }
 
-int main() {
-  checkMcf<NetworkSimplex<SmartDigraph> >();
-  checkMcf<CostScaling<SmartDigraph> >();
-  checkMcf<CycleCanceling<SmartDigraph> >();
-  checkMcf<CapacityScaling<SmartDigraph> >();
-  return 0;
-}
+int main()
+{
+ checkMcf< NetworkSimplex< SmartDigraph > >();
+ checkMcf< CostScaling< SmartDigraph > >();
+ checkMcf< CycleCanceling< SmartDigraph > >();
+ checkMcf< CapacityScaling< SmartDigraph > >();
+ return( 0 );
+ }
