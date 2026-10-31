@@ -433,6 +433,10 @@ namespace lemon {
   /// section to the stream. The output stream can be retrieved with
   /// the \c ostream() function, hence the second pass can append its
   /// output to the output of the first pass.
+  /// \warning The values given to the node, arc, edge and attribute
+  /// writing rules are kept by reference and read by run(), hence they
+  /// have to exist until then: a temporary passed to a rule is destroyed
+  /// at the end of the expression that passes it.
   template <typename DGR>
   class DigraphWriter {
   public:
@@ -1030,6 +1034,10 @@ namespace lemon {
   /// '+' and \c '-'. The arcs are written into the \c \@attributes
   /// section as a \c '+' or a \c '-' prefix (depends on the direction
   /// of the arc) and the label of corresponding edge.
+  /// \warning The values given to the node, arc, edge and attribute
+  /// writing rules are kept by reference and read by run(), hence they
+  /// have to exist until then: a temporary passed to a rule is destroyed
+  /// at the end of the expression that passes it.
   template <typename GR>
   class GraphWriter {
   public:
@@ -1664,6 +1672,10 @@ namespace lemon {
   /// The red and blue node maps are written to the corresponding
   /// sections. The node maps are written to both of these sections
   /// with the same map name.
+  /// \warning The values given to the node, arc, edge and attribute
+  /// writing rules are kept by reference and read by run(), hence they
+  /// have to exist until then: a temporary passed to a rule is destroyed
+  /// at the end of the expression that passes it.
   template <typename BGR>
   class BpGraphWriter {
   public:

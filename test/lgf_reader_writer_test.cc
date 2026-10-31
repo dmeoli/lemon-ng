@@ -387,7 +387,8 @@ void checkGraphReaderWriter() {
   writer.arcMap("arc_map2", arc_map, WriterConverter());
   writer.node("node", n2);
   writer.edge("edge", e1);
-  writer.arc("arc", graph.direct(e1, false));
+  Graph::Arc a1 = graph.direct(e1, false);
+  writer.arc("arc", a1);
   writer.attribute("attr1", attr);
   writer.attribute("attr2", attr, WriterConverter());
 
@@ -495,7 +496,8 @@ void checkBpGraphReaderWriter() {
   writer.redNode("red_node", rn1);
   writer.blueNode("blue_node", bn2);
   writer.edge("edge", e1);
-  writer.arc("arc", graph.direct(e1, false));
+  Graph::Arc a1 = graph.direct(e1, false);
+  writer.arc("arc", a1);
   writer.attribute("attr1", attr);
   writer.attribute("attr2", attr, WriterConverter());
 
