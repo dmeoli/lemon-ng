@@ -35,7 +35,7 @@ namespace lemon {
       WinLock();
       ~WinLock();
       void lock();
-      void unlock();\
+      void unlock();
     private:
       void *_repr;
     };
