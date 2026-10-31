@@ -73,3 +73,49 @@ jobs:
 
       - name: Test
         run: ctest --test-dir build -C Release --output-on-failure --no-tests=error
+
+  # LEMON installed with the library alone, as a package builds it, and a
+  # project built against the installation through its CMake configuration
+  # (and on Linux through pkg-config too)
+  install:
+    name: install on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Build and install the library
+        run: >
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+          -DCMAKE_INSTALL_PREFIX="${{ github.workspace }}/prefix"
+          -DLEMON_BUILD_TESTS=NO -DLEMON_BUILD_DEMOS=NO
+          -DLEMON_BUILD_TOOLS=NO -DLEMON_BUILD_DOC=NO
+          -DLEMON_ENABLE_GLPK=NO -DLEMON_ENABLE_ILOG=NO
+          -DLEMON_ENABLE_COIN=NO -DLEMON_ENABLE_SOPLEX=NO
+          && cmake --build build --config Release --parallel 4
+          && cmake --install build --config Release
+
+      - name: Build and run a project that uses the installation
+        run: >
+          cmake -S test/install -B use -DCMAKE_BUILD_TYPE=Release
+          -DCMAKE_PREFIX_PATH="${{ github.workspace }}/prefix"
+          && cmake --build use --config Release
+
+      - name: Run it (Linux and macOS)
+        if: runner.os != 'Windows'
+        run: ./use/install_test
+
+      - name: Run it (Windows)
+        if: runner.os == 'Windows'
+        run: ./use/Release/install_test.exe
+
+      - name: Build it through pkg-config (Linux)
+        if: runner.os == 'Linux'
+        run: >
+          g++ test/install/install_test.cc -o pc_test
+          $(PKG_CONFIG_PATH="${{ github.workspace }}/prefix/lib/pkgconfig"
+          pkg-config --cflags --libs lemon) && ./pc_test

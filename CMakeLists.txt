@@ -2,6 +2,9 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.19)
 
 SET(PROJECT_NAME "LEMON")
 PROJECT(${PROJECT_NAME})
+# PROJECT() sets an empty LEMON_VERSION, which would hide the one in the
+# cache when CMake runs again on the same build directory
+UNSET(LEMON_VERSION)
 
 INCLUDE(FindPythonInterp)
 INCLUDE(FindWget)
@@ -37,7 +40,19 @@ ELSE()
   )
 
   IF(HG_REVISION_TAG STREQUAL "")
-    SET(HG_REVISION_ID "hg-tip")
+    # no Mercurial checkout: the tag of git, else the version is unknown
+    # (a package passes it with -DLEMON_VERSION=...)
+    EXECUTE_PROCESS(
+      COMMAND git describe --tags --always
+      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+      OUTPUT_VARIABLE HG_REVISION
+      ERROR_QUIET
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+    STRING(REGEX REPLACE "^[rv]([0-9])" "\\1" HG_REVISION "${HG_REVISION}")
+    IF(HG_REVISION STREQUAL "")
+      SET(HG_REVISION "unknown")
+    ENDIF()
   ELSE()
     IF(HG_REVISION_TAG STREQUAL "null")
       SET(HG_REVISION_TAG "trunk")
@@ -283,13 +298,26 @@ ELSE()
   ADD_CUSTOM_TARGET(check COMMAND ${CMAKE_CTEST_COMMAND})
 ENDIF()
 
+OPTION(LEMON_BUILD_TESTS "Build the tests." ON)
+OPTION(LEMON_BUILD_DEMOS "Build the demos and the contributed programs." ON)
+OPTION(LEMON_BUILD_TOOLS "Build and install the tools." ON)
+OPTION(LEMON_BUILD_DOC "Build the documentation." ON)
+
 ADD_SUBDIRECTORY(lemon)
 IF(${CMAKE_SOURCE_DIR} STREQUAL ${PROJECT_SOURCE_DIR})
-  ADD_SUBDIRECTORY(contrib)
-  ADD_SUBDIRECTORY(demo)
-  ADD_SUBDIRECTORY(tools)
-  ADD_SUBDIRECTORY(doc)
-  ADD_SUBDIRECTORY(test)
+  IF(LEMON_BUILD_DEMOS)
+    ADD_SUBDIRECTORY(contrib)
+    ADD_SUBDIRECTORY(demo)
+  ENDIF()
+  IF(LEMON_BUILD_TOOLS)
+    ADD_SUBDIRECTORY(tools)
+  ENDIF()
+  IF(LEMON_BUILD_DOC)
+    ADD_SUBDIRECTORY(doc)
+  ENDIF()
+  IF(LEMON_BUILD_TESTS)
+    ADD_SUBDIRECTORY(test)
+  ENDIF()
 ENDIF()
 
 CONFIGURE_FILE(
@@ -297,17 +325,15 @@ CONFIGURE_FILE(
   ${PROJECT_BINARY_DIR}/cmake/LEMONConfig.cmake
   @ONLY
 )
-IF(UNIX)
-  INSTALL(
-    FILES ${PROJECT_BINARY_DIR}/cmake/LEMONConfig.cmake
-    DESTINATION share/lemon/cmake
-  )
-ELSEIF(WIN32)
-  INSTALL(
-    FILES ${PROJECT_BINARY_DIR}/cmake/LEMONConfig.cmake
-    DESTINATION cmake
-  )
-ENDIF()
+INSTALL(
+  FILES ${PROJECT_BINARY_DIR}/cmake/LEMONConfig.cmake
+  DESTINATION share/lemon/cmake
+)
+INSTALL(
+  EXPORT LEMONTargets
+  NAMESPACE LEMON::
+  DESTINATION share/lemon/cmake
+)
 
 CONFIGURE_FILE(
   ${PROJECT_SOURCE_DIR}/cmake/version.cmake.in

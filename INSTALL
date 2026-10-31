@@ -158,6 +158,21 @@ You find a list of the most useful options below.
 
   Root directory prefixes of optional third party libraries.
 
+-DLEMON_BUILD_TESTS=NO
+-DLEMON_BUILD_DEMOS=NO
+-DLEMON_BUILD_TOOLS=NO
+-DLEMON_BUILD_DOC=NO
+
+  Leave out the tests, the demos (and the contributed programs), the
+  tools and the documentation, which are all built by default; the
+  library and its headers are built and installed in any case.
+
+-DLEMON_VERSION=VERSION
+
+  The version of the build. By default it is taken from the tag of the
+  Mercurial or git checkout (or the commit, if no tag is there), and it
+  is 'unknown' in a source tree that is neither, e.g., an archive.
+
 Makefile Variables
 ==================
 
@@ -165,3 +180,18 @@ make VERBOSE=1
 
    This results in a more verbose output by showing the full
    compiler and linker commands.
+Using the Installed Library
+===========================
+
+The installation puts a CMake configuration in PREFIX/share/lemon/cmake,
+which defines the target LEMON::lemon (the library with its include
+directory) and the variables LEMON_INCLUDE_DIRS and LEMON_LIBRARIES:
+
+  find_package(LEMON CONFIG REQUIRED)
+  target_link_libraries(main PRIVATE LEMON::lemon)
+
+(PREFIX in CMAKE_PREFIX_PATH, if it is not a standard one). A build
+system other than CMake can use pkg-config, with PREFIX/lib/pkgconfig in
+PKG_CONFIG_PATH:
+
+  $ g++ main.cc $(pkg-config --cflags --libs lemon)
