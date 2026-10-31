@@ -29,6 +29,7 @@
 #include <limits>
 #include <iterator>
 #include <algorithm>
+#include <type_traits>
 
 namespace lemon {
 
@@ -221,7 +222,8 @@ namespace lemon {
   template <typename Iterator, typename Functor>
   void radixSort(Iterator first, Iterator last, Functor functor) {
     using namespace _radix_sort_bits;
-    typedef typename Functor::result_type Value;
+    typedef typename std::decay<decltype(std::declval<Functor&>()(
+      *first))>::type Value;
     RadixSortSelector<Value>::sort(first, last, functor);
   }
 
@@ -447,7 +449,8 @@ namespace lemon {
   template <typename Iterator, typename Functor>
   void stableRadixSort(Iterator first, Iterator last, Functor functor) {
     using namespace _radix_sort_bits;
-    typedef typename Functor::result_type Value;
+    typedef typename std::decay<decltype(std::declval<Functor&>()(
+      *first))>::type Value;
     StableRadixSortSelector<Value>::sort(first, last, functor);
   }
 

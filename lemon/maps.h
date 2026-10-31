@@ -22,6 +22,8 @@
 #include <iterator>
 #include <cstddef>
 #include <functional>
+#include <type_traits>
+#include <utility>
 #include <vector>
 #include <map>
 
@@ -548,8 +550,21 @@ namespace lemon {
   /// function.
   ///
   /// \sa ComposeMap
+  namespace _maps_bits {
+
+    // The type that F returns on the values of M1 and M2, which C++20 no
+    // longer gives as the result_type of the function objects of <functional>
+    template <typename M1, typename M2, typename F>
+    struct CombineValue {
+      typedef typename std::decay<decltype(std::declval<const F&>()(
+        std::declval<typename M1::Value>(),
+        std::declval<typename M2::Value>()))>::type type;
+    };
+
+  }
+
   template<typename M1, typename M2, typename F,
-           typename V = typename F::result_type>
+           typename V = typename _maps_bits::CombineValue<M1, M2, F>::type>
   class CombineMap : public MapBase<typename M1::Key, V> {
     const M1 &_m1;
     const M2 &_m2;
@@ -592,9 +607,11 @@ namespace lemon {
   }
 
   template<typename M1, typename M2, typename F>
-  inline CombineMap<M1, M2, F, typename F::result_type>
+  inline CombineMap<M1, M2, F,
+                    typename _maps_bits::CombineValue<M1, M2, F>::type>
   combineMap(const M1 &m1, const M2 &m2, const F &f) {
-    return combineMap<M1, M2, F, typename F::result_type>(m1,m2,f);
+    return combineMap<M1, M2, F,
+      typename _maps_bits::CombineValue<M1, M2, F>::type>(m1,m2,f);
   }
 
   template<typename M1, typename M2, typename K1, typename K2, typename V>
