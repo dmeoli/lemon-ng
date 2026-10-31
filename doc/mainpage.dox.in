@@ -19,7 +19,7 @@
 /**
 \mainpage lemon-ng
 
-\section fork lemon-ng
+\section fork About the fork
 
 lemon-ng is a maintained fork of LEMON 1.3.1, the last release of LEMON
 (2014): it keeps its headers and its namespace, compiles from C++11 to C++23
