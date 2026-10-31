@@ -16,6 +16,30 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # the lines that a pull request changes, in the style of .clang-format and
+  # of scripts/format.py
+  style:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check the style of the changed lines
+        run: |
+          pip install -q clang-format==22.1.5
+          base=origin/${{ github.base_ref }}
+          files=$(git diff --name-only --diff-filter=AMR $base HEAD |
+                  grep -E '\.(h|cc|cpp)$' || true)
+          [ -z "$files" ] && exit 0
+          if ! python3 scripts/format.py --check --since $base $files; then
+            echo "Put them in the style with"
+            echo "  python3 scripts/format.py --since $base <files>"
+            exit 1
+          fi
+
   build-test:
     name: ${{ matrix.os }} ${{ matrix.cc }} C++${{ matrix.std }} ${{ matrix.name }}
     runs-on: ${{ matrix.os }}

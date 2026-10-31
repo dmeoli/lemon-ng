@@ -48,3 +48,17 @@ test/
 tools/
 
    Various utilities related to LEMON.
+
+Code style
+==========
+
+The code is in the style of the .clang-format at the root, with what
+scripts/format.py adds to it and clang-format has no option for (e.g.,
+'return( x );' and a space before every comma). The CI checks the lines
+that a pull request changes, and
+
+   python3 scripts/format.py --since origin/master FILE...
+
+puts them in the style (clang-format 22 is needed, e.g., with
+'pip install clang-format==22.1.5'); scripts/ide-format runs the same on
+the file that an IDE shows.
