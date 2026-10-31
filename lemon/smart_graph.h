@@ -39,12 +39,12 @@ namespace lemon {
     struct NodeT
     {
       int first_in, first_out;
-      NodeT() {}
+      NodeT() : first_in(-1), first_out(-1) {}
     };
     struct ArcT
     {
       int target, source, next_in, next_out;
-      ArcT() {}
+      ArcT() : target(-1), source(-1), next_in(-1), next_out(-1) {}
     };
 
     std::vector<NodeT> _nodes;
