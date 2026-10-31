@@ -6,14 +6,15 @@ template library of graphs, maps and heaps and of the algorithms of network
 optimization built on them (shortest paths, maximum and minimum cost flows,
 matchings, connectivity, cuts and cycles), written by the Egerváry Research
 Group of the Eötvös Loránd University of Budapest. LEMON has had no release
-since 1.3.1 (2014); hence, the fixes collected in the meantime by its trac
-and by its forks were never distributed, and its headers no longer compile
-with the compilers and the standards of today (e.g., C++20 removed the
-members of `std::allocator` that `ArrayMap` and `ListPath` call). lemon-ng
-starts from the last revision of the Mercurial repository of LEMON, whose
-history it keeps. Its headers are still `lemon/` and its namespace is still
-`lemon`; hence, a program written for LEMON may be compiled with lemon-ng
-unchanged (and, possibly, with fewer warnings).
+since 1.3.1 (2014); hence, the fixes collected in the meantime by its trac and
+by its forks were never distributed, and its headers no longer compile with the
+compilers and the standards of today (e.g., C++20 removed the members of
+`std::allocator` that `ArrayMap` and `ListPath` call). Its documentation is at
+<https://dmeoli.github.io/lemon-ng/>. lemon-ng starts from the last revision of
+the Mercurial repository of LEMON, whose history it keeps. Its headers are
+still `lemon/` and its namespace is still `lemon`; hence, a program written for
+LEMON may be compiled with lemon-ng unchanged (and, possibly, with fewer
+warnings).
 
 ## Differences from LEMON 1.3.1
 

@@ -1,0 +1,57 @@
+# The documentation of lemon-ng, which Doxygen builds with the target html of
+# CMake, published on GitHub Pages at every push on master.
+
+name: Docs
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# one publication at a time, the last push winning
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install Doxygen and Ghostscript
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq doxygen ghostscript graphviz
+
+      - name: Build the documentation
+        run: |
+          cmake -S . -B build -DLEMON_BUILD_TESTS=NO -DLEMON_BUILD_DEMOS=NO \
+            -DLEMON_BUILD_TOOLS=NO -DLEMON_ENABLE_GLPK=NO \
+            -DLEMON_ENABLE_ILOG=NO -DLEMON_ENABLE_COIN=NO \
+            -DLEMON_ENABLE_SOPLEX=NO
+          cmake --build build --target html
+
+      - name: Upload the pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: build/doc/html
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Publish on GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
