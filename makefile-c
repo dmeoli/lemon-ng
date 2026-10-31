@@ -1,0 +1,35 @@
+##############################################################################
+################################ makefile-c ##################################
+##############################################################################
+#                                                                            #
+#   complete makefile of LEMON                                               #
+#                                                                            #
+#   The makefile to include from a project that uses LEMON: it includes      #
+#   makefile, which defines the objects, the headers and the -I directives   #
+#   of LEMON, and adds the external libraries that LEMON needs.              #
+#                                                                            #
+#   Input:  $(CC)       = compiler command                                   #
+#           $(SW)       = compiler options                                   #
+#           $(LEMONSDR) = the directory where the LEMON source is            #
+#                                                                            #
+#   Output: $(LEMONOBJ) = the final object(s)                                #
+#           $(LEMONLIB) = external libraries + -L< libdirs >                 #
+#           $(LEMONH)   = the .h files to include for LEMON                  #
+#           $(LEMONINC) = the -I$( LEMON directory )                         #
+#                                                                            #
+##############################################################################
+
+# include the makefile of the library - - - - - - - - - - - - - - - - - - - -
+
+include $(LEMONSDR)/makefile
+
+# macros to be exported - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# external libraries for LEMON: the threads of the system
+ifeq ($(OS),Windows_NT)
+LEMONLIB =
+else
+LEMONLIB = -lpthread
+endif
+
+############################ End of makefile #################################

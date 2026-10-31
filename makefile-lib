@@ -1,0 +1,43 @@
+##############################################################################
+############################### makefile-lib #################################
+##############################################################################
+#                                                                            #
+#   makefile of the static library of LEMON                                  #
+#                                                                            #
+#   Builds $(LEMONSDR)/lib/libemon.a, the library that CMake builds, out     #
+#   of the objects of makefile, e.g.:                                        #
+#                                                                            #
+#       make -f makefile-lib -j8 CC=clang++ SW="-O2 -std=c++17"              #
+#                                                                            #
+#   from the directory of the source.                                        #
+#                                                                            #
+#   Input:  $(CC)       = compiler command (default g++)                     #
+#           $(SW)       = compiler options (default -O2 -DNDEBUG)            #
+#           $(LEMONSDR) = the directory where the source is (default .)      #
+#                                                                            #
+#   Output: $(LEMONA)   = the static library                                 #
+#                                                                            #
+##############################################################################
+
+CC = g++
+SW = -O2 -DNDEBUG
+LEMONSDR = .
+
+LEMONA = $(LEMONSDR)/lib/libemon.a
+
+# the first target, before the ones of the makefile included below
+default: $(LEMONA)
+
+include $(LEMONSDR)/makefile-c
+
+$(LEMONA): $(LEMONOBJ)
+	mkdir -p $(dir $@)
+	rm -f $@
+	ar rcs $@ $(LEMONOBJ)
+
+clean::
+	rm -rf $(LEMONSDR)/lib
+
+.PHONY: default clean
+
+############################ End of makefile #################################

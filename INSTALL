@@ -173,6 +173,26 @@ You find a list of the most useful options below.
   Mercurial or git checkout (or the commit, if no tag is there), and it
   is 'unknown' in a source tree that is neither, e.g., an archive.
 
+Building with the Makefiles
+===========================
+
+Besides CMake, LEMON can be built with GNU make and the makefiles of its
+source tree, which need no configuration step and write lemon/config.h as
+CMake does for GCC and Clang (with no LP or MIP solver):
+
+  $ make -f makefile-lib CC=g++
+
+builds the static library lib/libemon.a,
+
+  $ make -C test CC=clang++ STD=c++20 check
+
+builds the tests and runs them, and 'make -C tools' and 'make -C demo'
+build the tools and the demos. A project built with make uses LEMON by
+including its makefile-c, after setting LEMONSDR to the directory of the
+source of LEMON: it defines LEMONOBJ (the objects to link), LEMONINC (the
+-I directives), LEMONH (the headers, for the dependencies) and LEMONLIB
+(the libraries that LEMON needs), as test/makefile does.
+
 Makefile Variables
 ==================
 

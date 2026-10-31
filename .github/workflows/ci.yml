@@ -143,3 +143,44 @@ jobs:
           g++ test/install/install_test.cc -o pc_test
           $(PKG_CONFIG_PATH="${{ github.workspace }}/prefix/lib/pkgconfig"
           pkg-config --cflags --libs lemon) && ./pc_test
+
+  # the library, the tests, the tools and the demos built with the makefiles
+  # instead of CMake, and the tests run, on Linux, macOS (whose sed is the
+  # one of BSD) and Windows (MinGW in MSYS2)
+  makefiles:
+    name: makefiles on ${{ matrix.os }} ${{ matrix.cc }} C++${{ matrix.std }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: ubuntu-latest,  cc: g++,     std: 11 }
+          - { os: ubuntu-latest,  cc: clang++, std: 20 }
+          - { os: macos-latest,   cc: clang++, std: 17 }
+          - { os: windows-latest, cc: g++,     std: 17 }
+    defaults:
+      run:
+        shell: ${{ runner.os == 'Windows' && 'msys2 {0}' || 'bash' }}
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up MSYS2 (Windows)
+        if: runner.os == 'Windows'
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRT64
+          install: make git mingw-w64-ucrt-x86_64-gcc
+
+      - name: Build and run the tests
+        run: >
+          make -C test -j4 CC=${{ matrix.cc }} STD=c++${{ matrix.std }}
+          FLAGS=-Werror check
+
+      - name: Build the tools, the demos and the static library
+        run: |
+          make -C tools -j4 CC=${{ matrix.cc }} STD=c++${{ matrix.std }}
+          make -C demo -j4 CC=${{ matrix.cc }} STD=c++${{ matrix.std }}
+          make -f makefile-lib -j4 CC=${{ matrix.cc }}

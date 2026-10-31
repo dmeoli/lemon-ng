@@ -1,0 +1,36 @@
+# objects, libraries and logs
+*.o
+*.obj
+*.a
+*.log
+*~
+*.orig
+*.rej
+*.bak
+
+# the build directories of CMake, and what CMake writes in the source
+/build*/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+DartTestfile.txt
+cmake/version.cmake
+
+# what the makefiles build: the objects and lemon/config.h, the library,
+# the tests, the tools and the demos
+/obj/
+/lib/
+/test/*_test
+/test/*_test.exe
+/tools/lgf-gen
+/tools/dimacs-to-lgf
+/tools/dimacs-solver
+/tools/*.exe
+/demo/*_demo
+/demo/*_demo.exe
+/demo/*.eps
+
+# the documentation that doxygen writes
+/doc/html/
+/doc/*.tag
+/doc/gen-images/
