@@ -1,0 +1,99 @@
+# The recipes of the packages of lemon-ng (conda, Homebrew, vcpkg, Conan),
+# built and tested as their channels build and test them, on the systems
+# each channel serves. A recipe is in packaging/ before it is submitted to
+# its channel, and is tested here first.
+
+name: Packaging
+
+on:
+  push:
+    branches: [master]
+    paths: ["packaging/**", ".github/workflows/packaging.yml"]
+  pull_request:
+    paths: ["packaging/**", ".github/workflows/packaging.yml"]
+  workflow_dispatch:
+
+concurrency:
+  group: packaging-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  conda:
+    name: conda on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and test the recipe with rattler-build
+        uses: prefix-dev/rattler-build-action@v0.2.34
+        with:
+          recipe-path: packaging/conda/recipe.yaml
+          upload-artifact: false
+
+  homebrew:
+    name: Homebrew on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, ubuntu-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install, test and audit the formula from a local tap
+        run: |
+          eval "$(brew shellenv 2> /dev/null ||
+                  /home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+          brew tap-new --no-git local/lemon-ng
+          cp packaging/homebrew/lemon-ng.rb \
+            "$(brew --repository local/lemon-ng)/Formula/"
+          brew install --build-from-source local/lemon-ng/lemon-ng
+          brew test local/lemon-ng/lemon-ng
+          brew audit --strict local/lemon-ng/lemon-ng
+
+  vcpkg:
+    name: vcpkg on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install the port and build a project against it
+        shell: bash
+        run: |
+          V="${VCPKG_INSTALLATION_ROOT:-$HOME/vcpkg}"
+          if [ ! -x "$V/vcpkg" ] && [ ! -x "$V/vcpkg.exe" ]; then
+            git clone --depth 1 https://github.com/microsoft/vcpkg "$V"
+            "$V/bootstrap-vcpkg.sh" -disableMetrics
+          fi
+          "$V/vcpkg" install lemon-ng --overlay-ports=packaging/vcpkg/lemon-ng
+          cmake -S test/install -B use -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_TOOLCHAIN_FILE="$V/scripts/buildsystems/vcpkg.cmake"
+          cmake --build use --config Release
+          if [ "$RUNNER_OS" = Windows ]; then ./use/Release/install_test.exe
+          else ./use/install_test; fi
+
+  conan:
+    name: Conan on ${{ matrix.os }} (shared ${{ matrix.shared }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: ubuntu-latest,  shared: "False" }
+          - { os: ubuntu-latest,  shared: "True" }
+          - { os: macos-latest,   shared: "False" }
+          - { os: windows-latest, shared: "False" }
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create the package and run its test_package
+        shell: bash
+        run: |
+          pip install -q conan
+          conan profile detect
+          conan create packaging/conan/all --version 1.4.0 \
+            --build=missing -o "lemon-ng/*:shared=${{ matrix.shared }}"
