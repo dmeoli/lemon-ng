@@ -26,6 +26,7 @@ void f()
  volatile double d = 0;
  for( int i = 0 ; i < 1000 ; i++ )
   d += 0.1;
+ ::lemon::ignore_unused_variable_warning( d );
  }
 
 void g()
