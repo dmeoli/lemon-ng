@@ -1,0 +1,5 @@
+# the commits that change only the layout of the code, which git blame
+# skips with blame.ignoreRevsFile (GitHub reads this file by itself)
+
+# all the code in the style of .clang-format and of scripts/format.py
+1e95c2ef80930cfcd74e9112a7827dea5eabbec6
