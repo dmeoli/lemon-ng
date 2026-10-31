@@ -399,11 +399,23 @@ void runMcfGeqTests( Param param,
   checkMcf(mcf3, mcf3.run(param), neg2_gr, neg2_l, neg2_u, neg2_c, neg2_s,
            mcf3.OPTIMAL, true,     -300, test_str + "-18", GEQ);
 
-  // Tests for empty graph
+  // Tests for empty graph, whose empty flow is optimal
   Digraph gr0;
   MCF mcf0(gr0);
-  mcf0.run(param);
-  check(mcf0.totalCost() == 0, "Wrong total cost");  
+  check(mcf0.run(param) == MCF::OPTIMAL, "Wrong result for empty graph");
+  check(mcf0.totalCost() == 0, "Wrong total cost");
+
+  // Tests for a graph of one node, feasible only with a zero supply
+  Digraph gr_one;
+  Node n_one = gr_one.addNode();
+  Digraph::NodeMap<int> sup_one(gr_one, 0);
+  MCF mcf_one(gr_one);
+  mcf_one.supplyMap(sup_one);
+  check(mcf_one.run(param) == MCF::OPTIMAL, "Wrong result for one node");
+  sup_one[n_one] = 5;
+  mcf_one.supplyMap(sup_one);
+  check(mcf_one.run(param) == MCF::INFEASIBLE,
+        "Wrong result for one node with a supply");
 }
 
 template < typename MCF, typename Param >

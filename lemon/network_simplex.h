@@ -872,6 +872,8 @@ namespace lemon {
     /// \see ProblemType, PivotRule
     /// \see resetParams(), reset()
     ProblemType run(PivotRule pivot_rule = BLOCK_SEARCH) {
+      // A problem without nodes has the empty flow, which is optimal
+      if (_node_num == 0) return OPTIMAL;
       if (!init()) return INFEASIBLE;
       return start(pivot_rule);
     }

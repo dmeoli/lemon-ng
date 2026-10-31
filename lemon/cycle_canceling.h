@@ -416,6 +416,8 @@ namespace lemon {
     /// \see ProblemType, Method
     /// \see resetParams(), reset()
     ProblemType run(Method method = CANCEL_AND_TIGHTEN) {
+      // A problem without nodes has the empty flow, which is optimal
+      if (_node_num == 0) return OPTIMAL;
       ProblemType pt = init();
       if (pt != OPTIMAL) return pt;
       start(method);

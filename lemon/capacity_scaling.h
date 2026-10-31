@@ -493,6 +493,9 @@ namespace lemon {
     /// \see resetParams(), reset()
     ProblemType run(int factor = 4) {
       _factor = factor;
+      // A problem without nodes (the only one here being the root) has the
+      // empty flow, which is optimal
+      if (_node_num == 1) return OPTIMAL;
       ProblemType pt = init();
       if (pt != OPTIMAL) return pt;
       return start();

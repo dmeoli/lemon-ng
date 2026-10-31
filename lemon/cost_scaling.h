@@ -513,6 +513,8 @@ namespace lemon {
     ProblemType run(Method method = PARTIAL_AUGMENT, int factor = 16) {
       LEMON_ASSERT(factor >= 2, "The scaling factor must be at least 2");
       _alpha = factor;
+      // A problem without nodes has the empty flow, which is optimal
+      if (_node_num == 0) return OPTIMAL;
       ProblemType pt = init();
       if (pt != OPTIMAL) return pt;
       start(method);
