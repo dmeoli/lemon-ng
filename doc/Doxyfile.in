@@ -4,10 +4,10 @@
 # Project related configuration options
 #---------------------------------------------------------------------------
 DOXYFILE_ENCODING      = UTF-8
-PROJECT_NAME           = 
-PROJECT_NUMBER         = 
-PROJECT_BRIEF          =
-PROJECT_LOGO           =
+PROJECT_NAME           = lemon-ng
+PROJECT_NUMBER         = @PROJECT_VERSION@
+PROJECT_BRIEF          = "A maintained fork of LEMON"
+PROJECT_LOGO           = "@abs_top_srcdir@/doc/theme/lemon-logo.png"
 OUTPUT_DIRECTORY       = 
 CREATE_SUBDIRS         = NO
 OUTPUT_LANGUAGE        = English
@@ -171,7 +171,7 @@ GENERATE_ECLIPSEHELP   = NO
 ECLIPSE_DOC_ID         = org.doxygen.Project
 DISABLE_INDEX          = NO
 ENUM_VALUES_PER_LINE   = 4
-GENERATE_TREEVIEW      = NO
+GENERATE_TREEVIEW      = YES
 TREEVIEW_WIDTH         = 250
 EXT_LINKS_IN_WINDOW    = NO
 FORMULA_FONTSIZE       = 10
@@ -274,3 +274,8 @@ MAX_DOT_GRAPH_DEPTH    = 0
 DOT_MULTI_TARGETS      = NO
 GENERATE_LEGEND        = YES
 DOT_CLEANUP            = YES
+FULL_SIDEBAR           = NO
+HTML_COLORSTYLE        = LIGHT
+HTML_EXTRA_STYLESHEET  = "@abs_top_srcdir@/doc/theme/awesome/doxygen-awesome.css" \
+                         "@abs_top_srcdir@/doc/theme/awesome/doxygen-awesome-sidebar-only.css" \
+                         "@abs_top_srcdir@/doc/theme/custom.css"

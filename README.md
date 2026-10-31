@@ -1,4 +1,17 @@
+<p align="center">
+  <img src="doc/theme/lemon-logo.png" alt="lemon-ng" width="60">
+</p>
+
 # lemon-ng
+
+[![CI](https://github.com/dmeoli/lemon-ng/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/dmeoli/lemon-ng/actions/workflows/ci.yml)
+[![Packaging](https://github.com/dmeoli/lemon-ng/actions/workflows/packaging.yml/badge.svg?branch=master)](https://github.com/dmeoli/lemon-ng/actions/workflows/packaging.yml)
+[![Release](https://img.shields.io/github/v/release/dmeoli/lemon-ng)](https://github.com/dmeoli/lemon-ng/releases)
+[![Documentation](https://img.shields.io/badge/docs-online-blue)](https://dmeoli.github.io/lemon-ng/)
+[![C++ Standard](https://img.shields.io/badge/C%2B%2B-11%20to%2023-blue)](https://en.cppreference.com/w/cpp)
+[![Platforms](https://img.shields.io/badge/platforms-Linux%20%7C%20macOS%20%7C%20Windows-lightgrey)](https://github.com/dmeoli/lemon-ng/actions/workflows/ci.yml)
+[![Homebrew](https://img.shields.io/badge/homebrew-dmeoli%2Flemon--ng-orange)](https://github.com/dmeoli/homebrew-lemon-ng)
+[![License: BSL-1.0](https://img.shields.io/badge/License-BSL_1.0-blue.svg)](https://www.boost.org/LICENSE_1_0.txt)
 
 lemon-ng is a maintained fork of [LEMON](https://lemon.cs.elte.hu/trac/lemon),
 the Library for Efficient Modeling and Optimization in Networks, i.e., a C++

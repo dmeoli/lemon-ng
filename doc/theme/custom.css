@@ -1,0 +1,30 @@
+/*
+ * What the documentation of lemon-ng changes in doxygen-awesome-css, loaded
+ * after it [see HTML_EXTRA_STYLESHEET in Doxyfile.in].
+ */
+
+/* the colors of the lemon of the logo for the accents */
+html {
+    --primary-color: #a8860b;
+    --primary-dark-color: #7a6108;
+    --primary-light-color: #d9b52c;
+    --content-maxwidth: 1200px;
+}
+
+/* the logo and the title in the side panel, which has the width that
+   doxygen-awesome-sidebar-only.css wants */
+#projectlogo img {
+    max-width: 60px;
+    height: auto;
+}
+
+#projectname {
+    white-space: normal;
+}
+
+/* a display formula wider than the page scrolls in its own box */
+mjx-container[display="true"] {
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+}

@@ -17,7 +17,18 @@
  */
 
 /**
-\mainpage @PACKAGE_NAME@ @PACKAGE_VERSION@ Documentation
+\mainpage lemon-ng
+
+\section fork lemon-ng
+
+lemon-ng is a maintained fork of LEMON 1.3.1, the last release of LEMON
+(2014): it keeps its headers and its namespace, compiles from C++11 to C++23
+with GCC, Clang, AppleClang and MSVC, fixes the defects of LEMON 1.3.1 that
+its trac and its forks reported, and extends the algorithms of minimum cost
+flow (see the
+<a href="https://github.com/dmeoli/lemon-ng/blob/master/NEWS">NEWS</a> and
+the <a href="https://github.com/dmeoli/lemon-ng">repository</a>). What
+follows is the documentation of LEMON, kept up to date with the fork.
 
 \section intro Introduction
 

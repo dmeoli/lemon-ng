@@ -27,10 +27,17 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install Doxygen and Ghostscript
+      # Doxygen 1.15, whose layout has the Topics (the groups of
+      # doc/groups.dox), which the Doxygen of Ubuntu does not know
+      - name: Install Doxygen
+        uses: ssciwr/doxygen-install@v1
+        with:
+          version: "1.15.0"
+
+      - name: Install Ghostscript and Graphviz
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y -qq doxygen ghostscript graphviz
+          sudo apt-get install -y -qq ghostscript graphviz
 
       - name: Build the documentation
         run: |
