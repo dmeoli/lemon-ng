@@ -329,6 +329,24 @@ void checkMcf( const MCF& mcf, PT mcf_result,
   }
 }
 
+// A problem in a value type narrower than int, whose arithmetic promotes
+// to int: the algorithm has to compile and to solve it
+template <typename MCF, typename V>
+void checkNarrowType() {
+  SmartDigraph g;
+  SmartDigraph::Node a = g.addNode(), b = g.addNode(), c = g.addNode();
+  SmartDigraph::ArcMap<V> cap(g), cost(g);
+  SmartDigraph::NodeMap<V> sup(g, 0);
+  SmartDigraph::Arc x = g.addArc(a, b), y = g.addArc(b, c), z = g.addArc(a, c);
+  cap[x] = 3; cap[y] = 3; cap[z] = 5;
+  cost[x] = 1; cost[y] = 1; cost[z] = 3;
+  sup[a] = 6; sup[c] = -6;
+  MCF mcf(g);
+  mcf.upperMap(cap).costMap(cost).supplyMap(sup);
+  check(mcf.run() == MCF::OPTIMAL && mcf.totalCost() == 15,
+        "Wrong result on a narrow value type");
+}
+
 template < typename MCF, typename Param >
 void runMcfGeqTests( Param param,
                      const std::string &test_str = "",
@@ -608,6 +626,16 @@ int main()
           "Wrong result: CostScaling, no upper bounds, supplies grown");
     check(cc.run() == cc.OPTIMAL && cc.totalCost() == 80,
           "Wrong result: CycleCanceling, no upper bounds, supplies grown");
+  }
+
+  // Test the four algorithms on value types narrower than int
+  {
+    typedef SmartDigraph G;
+    checkNarrowType<NetworkSimplex<G, short>, short>();
+    checkNarrowType<CostScaling<G, short>, short>();
+    checkNarrowType<CycleCanceling<G, short>, short>();
+    checkNarrowType<CapacityScaling<G, short>, short>();
+    checkNarrowType<CapacityScaling<G, signed char>, signed char>();
   }
 
   // Test CapacityScaling

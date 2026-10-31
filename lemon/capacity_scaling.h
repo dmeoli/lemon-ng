@@ -938,7 +938,7 @@ namespace lemon {
           }
 
           // Augment along a shortest path from s to t
-          Value d = std::min(_excess[s], -_excess[t]);
+          Value d = std::min<Value>(_excess[s], -_excess[t]);
           int u = t;
           int a;
           if (d > _delta) {
@@ -987,7 +987,7 @@ namespace lemon {
         if ((t = _dijkstra.run(s)) == -1) return INFEASIBLE;
 
         // Augment along a shortest path from s to t
-        Value d = std::min(_excess[s], -_excess[t]);
+        Value d = std::min<Value>(_excess[s], -_excess[t]);
         int u = t;
         int a;
         if (d > 1) {
