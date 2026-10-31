@@ -28,7 +28,7 @@
 #include <limits>
 #include <lemon/core.h>
 #include <lemon/maps.h>
-#include <lemon/bin_heap.h>
+#include <lemon/quad_heap.h>
 
 namespace lemon {
 
@@ -55,8 +55,10 @@ namespace lemon {
     /// The type of the heap used for internal Dijkstra computations.
     /// It must conform to the \ref lemon::concepts::Heap "Heap" concept,
     /// its priority type must be \c Cost and its cross reference type
-    /// must be \ref RangeMap "RangeMap<int>".
-    typedef BinHeap<Cost, RangeMap<int> > Heap;
+    /// must be \ref RangeMap "RangeMap<int>". By default it is a
+    /// \ref QuadHeap "4-ary heap", whose fewer levels make the shortest
+    /// path searches cheaper than on a binary heap \cite johnson75heap.
+    typedef QuadHeap<Cost, RangeMap<int> > Heap;
   };
 
   /// \addtogroup min_cost_flow_algs
