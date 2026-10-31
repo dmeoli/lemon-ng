@@ -115,6 +115,10 @@ void aTest(MipSolver& mip, bool solve_empty=true)
   expected_opt=1;
   solveAndCheck(mip, MipSolver::OPTIMAL, expected_opt);
 
+  //An integer x1 of at most 1 and at least 3: infeasible
+  mip.addRow(x1 >= 3);
+  solveAndCheck(mip, MipSolver::INFEASIBLE, 0);
+
 }
 
 

@@ -380,6 +380,9 @@ namespace lemon {
       return OPTIMAL;
     } else if (_cbc_model->isContinuousUnbounded()) {
       return UNBOUNDED;
+    } else if (_cbc_model->isProvenInfeasible() ||
+               _cbc_model->isInitialSolveProvenPrimalInfeasible()) {
+      return INFEASIBLE;
     }
     return FEASIBLE;
   }
