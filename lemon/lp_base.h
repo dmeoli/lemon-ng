@@ -1613,10 +1613,10 @@ namespace lemon {
     Sense sense() const {return _getSense(); }
 
     ///Set the sense to maximization
-    void max() { _setSense(MAX); }
+    void (max)() { _setSense(MAX); }
 
     ///Set the sense to maximization
-    void min() { _setSense(MIN); }
+    void (min)() { _setSense(MIN); }
 
     ///Clear the problem
     void clear() { _clear(); _rows.clear(); _cols.clear(); }

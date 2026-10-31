@@ -119,7 +119,7 @@ namespace lemon {
   /// be set to "infinite" instead. The actual value of "infinite" is
   /// contolled by the \c infty parameter. If it is 0 (the default value),
   /// \c std::numeric_limits<Capacity>::infinity() will be used if available,
-  /// \c std::numeric_limits<Capacity>::max() otherwise. If \c infty is set to
+  /// \c (std::numeric_limits<Capacity>::max)() otherwise. If \c infty is set to
   /// a non-zero value, that value will be used as "infinite".
   ///
   /// If the file type was previously evaluated by dimacsType(), then
@@ -160,7 +160,7 @@ namespace lemon {
     if(infty==0)
       infty = std::numeric_limits<Capacity>::has_infinity ?
         std::numeric_limits<Capacity>::infinity() :
-        std::numeric_limits<Capacity>::max();
+        (std::numeric_limits<Capacity>::max)();
 
     while (is >> c) {
       switch (c) {
@@ -212,7 +212,7 @@ namespace lemon {
     if(infty==0)
       infty = std::numeric_limits<Capacity>::has_infinity ?
         std::numeric_limits<Capacity>::infinity() :
-        std::numeric_limits<Capacity>::max();
+        (std::numeric_limits<Capacity>::max)();
 
     while (is >> c) {
       switch (c) {
@@ -273,7 +273,7 @@ namespace lemon {
   /// be set to "infinite" instead. The actual value of "infinite" is
   /// contolled by the \c infty parameter. If it is 0 (the default value),
   /// \c std::numeric_limits<Capacity>::infinity() will be used if available,
-  /// \c std::numeric_limits<Capacity>::max() otherwise. If \c infty is set to
+  /// \c (std::numeric_limits<Capacity>::max)() otherwise. If \c infty is set to
   /// a non-zero value, that value will be used as "infinite".
   ///
   /// If the file type was previously evaluated by dimacsType(), then
@@ -331,7 +331,7 @@ namespace lemon {
   /// be set to "infinite" instead. The actual value of "infinite" is
   /// contolled by the \c infty parameter. If it is 0 (the default value),
   /// \c std::numeric_limits<Capacity>::infinity() will be used if available,
-  /// \c std::numeric_limits<Capacity>::max() otherwise. If \c infty is set to
+  /// \c (std::numeric_limits<Capacity>::max)() otherwise. If \c infty is set to
   /// a non-zero value, that value will be used as "infinite".
   ///
   /// If the file type was previously evaluated by dimacsType(), then

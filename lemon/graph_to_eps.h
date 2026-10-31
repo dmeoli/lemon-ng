@@ -291,10 +291,10 @@ private:
     arcLess(const Graph &_g) : g(_g) {}
     bool operator()(Arc a,Arc b) const
     {
-      Node ai=std::min(g.source(a),g.target(a));
-      Node aa=std::max(g.source(a),g.target(a));
-      Node bi=std::min(g.source(b),g.target(b));
-      Node ba=std::max(g.source(b),g.target(b));
+      Node ai=(std::min)(g.source(a),g.target(a));
+      Node aa=(std::max)(g.source(a),g.target(a));
+      Node bi=(std::min)(g.source(b),g.target(b));
+      Node ba=(std::max)(g.source(b),g.target(b));
       return ai<bi ||
         (ai==bi && (aa < ba ||
                     (aa==ba && ai==g.source(a) && bi==g.target(b))));
@@ -689,7 +689,7 @@ public:
     if (_autoArcWidthScale) {
       double max_w=0;
       for(ArcIt e(g);e!=INVALID;++e)
-        max_w=std::max(double(_arcWidths[e]),max_w);
+        max_w=(std::max)(double(_arcWidths[e]),max_w);
       if(max_w>EPSILON) {
         _arcWidthScale/=max_w;
       }
@@ -698,7 +698,7 @@ public:
     if (_autoNodeScale) {
       double max_s=0;
       for(NodeIt n(g);n!=INVALID;++n)
-        max_s=std::max(double(_nodeSizes[n]),max_s);
+        max_s=(std::max)(double(_nodeSizes[n]),max_s);
       if(max_s>EPSILON) {
         _nodeScale/=max_s;
       }
@@ -845,7 +845,7 @@ public:
     os << "\ngsave\n";
     if(_scaleToA4)
       if(bb.height()>bb.width()) {
-        double sc= std::min((A4HEIGHT-2*A4BORDER)/bb.height(),
+        double sc= (std::min)((A4HEIGHT-2*A4BORDER)/bb.height(),
                   (A4WIDTH-2*A4BORDER)/bb.width());
         os << ((A4WIDTH -2*A4BORDER)-sc*bb.width())/2 + A4BORDER << ' '
            << ((A4HEIGHT-2*A4BORDER)-sc*bb.height())/2 + A4BORDER
@@ -854,7 +854,7 @@ public:
            << -bb.left() << ' ' << -bb.bottom() << " translate\n";
       }
       else {
-        double sc= std::min((A4HEIGHT-2*A4BORDER)/bb.width(),
+        double sc= (std::min)((A4HEIGHT-2*A4BORDER)/bb.width(),
                   (A4WIDTH-2*A4BORDER)/bb.height());
         os << ((A4WIDTH -2*A4BORDER)-sc*bb.height())/2 + A4BORDER << ' '
            << ((A4HEIGHT-2*A4BORDER)-sc*bb.width())/2 + A4BORDER
@@ -886,7 +886,7 @@ public:
           dim2::Point<double>
             dvec(mycoords[g.target(*i)]-mycoords[g.source(*i)]);
           double l=std::sqrt(dvec.normSquare());
-          dim2::Point<double> d(dvec/std::max(l,EPSILON));
+          dim2::Point<double> d(dvec/(std::max)(l,EPSILON));
           dim2::Point<double> m;
 //           m=dim2::Point<double>(mycoords[g.target(*i)]+
 //                                 mycoords[g.source(*i)])/2.0;

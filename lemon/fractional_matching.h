@@ -848,7 +848,7 @@ namespace lemon {
       _delta1->erase(node);
       _node_potential->set(node, (*_node_potential)[node] - _delta_sum);
       Arc min = INVALID;
-      Value minrw = std::numeric_limits<Value>::max();
+      Value minrw = (std::numeric_limits<Value>::max)();
       for (InArcIt a(_graph, node); a != INVALID; ++a) {
         Node v = _graph.source(a);
         Value rw = (*_node_potential)[node] + (*_node_potential)[v] -
@@ -867,7 +867,7 @@ namespace lemon {
         } else if ((*_status)[v]  == MATCHED) {
           if ((*_pred)[v] == a) {
             Arc mina = INVALID;
-            Value minrwa = std::numeric_limits<Value>::max();
+            Value minrwa = (std::numeric_limits<Value>::max)();
             for (OutArcIt aa(_graph, v); aa != INVALID; ++aa) {
               Node va = _graph.target(aa);
               if ((*_status)[va] != EVEN ||
@@ -900,7 +900,7 @@ namespace lemon {
     void oddToMatched(Node node) {
       _node_potential->set(node, (*_node_potential)[node] + _delta_sum);
       Arc min = INVALID;
-      Value minrw = std::numeric_limits<Value>::max();
+      Value minrw = (std::numeric_limits<Value>::max)();
       for (InArcIt a(_graph, node); a != INVALID; ++a) {
         Node v = _graph.source(a);
         if ((*_status)[v] != EVEN) continue;
@@ -1211,13 +1211,13 @@ namespace lemon {
       int unmatched = _node_num;
       while (unmatched > 0) {
         Value d1 = !_delta1->empty() ?
-          _delta1->prio() : std::numeric_limits<Value>::max();
+          _delta1->prio() : (std::numeric_limits<Value>::max)();
 
         Value d2 = !_delta2->empty() ?
-          _delta2->prio() : std::numeric_limits<Value>::max();
+          _delta2->prio() : (std::numeric_limits<Value>::max)();
 
         Value d3 = !_delta3->empty() ?
-          _delta3->prio() : std::numeric_limits<Value>::max();
+          _delta3->prio() : (std::numeric_limits<Value>::max)();
 
         _delta_sum = d3; OpType ot = D3;
         if (d1 < _delta_sum) { _delta_sum = d1; ot = D1; }
@@ -1604,7 +1604,7 @@ namespace lemon {
     void evenToMatched(Node node, int tree) {
       _node_potential->set(node, (*_node_potential)[node] - _delta_sum);
       Arc min = INVALID;
-      Value minrw = std::numeric_limits<Value>::max();
+      Value minrw = (std::numeric_limits<Value>::max)();
       for (InArcIt a(_graph, node); a != INVALID; ++a) {
         Node v = _graph.source(a);
         Value rw = (*_node_potential)[node] + (*_node_potential)[v] -
@@ -1623,7 +1623,7 @@ namespace lemon {
         } else if ((*_status)[v]  == MATCHED) {
           if ((*_pred)[v] == a) {
             Arc mina = INVALID;
-            Value minrwa = std::numeric_limits<Value>::max();
+            Value minrwa = (std::numeric_limits<Value>::max)();
             for (OutArcIt aa(_graph, v); aa != INVALID; ++aa) {
               Node va = _graph.target(aa);
               if ((*_status)[va] != EVEN ||
@@ -1656,7 +1656,7 @@ namespace lemon {
     void oddToMatched(Node node) {
       _node_potential->set(node, (*_node_potential)[node] + _delta_sum);
       Arc min = INVALID;
-      Value minrw = std::numeric_limits<Value>::max();
+      Value minrw = (std::numeric_limits<Value>::max)();
       for (InArcIt a(_graph, node); a != INVALID; ++a) {
         Node v = _graph.source(a);
         if ((*_status)[v] != EVEN) continue;
@@ -1915,7 +1915,7 @@ namespace lemon {
       _tree_set->clear();
 
       for (NodeIt n(_graph); n != INVALID; ++n) {
-        Value max = - std::numeric_limits<Value>::max();
+        Value max = - (std::numeric_limits<Value>::max)();
         for (OutArcIt e(_graph, n); e != INVALID; ++e) {
           if (_graph.target(e) == n && !_allow_loops) continue;
           if ((dualScale * _weight[e]) / 2 > max) {
@@ -1953,15 +1953,15 @@ namespace lemon {
       int unmatched = _node_num;
       while (unmatched > 0) {
         Value d2 = !_delta2->empty() ?
-          _delta2->prio() : std::numeric_limits<Value>::max();
+          _delta2->prio() : (std::numeric_limits<Value>::max)();
 
         Value d3 = !_delta3->empty() ?
-          _delta3->prio() : std::numeric_limits<Value>::max();
+          _delta3->prio() : (std::numeric_limits<Value>::max)();
 
         _delta_sum = d3; OpType ot = D3;
         if (d2 < _delta_sum) { _delta_sum = d2; ot = D2; }
 
-        if (_delta_sum == std::numeric_limits<Value>::max()) {
+        if (_delta_sum == (std::numeric_limits<Value>::max)()) {
           return false;
         }
 

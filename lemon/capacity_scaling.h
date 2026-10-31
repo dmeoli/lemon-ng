@@ -199,7 +199,7 @@ namespace lemon {
     ///
     /// Constant for infinite upper bounds (capacities).
     /// It is \c std::numeric_limits<Value>::infinity() if available,
-    /// \c std::numeric_limits<Value>::max() otherwise.
+    /// \c (std::numeric_limits<Value>::max)() otherwise.
     const Value INF;
 
   private:
@@ -326,7 +326,7 @@ namespace lemon {
       _graph(graph), _node_id(graph), _arc_idf(graph), _arc_idb(graph),
       INF(std::numeric_limits<Value>::has_infinity ?
           std::numeric_limits<Value>::infinity() :
-          std::numeric_limits<Value>::max())
+          (std::numeric_limits<Value>::max)())
     {
       // Check the number types
       LEMON_ASSERT(std::numeric_limits<Value>::is_signed,
@@ -755,7 +755,7 @@ namespace lemon {
       }
 
       // Remove non-zero lower bounds
-      const Value MAX = std::numeric_limits<Value>::max();
+      const Value MAX = (std::numeric_limits<Value>::max)();
       int last_out;
       if (_has_lower) {
         for (int i = 0; i != _root; ++i) {
@@ -832,7 +832,7 @@ namespace lemon {
             if (_res_cap[j] > max_cap) max_cap = _res_cap[j];
           }
         }
-        max_sup = std::min(std::min(max_sup, max_dem), max_cap);
+        max_sup = (std::min)((std::min)(max_sup, max_dem), max_cap);
         for (_delta = 1; 2 * _delta <= max_sup; _delta *= 2) ;
       } else {
         // Without scaling
@@ -938,7 +938,7 @@ namespace lemon {
           }
 
           // Augment along a shortest path from s to t
-          Value d = std::min<Value>(_excess[s], -_excess[t]);
+          Value d = (std::min<Value>)(_excess[s], -_excess[t]);
           int u = t;
           int a;
           if (d > _delta) {
@@ -987,7 +987,7 @@ namespace lemon {
         if ((t = _dijkstra.run(s)) == -1) return INFEASIBLE;
 
         // Augment along a shortest path from s to t
-        Value d = std::min<Value>(_excess[s], -_excess[t]);
+        Value d = (std::min<Value>)(_excess[s], -_excess[t]);
         int u = t;
         int a;
         if (d > 1) {

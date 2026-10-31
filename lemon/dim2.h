@@ -513,10 +513,10 @@ namespace lemon {
         if (_empty || u._empty) {
           b._empty = true;
         } else {
-          b._bottom_left.x = std::max(_bottom_left.x, u._bottom_left.x);
-          b._bottom_left.y = std::max(_bottom_left.y, u._bottom_left.y);
-          b._top_right.x = std::min(_top_right.x, u._top_right.x);
-          b._top_right.y = std::min(_top_right.y, u._top_right.y);
+          b._bottom_left.x = (std::max)(_bottom_left.x, u._bottom_left.x);
+          b._bottom_left.y = (std::max)(_bottom_left.y, u._bottom_left.y);
+          b._top_right.x = (std::min)(_top_right.x, u._top_right.x);
+          b._top_right.y = (std::min)(_top_right.y, u._top_right.y);
           b._empty = b._bottom_left.x > b._top_right.x ||
                      b._bottom_left.y > b._top_right.y;
         }

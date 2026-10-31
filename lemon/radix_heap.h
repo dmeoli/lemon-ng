@@ -92,7 +92,7 @@ namespace lemon {
     struct RadixBox {
       int first;
       int min, size;
-      RadixBox(int _min, int _size) : first(-1), min(_min), size(_size) {}
+      RadixBox(int _min, int _size) : first(-1), min{_min}, size(_size) {}
     };
 
     std::vector<RadixItem> _data;
@@ -255,7 +255,7 @@ namespace lemon {
                 _boxes[box].min + _boxes[box].size;
       int min = minValue(box);
       for (int i = 0; i <= box; ++i) {
-        _boxes[i].min = std::min(min, end);
+        _boxes[i].min = (std::min)(min, end);
         min += _boxes[i].size;
       }
       int curr = _boxes[box].first, next;

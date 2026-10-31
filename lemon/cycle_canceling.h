@@ -235,7 +235,7 @@ namespace lemon {
     ///
     /// Constant for infinite upper bounds (capacities).
     /// It is \c std::numeric_limits<Value>::infinity() if available,
-    /// \c std::numeric_limits<Value>::max() otherwise.
+    /// \c (std::numeric_limits<Value>::max)() otherwise.
     const Value INF;
 
   public:
@@ -250,7 +250,7 @@ namespace lemon {
       _cost_map(_cost_vec), _pi_map(_pi),
       INF(std::numeric_limits<Value>::has_infinity ?
           std::numeric_limits<Value>::infinity() :
-          std::numeric_limits<Value>::max())
+          (std::numeric_limits<Value>::max)())
     {
       // Check the number types
       LEMON_ASSERT(std::numeric_limits<Value>::is_signed,
@@ -694,7 +694,7 @@ namespace lemon {
       ValueVector excess(_supply);
 
       // Remove infinite upper bounds and check negative arcs
-      const Value MAX = std::numeric_limits<Value>::max();
+      const Value MAX = (std::numeric_limits<Value>::max)();
       int last_out;
       if (_has_lower) {
         for (int i = 0; i != _root; ++i) {
@@ -967,7 +967,7 @@ namespace lemon {
       const int HW_ITER_LIMIT_MIN_VALUE = 5;
 
       const int hw_iter_limit =
-          std::max(static_cast<int>(HW_ITER_LIMIT_FACTOR * _node_num),
+          (std::max)(static_cast<int>(HW_ITER_LIMIT_FACTOR * _node_num),
                    HW_ITER_LIMIT_MIN_VALUE);
 
       SPath cycle;
@@ -1020,7 +1020,7 @@ namespace lemon {
       const int HW_ITER_LIMIT_MIN_VALUE = 5;
 
       const int hw_iter_limit =
-          std::max(static_cast<int>(HW_ITER_LIMIT_FACTOR * _node_num),
+          (std::max)(static_cast<int>(HW_ITER_LIMIT_FACTOR * _node_num),
                    HW_ITER_LIMIT_MIN_VALUE);
 
       // Contruct auxiliary data vectors
@@ -1164,7 +1164,7 @@ namespace lemon {
           }
 
           // Modify potentials
-          double q = std::numeric_limits<double>::max();
+          double q = (std::numeric_limits<double>::max)();
           for (int u = 0; u != _res_node_num; ++u) {
             int lu = level[u];
             double p, pu = pi[u];

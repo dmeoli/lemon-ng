@@ -250,7 +250,7 @@ namespace lemon {
     ///
     /// Constant for infinite upper bounds (capacities).
     /// It is \c std::numeric_limits<Value>::infinity() if available,
-    /// \c std::numeric_limits<Value>::max() otherwise.
+    /// \c (std::numeric_limits<Value>::max)() otherwise.
     const Value INF;
 
   private:
@@ -407,7 +407,7 @@ namespace lemon {
         const double BLOCK_SIZE_FACTOR = 1.0;
         const int MIN_BLOCK_SIZE = 10;
 
-        _block_size = std::max( int(BLOCK_SIZE_FACTOR *
+        _block_size = (std::max)( int(BLOCK_SIZE_FACTOR *
                                     std::sqrt(double(_search_arc_num))),
                                 MIN_BLOCK_SIZE );
       }
@@ -486,10 +486,10 @@ namespace lemon {
         const double MINOR_LIMIT_FACTOR = 0.1;
         const int MIN_MINOR_LIMIT = 3;
 
-        _list_length = std::max( int(LIST_LENGTH_FACTOR *
+        _list_length = (std::max)( int(LIST_LENGTH_FACTOR *
                                      std::sqrt(double(_search_arc_num))),
                                  MIN_LIST_LENGTH );
-        _minor_limit = std::max( int(MINOR_LIMIT_FACTOR * _list_length),
+        _minor_limit = (std::max)( int(MINOR_LIMIT_FACTOR * _list_length),
                                  MIN_MINOR_LIMIT );
         _curr_length = _minor_count = 0;
         _candidates.resize(_list_length);
@@ -605,10 +605,10 @@ namespace lemon {
         const double HEAD_LENGTH_FACTOR = 0.01;
         const int MIN_HEAD_LENGTH = 3;
 
-        _block_size = std::max( int(BLOCK_SIZE_FACTOR *
+        _block_size = (std::max)( int(BLOCK_SIZE_FACTOR *
                                     std::sqrt(double(_search_arc_num))),
                                 MIN_BLOCK_SIZE );
-        _head_length = std::max( int(HEAD_LENGTH_FACTOR * _block_size),
+        _head_length = (std::max)( int(HEAD_LENGTH_FACTOR * _block_size),
                                  MIN_HEAD_LENGTH );
         _candidates.resize(_head_length + _block_size);
         _curr_length = 0;
@@ -662,7 +662,7 @@ namespace lemon {
       search_end:
 
         // Perform partial sort operation on the candidate list
-        int new_length = std::min(_head_length + 1, _curr_length);
+        int new_length = (std::min)(_head_length + 1, _curr_length);
         std::partial_sort(_candidates.begin(), _candidates.begin() + new_length,
                           _candidates.begin() + _curr_length, _sort_func);
 
@@ -691,7 +691,7 @@ namespace lemon {
     NetworkSimplex(const GR& graph, bool arc_mixing = true) :
       _graph(graph), _node_id(graph), _arc_id(graph),
       _arc_mixing(arc_mixing),
-      MAX_VALUE(std::numeric_limits<Value>::max()),
+      MAX_VALUE((std::numeric_limits<Value>::max)()),
       INF(std::numeric_limits<Value>::has_infinity ?
           std::numeric_limits<Value>::infinity() : MAX_VALUE)
     {
@@ -982,7 +982,7 @@ namespace lemon {
       }
       if (_arc_mixing && _node_num > 1) {
         // Store the arcs in a mixed order
-        const int skip = std::max(_arc_num / _node_num, 3);
+        const int skip = (std::max)(_arc_num / _node_num, 3);
         int i = 0, j = 0;
         for (ArcIt a(_graph); a != INVALID; ++a) {
           _arc_id[a] = i;
@@ -1141,7 +1141,7 @@ namespace lemon {
       // Initialize artifical cost
       Cost ART_COST;
       if (std::numeric_limits<Cost>::is_exact) {
-        ART_COST = std::numeric_limits<Cost>::max() / 2 + 1;
+        ART_COST = (std::numeric_limits<Cost>::max)() / 2 + 1;
       } else {
         ART_COST = 0;
         for (int i = 0; i != _arc_num; ++i) {
@@ -1598,7 +1598,7 @@ namespace lemon {
           // Find the min. cost incoming arc for each demand node
           for (int i = 0; i != int(demand_nodes.size()); ++i) {
             Node v = demand_nodes[i];
-            Cost c, min_cost = std::numeric_limits<Cost>::max();
+            Cost c, min_cost = (std::numeric_limits<Cost>::max)();
             Arc min_arc = INVALID;
             for (InArcIt a(_graph, v); a != INVALID; ++a) {
               c = _cost[_arc_id[a]];
@@ -1616,7 +1616,7 @@ namespace lemon {
         // Find the min. cost outgoing arc for each supply node
         for (int i = 0; i != int(supply_nodes.size()); ++i) {
           Node u = supply_nodes[i];
-          Cost c, min_cost = std::numeric_limits<Cost>::max();
+          Cost c, min_cost = (std::numeric_limits<Cost>::max)();
           Arc min_arc = INVALID;
           for (OutArcIt a(_graph, u); a != INVALID; ++a) {
             c = _cost[_arc_id[a]];
@@ -1708,7 +1708,7 @@ namespace lemon {
       // optimality conditions
       if (_sum_supply == 0) {
         if (_stype == GEQ) {
-          Cost max_pot = -std::numeric_limits<Cost>::max();
+          Cost max_pot = -(std::numeric_limits<Cost>::max)();
           for (int i = 0; i != _node_num; ++i) {
             if (_pi[i] > max_pot) max_pot = _pi[i];
           }
@@ -1717,7 +1717,7 @@ namespace lemon {
               _pi[i] -= max_pot;
           }
         } else {
-          Cost min_pot = std::numeric_limits<Cost>::max();
+          Cost min_pot = (std::numeric_limits<Cost>::max)();
           for (int i = 0; i != _node_num; ++i) {
             if (_pi[i] < min_pot) min_pot = _pi[i];
           }

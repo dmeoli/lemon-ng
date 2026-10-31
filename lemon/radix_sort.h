@@ -267,7 +267,7 @@ namespace lemon {
     void stableRadixIntroSort(Key *first, Key *last, Key *target,
                               int byte, Functor functor) {
       const int size =
-        unsigned(std::numeric_limits<unsigned char>::max()) + 1;
+        unsigned((std::numeric_limits<unsigned char>::max)()) + 1;
       std::vector<int> counter(size);
       for (int i = 0; i < size; ++i) {
         counter[i] = 0;
@@ -293,7 +293,7 @@ namespace lemon {
     void signedStableRadixIntroSort(Key *first, Key *last, Key *target,
                                     int byte, Functor functor) {
       const int size =
-        unsigned(std::numeric_limits<unsigned char>::max()) + 1;
+        unsigned((std::numeric_limits<unsigned char>::max)()) + 1;
       std::vector<int> counter(size);
       for (int i = 0; i < size; ++i) {
         counter[i] = 0;

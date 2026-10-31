@@ -75,7 +75,7 @@ namespace lemon {
       return static_cast<Value>(0);
     }
     static Value infinity() {
-      return std::numeric_limits<Value>::max();
+      return (std::numeric_limits<Value>::max)();
     }
     static Value plus(const Value& left, const Value& right) {
       if (left == infinity() || right == infinity()) return infinity();

@@ -145,7 +145,7 @@ namespace lemon {
         (*_order)[n] = -1;
       }
       (*_pred)[_root] = INVALID;
-      (*_weight)[_root] = std::numeric_limits<Value>::max();
+      (*_weight)[_root] = (std::numeric_limits<Value>::max)();
     }
 
 
@@ -262,7 +262,7 @@ namespace lemon {
     /// \pre \ref run() must be called before using this function.
     Value minCutValue(const Node& s, const Node& t) const {
       Node sn = s, tn = t;
-      Value value = std::numeric_limits<Value>::max();
+      Value value = (std::numeric_limits<Value>::max)();
 
       while (sn != tn) {
         if ((*_order)[sn] < (*_order)[tn]) {
@@ -301,7 +301,7 @@ namespace lemon {
       Node sn = s, tn = t;
       bool s_root=false;
       Node rn = INVALID;
-      Value value = std::numeric_limits<Value>::max();
+      Value value = (std::numeric_limits<Value>::max)();
 
       while (sn != tn) {
         if ((*_order)[sn] < (*_order)[tn]) {

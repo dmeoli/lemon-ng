@@ -902,7 +902,7 @@ namespace lemon {
         _min_cut_map = new MinCutMap(_graph);
       }
 
-      _min_cut = std::numeric_limits<Value>::max();
+      _min_cut = (std::numeric_limits<Value>::max)();
     }
 
 

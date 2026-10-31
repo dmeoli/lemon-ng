@@ -3105,7 +3105,7 @@ namespace lemon {
       }
     }
     int maxArcId() const {
-      return std::max(_digraph->maxNodeId() << 1,
+      return (std::max)(_digraph->maxNodeId() << 1,
                       (_digraph->maxArcId() << 1) | 1);
     }
 

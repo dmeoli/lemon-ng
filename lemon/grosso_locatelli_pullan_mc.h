@@ -338,7 +338,7 @@ namespace lemon {
       // Return a node index for a feasible add move or -1 if no one exists
       int nextFeasibleAddNode() const {
         int start_node = _rnd[_n];
-        int node = -1, min_p = std::numeric_limits<int>::max();
+        int node = -1, min_p = (std::numeric_limits<int>::max)();
         for (int i = start_node; i != _n; i++) {
           if (_delta[i] == 0 && !_tabu[i] && _penalty[i] < min_p) {
             node = i;
@@ -357,7 +357,7 @@ namespace lemon {
       // Return a node index for a feasible swap move or -1 if no one exists
       int nextFeasibleSwapNode() const {
         int start_node = _rnd[_n];
-        int node = -1, min_p = std::numeric_limits<int>::max();
+        int node = -1, min_p = (std::numeric_limits<int>::max)();
         for (int i = start_node; i != _n; i++) {
           if (!_clique[i] && _delta[i] == 1 && !_tabu[i] &&
               _penalty[i] < min_p) {
@@ -378,7 +378,7 @@ namespace lemon {
       // Return a node index for an add move or -1 if no one exists
       int nextAddNode() const {
         int start_node = _rnd[_n];
-        int node = -1, min_p = std::numeric_limits<int>::max();
+        int node = -1, min_p = (std::numeric_limits<int>::max)();
         for (int i = start_node; i != _n; i++) {
           if (_delta[i] == 0 && _penalty[i] < min_p) {
             node = i;
@@ -755,9 +755,9 @@ namespace lemon {
       // Iterated local search algorithm
       const int max_size = _size_limit >= 0 ? _size_limit : _n;
       const int max_restart = _iteration_limit >= 0 ?
-        _iteration_limit : std::numeric_limits<int>::max();
+        _iteration_limit : (std::numeric_limits<int>::max)();
       const int max_select = _step_limit >= 0 ?
-        _step_limit : std::numeric_limits<int>::max();
+        _step_limit : (std::numeric_limits<int>::max)();
 
       SelectionRuleImpl sel_method(*this);
       int select = 0, restart = 0;

@@ -268,7 +268,7 @@ namespace lemon {
       _comp(digraph), _in_arcs(digraph),
       INF(std::numeric_limits<LargeCost>::has_infinity ?
           std::numeric_limits<LargeCost>::infinity() :
-          std::numeric_limits<LargeCost>::max())
+          (std::numeric_limits<LargeCost>::max)())
     {}
 
     /// Destructor.
@@ -362,7 +362,7 @@ namespace lemon {
     /// \return The termination cause of the search process.
     /// For more information, see \ref TerminationCause.
     TerminationCause findCycleMean(int limit =
-                                   std::numeric_limits<int>::max()) {
+                                   (std::numeric_limits<int>::max)()) {
       // Initialize and find strongly connected components
       init();
       findComponents();

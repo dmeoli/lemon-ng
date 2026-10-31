@@ -941,7 +941,7 @@ namespace lemon {
       for (typename BlossomSet::ItemIt n(*_blossom_set, blossom);
            n != INVALID; ++n) {
 
-        _blossom_set->increase(n, std::numeric_limits<Value>::max());
+        _blossom_set->increase(n, (std::numeric_limits<Value>::max)());
         int ni = (*_node_index)[n];
 
         (*_node_data)[ni].heap.clear();
@@ -1082,14 +1082,14 @@ namespace lemon {
               (*_node_data)[vi].heap.erase(it->second);
               (*_node_data)[vi].heap_index.erase(it);
               if ((*_node_data)[vi].heap.empty()) {
-                _blossom_set->increase(v, std::numeric_limits<Value>::max());
+                _blossom_set->increase(v, (std::numeric_limits<Value>::max)());
               } else if ((*_blossom_set)[v] < (*_node_data)[vi].heap.prio()) {
                 _blossom_set->increase(v, (*_node_data)[vi].heap.prio());
               }
 
               if ((*_blossom_data)[vb].status == MATCHED) {
                 if (_blossom_set->classPrio(vb) ==
-                    std::numeric_limits<Value>::max()) {
+                    (std::numeric_limits<Value>::max)()) {
                   _delta2->erase(vb);
                 } else if ((*_delta2)[vb] < _blossom_set->classPrio(vb) -
                            (*_blossom_data)[vb].offset) {
@@ -1107,7 +1107,7 @@ namespace lemon {
       (*_blossom_data)[blossom].offset -= _delta_sum;
 
       if (_blossom_set->classPrio(blossom) !=
-          std::numeric_limits<Value>::max()) {
+          (std::numeric_limits<Value>::max)()) {
         _delta2->push(blossom, _blossom_set->classPrio(blossom) -
                       (*_blossom_data)[blossom].offset);
       }
@@ -1128,7 +1128,7 @@ namespace lemon {
            n != INVALID; ++n) {
         int ni = (*_node_index)[n];
 
-        _blossom_set->increase(n, std::numeric_limits<Value>::max());
+        _blossom_set->increase(n, (std::numeric_limits<Value>::max)());
 
         (*_node_data)[ni].heap.clear();
         (*_node_data)[ni].heap_index.clear();
@@ -1439,7 +1439,7 @@ namespace lemon {
           (*_blossom_data)[subblossoms[i]].pot -= 2 * offset;
         }
         if (_blossom_set->classPrio(subblossoms[i]) !=
-            std::numeric_limits<Value>::max()) {
+            (std::numeric_limits<Value>::max)()) {
           _delta2->push(subblossoms[i],
                         _blossom_set->classPrio(subblossoms[i]) -
                         (*_blossom_data)[subblossoms[i]].offset);
@@ -1688,7 +1688,7 @@ namespace lemon {
         (*_node_data)[index].pot = max;
         _delta1->push(n, max);
         int blossom =
-          _blossom_set->insert(n, std::numeric_limits<Value>::max());
+          _blossom_set->insert(n, (std::numeric_limits<Value>::max)());
 
         _tree_set->insert(blossom);
 
@@ -1755,7 +1755,7 @@ namespace lemon {
         (*_node_data)[index].heap_index.clear();
         (*_node_data)[index].heap.clear();
         int blossom =
-          _blossom_set->insert(n, std::numeric_limits<Value>::max());
+          _blossom_set->insert(n, (std::numeric_limits<Value>::max)());
 
         (*_blossom_data)[blossom].status = MATCHED;
         (*_blossom_data)[blossom].pred = INVALID;
@@ -1871,16 +1871,16 @@ namespace lemon {
 
       while (_unmatched > 0) {
         Value d1 = !_delta1->empty() ?
-          _delta1->prio() : std::numeric_limits<Value>::max();
+          _delta1->prio() : (std::numeric_limits<Value>::max)();
 
         Value d2 = !_delta2->empty() ?
-          _delta2->prio() : std::numeric_limits<Value>::max();
+          _delta2->prio() : (std::numeric_limits<Value>::max)();
 
         Value d3 = !_delta3->empty() ?
-          _delta3->prio() : std::numeric_limits<Value>::max();
+          _delta3->prio() : (std::numeric_limits<Value>::max)();
 
         Value d4 = !_delta4->empty() ?
-          _delta4->prio() : std::numeric_limits<Value>::max();
+          _delta4->prio() : (std::numeric_limits<Value>::max)();
 
         _delta_sum = d3; OpType ot = D3;
         if (d1 < _delta_sum) { _delta_sum = d1; ot = D1; }
@@ -2422,7 +2422,7 @@ namespace lemon {
       for (typename BlossomSet::ItemIt n(*_blossom_set, blossom);
            n != INVALID; ++n) {
 
-        _blossom_set->increase(n, std::numeric_limits<Value>::max());
+        _blossom_set->increase(n, (std::numeric_limits<Value>::max)());
         int ni = (*_node_index)[n];
 
         (*_node_data)[ni].heap.clear();
@@ -2559,14 +2559,14 @@ namespace lemon {
               (*_node_data)[vi].heap.erase(it->second);
               (*_node_data)[vi].heap_index.erase(it);
               if ((*_node_data)[vi].heap.empty()) {
-                _blossom_set->increase(v, std::numeric_limits<Value>::max());
+                _blossom_set->increase(v, (std::numeric_limits<Value>::max)());
               } else if ((*_blossom_set)[v] < (*_node_data)[vi].heap.prio()) {
                 _blossom_set->increase(v, (*_node_data)[vi].heap.prio());
               }
 
               if ((*_blossom_data)[vb].status == MATCHED) {
                 if (_blossom_set->classPrio(vb) ==
-                    std::numeric_limits<Value>::max()) {
+                    (std::numeric_limits<Value>::max)()) {
                   _delta2->erase(vb);
                 } else if ((*_delta2)[vb] < _blossom_set->classPrio(vb) -
                            (*_blossom_data)[vb].offset) {
@@ -2584,7 +2584,7 @@ namespace lemon {
       (*_blossom_data)[blossom].offset -= _delta_sum;
 
       if (_blossom_set->classPrio(blossom) !=
-          std::numeric_limits<Value>::max()) {
+          (std::numeric_limits<Value>::max)()) {
         _delta2->push(blossom, _blossom_set->classPrio(blossom) -
                        (*_blossom_data)[blossom].offset);
       }
@@ -2605,7 +2605,7 @@ namespace lemon {
            n != INVALID; ++n) {
         int ni = (*_node_index)[n];
 
-        _blossom_set->increase(n, std::numeric_limits<Value>::max());
+        _blossom_set->increase(n, (std::numeric_limits<Value>::max)());
 
         (*_node_data)[ni].heap.clear();
         (*_node_data)[ni].heap_index.clear();
@@ -2887,7 +2887,7 @@ namespace lemon {
           (*_blossom_data)[subblossoms[i]].pot -= 2 * offset;
         }
         if (_blossom_set->classPrio(subblossoms[i]) !=
-            std::numeric_limits<Value>::max()) {
+            (std::numeric_limits<Value>::max)()) {
           _delta2->push(subblossoms[i],
                         _blossom_set->classPrio(subblossoms[i]) -
                         (*_blossom_data)[subblossoms[i]].offset);
@@ -3113,7 +3113,7 @@ namespace lemon {
 
       int index = 0;
       for (NodeIt n(_graph); n != INVALID; ++n) {
-        Value max = - std::numeric_limits<Value>::max();
+        Value max = - (std::numeric_limits<Value>::max)();
         for (OutArcIt e(_graph, n); e != INVALID; ++e) {
           if (_graph.target(e) == n) continue;
           if ((dualScale * _weight[e]) / 2 > max) {
@@ -3125,7 +3125,7 @@ namespace lemon {
         (*_node_data)[index].heap.clear();
         (*_node_data)[index].pot = max;
         int blossom =
-          _blossom_set->insert(n, std::numeric_limits<Value>::max());
+          _blossom_set->insert(n, (std::numeric_limits<Value>::max)());
 
         _tree_set->insert(blossom);
 
@@ -3191,7 +3191,7 @@ namespace lemon {
         (*_node_data)[index].heap_index.clear();
         (*_node_data)[index].heap.clear();
         int blossom =
-          _blossom_set->insert(n, std::numeric_limits<Value>::max());
+          _blossom_set->insert(n, (std::numeric_limits<Value>::max)());
 
         (*_blossom_data)[blossom].status = MATCHED;
         (*_blossom_data)[blossom].pred = INVALID;
@@ -3304,19 +3304,19 @@ namespace lemon {
 
       while (_unmatched > 0) {
         Value d2 = !_delta2->empty() ?
-          _delta2->prio() : std::numeric_limits<Value>::max();
+          _delta2->prio() : (std::numeric_limits<Value>::max)();
 
         Value d3 = !_delta3->empty() ?
-          _delta3->prio() : std::numeric_limits<Value>::max();
+          _delta3->prio() : (std::numeric_limits<Value>::max)();
 
         Value d4 = !_delta4->empty() ?
-          _delta4->prio() : std::numeric_limits<Value>::max();
+          _delta4->prio() : (std::numeric_limits<Value>::max)();
 
         _delta_sum = d3; OpType ot = D3;
         if (d2 < _delta_sum) { _delta_sum = d2; ot = D2; }
         if (d4 < _delta_sum) { _delta_sum = d4; ot = D4; }
 
-        if (_delta_sum == std::numeric_limits<Value>::max()) {
+        if (_delta_sum == (std::numeric_limits<Value>::max)()) {
           return false;
         }
 

@@ -781,7 +781,7 @@ template< typename GR,
       Value delta=0;
       Value inf_cap = std::numeric_limits<Value>::has_infinity ?
         std::numeric_limits<Value>::infinity() :
-        std::numeric_limits<Value>::max();
+        (std::numeric_limits<Value>::max)();
       for(NodeIt n(_g);n!=INVALID;++n)
         if(barrier(n))
           delta-=(*_supply)[n];

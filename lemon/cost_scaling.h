@@ -302,7 +302,7 @@ namespace lemon {
     ///
     /// Constant for infinite upper bounds (capacities).
     /// It is \c std::numeric_limits<Value>::infinity() if available,
-    /// \c std::numeric_limits<Value>::max() otherwise.
+    /// \c (std::numeric_limits<Value>::max)() otherwise.
     const Value INF;
 
   public:
@@ -344,7 +344,7 @@ namespace lemon {
       _graph(graph), _node_id(graph), _arc_idf(graph), _arc_idb(graph),
       INF(std::numeric_limits<Value>::has_infinity ?
           std::numeric_limits<Value>::infinity() :
-          std::numeric_limits<Value>::max())
+          (std::numeric_limits<Value>::max)())
     {
       // Check the number types
       LEMON_ASSERT(std::numeric_limits<Value>::is_signed,
@@ -790,7 +790,7 @@ namespace lemon {
       }
 
       // Remove infinite upper bounds and check negative arcs
-      const Value MAX = std::numeric_limits<Value>::max();
+      const Value MAX = (std::numeric_limits<Value>::max)();
       int last_out;
       if (_has_lower) {
         for (int i = 0; i != _root; ++i) {
@@ -1088,7 +1088,7 @@ namespace lemon {
           }
 
           if (rank_u > 0) {
-            top_rank = std::max(top_rank, rank_u);
+            top_rank = (std::max)(top_rank, rank_u);
             int bfirst = _buckets[rank_u];
             _bucket_next[u] = bfirst;
             _bucket_prev[bfirst] = u;
@@ -1355,7 +1355,7 @@ namespace lemon {
 
       // Relabel nodes
       for (int u = 0; u != _res_node_num; ++u) {
-        int k = std::min(_rank[u], r);
+        int k = (std::min)(_rank[u], r);
         if (k > 0) {
           _pi[u] -= _epsilon * k;
           _next_out[u] = _first_out[u];
@@ -1404,7 +1404,8 @@ namespace lemon {
           int tip = start;
           while (int(path.size()) < max_length && _excess[tip] >= 0) {
             int u;
-            LargeCost rc, min_red_cost = std::numeric_limits<LargeCost>::max();
+            LargeCost rc,
+              min_red_cost = (std::numeric_limits<LargeCost>::max)();
             LargeCost pi_tip = _pi[tip];
             int last_out = _first_out[tip+1];
             for (int a = _next_out[tip]; a != last_out; ++a) {
@@ -1431,7 +1432,7 @@ namespace lemon {
             if (tip != start) {
               int ra = _reverse[path.back()];
               min_red_cost =
-                std::min(min_red_cost, _cost[ra] + pi_tip - _pi[_target[ra]]);
+                (std::min)(min_red_cost, _cost[ra] + pi_tip - _pi[_target[ra]]);
             }
             last_out = _next_out[tip];
             for (int a = _first_out[tip]; a != last_out; ++a) {
@@ -1466,7 +1467,7 @@ namespace lemon {
             u = v;
             v = _target[pa];
             path_arc[pa] = false;
-            delta = std::min(_res_cap[pa], _excess[u]);
+            delta = (std::min)(_res_cap[pa], _excess[u]);
             _res_cap[pa] -= delta;
             _res_cap[_reverse[pa]] += delta;
             _excess[u] -= delta;
@@ -1533,7 +1534,7 @@ namespace lemon {
             for (a = _next_out[n]; a != last_out; ++a) {
               if (_res_cap[a] > 0 &&
                   _cost[a] + pi_n - _pi[_target[a]] < 0) {
-                delta = std::min(_res_cap[a], _excess[n]);
+                delta = (std::min)(_res_cap[a], _excess[n]);
                 t = _target[a];
 
                 // Push-look-ahead heuristic
@@ -1580,7 +1581,7 @@ namespace lemon {
           // Relabel the node if it is still active (or hyper)
           if (_excess[n] > 0 || hyper[n]) {
              min_red_cost = hyper[n] ? -hyper_cost[n] :
-               std::numeric_limits<LargeCost>::max();
+               (std::numeric_limits<LargeCost>::max)();
             for (int a = _first_out[n]; a != last_out; ++a) {
               if (_res_cap[a] > 0) {
                 rc = _cost[a] + pi_n - _pi[_target[a]];

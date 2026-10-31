@@ -264,7 +264,7 @@ namespace lemon {
       _cycle_path(NULL), _local_path(false), _data(digraph),
       INF(std::numeric_limits<LargeCost>::has_infinity ?
           std::numeric_limits<LargeCost>::infinity() :
-          std::numeric_limits<LargeCost>::max())
+          (std::numeric_limits<LargeCost>::max)())
     {}
 
     /// Destructor.

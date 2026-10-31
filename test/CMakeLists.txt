@@ -37,6 +37,7 @@ SET(TESTS
   kruskal_test
   lgf_reader_writer_test
   lgf_test
+  macro_test
   maps_test
   matching_test
   max_cardinality_search_test

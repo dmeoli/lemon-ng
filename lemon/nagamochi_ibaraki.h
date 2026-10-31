@@ -450,7 +450,7 @@ namespace lemon {
       }
 
       typename Graph::Node cut_node = INVALID;
-      _min_cut = std::numeric_limits<Value>::max();
+      _min_cut = (std::numeric_limits<Value>::max)();
 
       for (typename Graph::Node n = _first_node;
            n != INVALID; n = (*_nodes)[n].next) {
@@ -487,7 +487,7 @@ namespace lemon {
       int sep = 0;
 
       Value alpha = 0;
-      Value pmc = std::numeric_limits<Value>::max();
+      Value pmc = (std::numeric_limits<Value>::max)();
 
       _heap->push(_first_node, static_cast<Value>(0));
       while (!_heap->empty()) {
