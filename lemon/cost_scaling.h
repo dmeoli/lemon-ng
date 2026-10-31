@@ -31,7 +31,7 @@
 #include <lemon/maps.h>
 #include <lemon/math.h>
 #include <lemon/static_graph.h>
-#include <lemon/circulation.h>
+#include <lemon/bits/mcf_feasible_flow.h>
 #include <lemon/bellman_ford.h>
 
 namespace lemon {
@@ -137,6 +137,10 @@ namespace lemon {
 #endif
   class CostScaling
   {
+    template <typename MCF>
+    friend bool _mcf_bits::feasibleFlow(MCF&, bool,
+      typename MCF::Value, int&);
+
   public:
 
     /// The type of the digraph
@@ -843,73 +847,9 @@ namespace lemon {
       }
       _epsilon /= _alpha;
 
-      // Initialize maps for Circulation and remove non-zero lower bounds
-      ConstMap<Arc, Value> low(0);
-      typedef typename Digraph::template ArcMap<Value> ValueArcMap;
-      typedef typename Digraph::template NodeMap<Value> ValueNodeMap;
-      ValueArcMap cap(_graph), flow(_graph);
-      ValueNodeMap sup(_graph);
-      for (NodeIt n(_graph); n != INVALID; ++n) {
-        sup[n] = _supply[_node_id[n]];
-      }
-      if (_has_lower) {
-        for (ArcIt a(_graph); a != INVALID; ++a) {
-          int j = _arc_idf[a];
-          Value c = _lower[j];
-          cap[a] = _upper[j] - c;
-          sup[_graph.source(a)] -= c;
-          sup[_graph.target(a)] += c;
-        }
-      } else {
-        for (ArcIt a(_graph); a != INVALID; ++a) {
-          cap[a] = _upper[_arc_idf[a]];
-        }
-      }
-
-      _sup_node_num = 0;
-      for (NodeIt n(_graph); n != INVALID; ++n) {
-        if (sup[n] > 0) ++_sup_node_num;
-      }
-
-      // Find a feasible flow using Circulation
-      Circulation<Digraph, ConstMap<Arc, Value>, ValueArcMap, ValueNodeMap>
-        circ(_graph, low, cap, sup);
-      if (!circ.flowMap(flow).run()) return INFEASIBLE;
-
-      // Set residual capacities and handle GEQ supply type
-      if (_sum_supply < 0) {
-        for (ArcIt a(_graph); a != INVALID; ++a) {
-          Value fa = flow[a];
-          _res_cap[_arc_idf[a]] = cap[a] - fa;
-          _res_cap[_arc_idb[a]] = fa;
-          sup[_graph.source(a)] -= fa;
-          sup[_graph.target(a)] += fa;
-        }
-        for (NodeIt n(_graph); n != INVALID; ++n) {
-          _excess[_node_id[n]] = sup[n];
-        }
-        for (int a = _first_out[_root]; a != _res_arc_num; ++a) {
-          int u = _target[a];
-          int ra = _reverse[a];
-          _res_cap[a] = -_sum_supply + 1;
-          _res_cap[ra] = -_excess[u];
-          _cost[a] = 0;
-          _cost[ra] = 0;
-          _excess[u] = 0;
-        }
-      } else {
-        for (ArcIt a(_graph); a != INVALID; ++a) {
-          Value fa = flow[a];
-          _res_cap[_arc_idf[a]] = cap[a] - fa;
-          _res_cap[_arc_idb[a]] = fa;
-        }
-        for (int a = _first_out[_root]; a != _res_arc_num; ++a) {
-          int ra = _reverse[a];
-          _res_cap[a] = 0;
-          _res_cap[ra] = 0;
-          _cost[a] = 0;
-          _cost[ra] = 0;
-        }
+      // Find a feasible flow on the residual network
+      if (!_mcf_bits::feasibleFlow(*this, false, Value(0), _sup_node_num)) {
+        return INFEASIBLE;
       }
 
       // Initialize data structures for buckets
