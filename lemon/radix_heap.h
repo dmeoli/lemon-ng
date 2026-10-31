@@ -24,6 +24,7 @@
 ///\brief Radix heap implementation.
 
 #include <vector>
+#include <algorithm>
 #include <lemon/error.h>
 
 namespace lemon {
@@ -153,8 +154,11 @@ namespace lemon {
       return pr < _boxes[box].min;
     }
 
+    // The box ends where the next one begins, which moveDown() may have
+    // moved closer than its size; the last one ends after its size
     bool lower(int box, Prio pr) {
-      return pr >= _boxes[box].min + _boxes[box].size;
+      return pr >= (box + 1 < int(_boxes.size()) ? _boxes[box + 1].min :
+                    _boxes[box].min + _boxes[box].size);
     }
 
     // Remove item from the box list
@@ -240,13 +244,18 @@ namespace lemon {
       return min;
     }
 
-    // Rearrange the items of the heap and make the first box non-empty
+    // Rearrange the items of the heap and make the first box non-empty:
+    // the boxes up to the first non-empty one are given the range from its
+    // minimum to its end, which is no larger than its size, so that they
+    // do not reach into the next box
     void moveDown() {
       int box = findFirst();
       if (box == 0) return;
+      int end = box + 1 < int(_boxes.size()) ? _boxes[box + 1].min :
+                _boxes[box].min + _boxes[box].size;
       int min = minValue(box);
       for (int i = 0; i <= box; ++i) {
-        _boxes[i].min = min;
+        _boxes[i].min = std::min(min, end);
         min += _boxes[i].size;
       }
       int curr = _boxes[box].first, next;

@@ -20,6 +20,8 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <set>
+#include <utility>
 
 #include <lemon/concept_check.h>
 #include <lemon/concepts/heap.h>
@@ -138,6 +140,67 @@ void heapEqualPairTest() {
   heap.pop();
   heap.pop();
   check(heap.empty(), "Heap not emptied after two equal priorities.");
+}
+
+// RadixHeap after the increase of trac #681, and against a sorted set on a
+// pseudo-random monotone sequence of push, pop, increase, decrease, set and
+// erase: the boxes that pop() rearranges must not overlap the next ones
+void radixHeapTest() {
+  {
+    RangeMap<int> map(3, -1);
+    RadixHeap<RangeMap<int> > heap(map);
+    heap.push(0, 2);
+    heap.push(1, 3);
+    heap.push(2, 4);
+    heap.pop();
+    heap.increase(1, 5);
+    check(heap.top() == 2 && heap.prio() == 4, "Wrong minimum after increase.");
+  }
+  const int n = 40;
+  RangeMap<int> map(n, -1);
+  RadixHeap<RangeMap<int> > heap(map);
+  std::set<std::pair<int, int> > ref;
+  std::vector<int> pr(n, -1);
+  int low = 0;
+  unsigned int r = 12345;
+  for (int step = 0; step != 4000; ++step) {
+    r = r * 1103515245 + 12345;
+    int i = (r >> 8) % n, op = (r >> 20) % 6, d = (r >> 4) % 100;
+    if (pr[i] < 0) {
+      if (op < 3) {
+        pr[i] = low + d;
+        heap.push(i, pr[i]);
+        ref.insert(std::make_pair(pr[i], i));
+      }
+      continue;
+    }
+    ref.erase(std::make_pair(pr[i], i));
+    if (op == 0) {
+      pr[i] += d / 2;
+      heap.increase(i, pr[i]);
+    } else if (op == 1) {
+      pr[i] = low + d % (pr[i] - low + 1);
+      heap.decrease(i, pr[i]);
+    } else if (op == 2) {
+      pr[i] = low + d;
+      heap.set(i, pr[i]);
+    } else if (op == 3) {
+      heap.erase(i);
+      pr[i] = -1;
+      continue;
+    } else {
+      ref.insert(std::make_pair(pr[i], i));
+      check(heap.prio() == ref.begin()->first, "Wrong minimum in RadixHeap.");
+      int t = heap.top();
+      check(pr[t] == ref.begin()->first, "Wrong top in RadixHeap.");
+      low = pr[t];
+      ref.erase(std::make_pair(pr[t], t));
+      heap.pop();
+      pr[t] = -1;
+      continue;
+    }
+    ref.insert(std::make_pair(pr[i], i));
+  }
 }
 
 template <typename Heap>
@@ -274,6 +337,7 @@ int main() {
 
   // RadixHeap
   {
+    radixHeapTest();
     typedef RadixHeap<ItemIntMap> IntHeap;
     checkConcept<Heap<Prio, ItemIntMap>, IntHeap>();
     heapSortTest<IntHeap>();
