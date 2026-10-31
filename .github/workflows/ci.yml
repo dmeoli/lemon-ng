@@ -12,7 +12,7 @@ on:
 
 jobs:
   build-test:
-    name: ${{ matrix.os }} ${{ matrix.cc }} C++${{ matrix.std }}
+    name: ${{ matrix.os }} ${{ matrix.cc }} C++${{ matrix.std }} ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -26,6 +26,10 @@ jobs:
               flags: -D_GLIBCXX_USE_DEPRECATED=0 }
           - { os: ubuntu-latest,  cc: clang, cxx: clang++, std: 11 }
           - { os: ubuntu-latest,  cc: clang, cxx: clang++, std: 20 }
+          - { os: ubuntu-latest,  cc: gcc,   cxx: g++,     std: 20,
+              flags: -fsanitize=address,undefined -fno-sanitize-recover=all
+                     -fno-omit-frame-pointer,
+              name: sanitizers }
           - { os: macos-latest,   cc: clang, cxx: clang++, std: 11 }
           - { os: macos-latest,   cc: clang, cxx: clang++, std: 20 }
           - { os: windows-latest, cc: cl,    cxx: cl,      std: 14 }
