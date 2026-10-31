@@ -326,7 +326,8 @@ namespace lemon {
     // Find the minimum of the roots
     int findMin() {
       if( _head!=-1 ) {
-        int min_loc=_head, min_val=_data[_head].prio;
+        int min_loc=_head;
+        Prio min_val=_data[_head].prio;
         for( int x=_data[_head].right_neighbor; x!=-1;
              x=_data[x].right_neighbor ) {
           if( _comp( _data[x].prio,min_val ) ) {

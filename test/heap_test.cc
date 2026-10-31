@@ -106,6 +106,40 @@ void heapSortTest() {
   }
 }
 
+// Priorities of a floating-point type, many of them equal and many below
+// one: the heap has to give them back in order, ties and fractions included
+template <typename Heap>
+void heapTiesTest() {
+  const int n = 200;
+  RangeMap<int> map(n, -1);
+  Heap heap(map);
+  std::vector<double> v(n);
+  for (int i = 0; i < n; ++i) {
+    v[i] = ((i * 37) % 11) / 4.0;
+    heap.push(i, v[i]);
+  }
+  std::sort(v.begin(), v.end());
+  for (int i = 0; i < n; ++i) {
+    check(!heap.empty(), "Heap emptied too early.");
+    check(v[i] == heap.prio(), "Wrong order with ties and fractions.");
+    heap.pop();
+  }
+  check(heap.empty(), "Heap not emptied.");
+}
+
+// Two items of equal priority, popped one after the other: a heap that
+// keeps a minimum which is no longer a root loops for ever on the second
+template <typename Heap>
+void heapEqualPairTest() {
+  RangeMap<int> map(2, -1);
+  Heap heap(map);
+  heap.push(0, 0);
+  heap.push(1, 0);
+  heap.pop();
+  heap.pop();
+  check(heap.empty(), "Heap not emptied after two equal priorities.");
+}
+
 template <typename Heap>
 void heapIncreaseTest() {
   RangeMap<int> map(test_len, -1);
@@ -175,6 +209,7 @@ int main() {
 
   // BinHeap
   {
+    heapTiesTest<BinHeap<double, RangeMap<int> > >();
     typedef BinHeap<Prio, ItemIntMap> IntHeap;
     checkConcept<Heap<Prio, ItemIntMap>, IntHeap>();
     heapSortTest<IntHeap>();
@@ -187,6 +222,7 @@ int main() {
 
   // QuadHeap
   {
+    heapTiesTest<QuadHeap<double, RangeMap<int> > >();
     typedef QuadHeap<Prio, ItemIntMap> IntHeap;
     checkConcept<Heap<Prio, ItemIntMap>, IntHeap>();
     heapSortTest<IntHeap>();
@@ -199,6 +235,7 @@ int main() {
 
   // DHeap
   {
+    heapTiesTest<DHeap<double, RangeMap<int> > >();
     typedef DHeap<Prio, ItemIntMap> IntHeap;
     checkConcept<Heap<Prio, ItemIntMap>, IntHeap>();
     heapSortTest<IntHeap>();
@@ -211,6 +248,7 @@ int main() {
 
   // FibHeap
   {
+    heapTiesTest<FibHeap<double, RangeMap<int> > >();
     typedef FibHeap<Prio, ItemIntMap> IntHeap;
     checkConcept<Heap<Prio, ItemIntMap>, IntHeap>();
     heapSortTest<IntHeap>();
@@ -223,6 +261,7 @@ int main() {
 
   // PairingHeap
   {
+    heapTiesTest<PairingHeap<double, RangeMap<int> > >();
     typedef PairingHeap<Prio, ItemIntMap> IntHeap;
     checkConcept<Heap<Prio, ItemIntMap>, IntHeap>();
     heapSortTest<IntHeap>();
@@ -247,6 +286,8 @@ int main() {
 
   // BinomialHeap
   {
+    heapTiesTest<BinomialHeap<double, RangeMap<int> > >();
+    heapEqualPairTest<BinomialHeap<int, RangeMap<int> > >();
     typedef BinomialHeap<Prio, ItemIntMap> IntHeap;
     checkConcept<Heap<Prio, ItemIntMap>, IntHeap>();
     heapSortTest<IntHeap>();
