@@ -31,6 +31,8 @@ jobs:
         uses: prefix-dev/rattler-build-action@v0.2.34
         with:
           recipe-path: packaging/conda/recipe.yaml
+          build-args: >-
+            -c conda-forge -m packaging/conda/variants.yaml
           upload-artifact: false
 
   homebrew:
