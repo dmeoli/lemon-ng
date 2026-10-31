@@ -638,6 +638,35 @@ int main()
     checkNarrowType<CapacityScaling<G, signed char>, signed char>();
   }
 
+  // Test CostScaling on a chain with costs of both signs, along which the
+  // ranks of the price refinement sum up past the number of its buckets:
+  // the chain has one feasible flow, of cost -99
+  {
+    const int sup[] = {7, -2, -3, 2, 1, 1, -1, 1, 2, 0, -7, 6, 2, -9};
+    const int cap[] = {14, 10, 4, 8, 10, 12, 10, 12, 16, 16, 2, 14, 18};
+    const int cst[] = {-1, -3, 0, 0, -3, -2, -3, -1, 0, 1, -3, -1, -3};
+    SmartDigraph g;
+    std::vector<SmartDigraph::Node> v(14);
+    for (int i = 0; i != 14; ++i) v[i] = g.addNode();
+    std::vector<SmartDigraph::Arc> a(13);
+    for (int i = 0; i != 13; ++i) a[i] = g.addArc(v[i], v[i + 1]);
+    SmartDigraph::ArcMap<int> c(g), u(g);
+    SmartDigraph::NodeMap<int> s(g);
+    for (int i = 0; i != 13; ++i) {
+      c[a[i]] = cst[i];
+      u[a[i]] = cap[i];
+    }
+    for (int i = 0; i != 14; ++i) s[v[i]] = sup[i];
+    typedef CostScaling<SmartDigraph> CS;
+    const CS::Method method[] = {CS::PUSH, CS::AUGMENT, CS::PARTIAL_AUGMENT};
+    for (int m = 0; m != 3; ++m) {
+      CS cs(g);
+      cs.costMap(c).upperMap(u).supplyMap(s);
+      check(cs.run(method[m]) == CS::OPTIMAL && cs.totalCost() == -99,
+            "Wrong result of CostScaling on a chain of signed costs");
+    }
+  }
+
   // Test CapacityScaling
   {
     typedef CapacityScaling<Digraph> MCF;
