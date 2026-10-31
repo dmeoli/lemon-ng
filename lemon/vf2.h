@@ -84,7 +84,7 @@ namespace lemon {
   ///\tparam G2 The type of the graph g1 will be embedded into.
   ///The default type is \ref ListGraph.
   ///\tparam M The type of the NodeMap storing the mapping.
-  ///By default, it is G1::NodeMap<G2::Node>
+  ///By default, it is G1::NodeMap<typename G2::Node>
   ///\tparam NEQ A bool-valued binary functor determinining whether a node is
   ///mappable to another. By default, it is an always-true operator.
   ///
@@ -94,7 +94,7 @@ namespace lemon {
 #else
   template<class G1 = ListGraph,
            class G2 = ListGraph,
-           class M = typename G1::template NodeMap<G2::Node>,
+           class M = typename G1::template NodeMap<typename G2::Node>,
            class NEQ = bits::vf2::AlwaysEq >
 #endif
   class Vf2 {

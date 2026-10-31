@@ -23,6 +23,7 @@
 ///\brief VF2 Plus Plus algorithm.
 
 #include <lemon/core.h>
+#include <lemon/list_graph.h>
 #include <lemon/concepts/graph.h>
 #include <lemon/bits/vf2_internals.h>
 
@@ -47,7 +48,7 @@ namespace lemon {
   ///\tparam G2 The type of the graph g1 will be embedded into.
   ///The default type is \ref ListGraph.
   ///\tparam M The type of the NodeMap storing the mapping.
-  ///By default, it is G1::NodeMap<G2::Node>
+  ///By default, it is G1::NodeMap<typename G2::Node>
   ///\tparam M1 The type of the NodeMap storing the integer node labels of G1.
   ///The labels must be the numbers {0,1,2,..,K-1}, where K is the number of
   ///different labels. By default, it is G1::NodeMap<int>.
@@ -61,7 +62,7 @@ namespace lemon {
 #else
   template<class G1 = ListGraph,
            class G2 = ListGraph,
-           class M = typename G1::template NodeMap<G2::Node>,
+           class M = typename G1::template NodeMap<typename G2::Node>,
            class M1 = typename G1::template NodeMap<int>,
            class M2 = typename G2::template NodeMap<int> >
 #endif
@@ -495,7 +496,7 @@ namespace lemon {
     ///\param g1 The graph to be embedded.
     ///\param g2 The graph \e g1 will be embedded into.
     ///\param m The type of the NodeMap storing the mapping.
-    ///By default, it is G1::NodeMap<G2::Node>
+    ///By default, it is G1::NodeMap<typename G2::Node>
     ///\param intLabel1 The NodeMap storing the integer node labels of G1.
     ///The labels must be the numbers {0,1,2,..,K-1}, where K is the number of
     ///different labels.
