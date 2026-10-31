@@ -28,29 +28,23 @@
 
 namespace lemon {
 
-  /*
-    "inline" is used for ignore_unused_variable_warning()
-    and function_requires() to make sure there is no
-    overtarget with g++.
-  */
+  namespace _concept_bits {
 
-  template <class T> inline void ignore_unused_variable_warning(const T&) { }
-  template <class T1, class T2>
-  inline void ignore_unused_variable_warning(const T1&, const T2&) { }
-  template <class T1, class T2, class T3>
-  inline void ignore_unused_variable_warning(const T1&, const T2&,
-                                             const T3&) { }
-  template <class T1, class T2, class T3, class T4>
-  inline void ignore_unused_variable_warning(const T1&, const T2&,
-                                             const T3&, const T4&) { }
-  template <class T1, class T2, class T3, class T4, class T5>
-  inline void ignore_unused_variable_warning(const T1&, const T2&,
-                                             const T3&, const T4&,
-                                             const T5&) { }
-  template <class T1, class T2, class T3, class T4, class T5, class T6>
-  inline void ignore_unused_variable_warning(const T1&, const T2&,
-                                             const T3&, const T4&,
-                                             const T5&, const T6&) { }
+    // A function object rather than overloaded functions, so that the
+    // unqualified calls that other libraries (e.g., Boost) make to their own
+    // function of the same name do not find this one by argument-dependent
+    // lookup on the types of LEMON and become ambiguous
+    struct IgnoreUnusedVariableWarning {
+      template <typename... T>
+      void operator()(const T&...) const {}
+    };
+
+  }
+
+  ///\e
+  const _concept_bits::IgnoreUnusedVariableWarning
+    ignore_unused_variable_warning =
+      _concept_bits::IgnoreUnusedVariableWarning();
 
   ///\e
   template <class Concept>

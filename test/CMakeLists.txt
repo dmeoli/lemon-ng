@@ -18,6 +18,7 @@ SET(TESTS
   bfs_test
   bpgraph_test
   circulation_test
+  concept_check_test
   connectivity_test
   counter_test
   dfs_test
