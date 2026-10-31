@@ -1858,7 +1858,7 @@ namespace lemon {
         : _edge(edge), _forward(forward) {}
 
     public:
-      Arc() {}
+      Arc() : _forward(true) {}
 
       Arc(Invalid) : _edge(INVALID), _forward(true) {}
 
@@ -2927,7 +2927,7 @@ namespace lemon {
 
     public:
 
-      Node() {}
+      Node() : _in(true) {}
       Node(Invalid) : DigraphNode(INVALID), _in(true) {}
 
       bool operator==(const Node& node) const {

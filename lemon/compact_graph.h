@@ -52,7 +52,7 @@ namespace lemon {
       int id;
       Node(int _id) : id(_id) {}
     public:
-      Node() {}
+      Node() : id(-1) {}
       Node (Invalid) : id(-1) {}
       bool operator==(const Node& node) const { return id == node.id; }
       bool operator!=(const Node& node) const { return id != node.id; }
@@ -66,7 +66,7 @@ namespace lemon {
       int source;
       Arc(int _id, int _source) : id(_id), source(_source) {}
     public:
-      Arc() { }
+      Arc() : id(-1), source(-1) {}
       Arc (Invalid) : id(-1), source(-1) {}
       bool operator==(const Arc& arc) const { return id == arc.id; }
       bool operator!=(const Arc& arc) const { return id != arc.id; }

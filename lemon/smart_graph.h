@@ -121,7 +121,7 @@ namespace lemon {
       int _id;
       explicit Node(int id) : _id(id) {}
     public:
-      Node() {}
+      Node() : _id(-1) {}
       Node (Invalid) : _id(-1) {}
       bool operator==(const Node i) const {return _id == i._id;}
       bool operator!=(const Node i) const {return _id != i._id;}
@@ -137,7 +137,7 @@ namespace lemon {
       int _id;
       explicit Arc(int id) : _id(id) {}
     public:
-      Arc() { }
+      Arc() : _id(-1) {}
       Arc (Invalid) : _id(-1) {}
       bool operator==(const Arc i) const {return _id == i._id;}
       bool operator!=(const Arc i) const {return _id != i._id;}
@@ -421,7 +421,7 @@ namespace lemon {
       explicit Node(int id) { _id = id;}
 
     public:
-      Node() {}
+      Node() : _id(-1) {}
       Node (Invalid) { _id = -1; }
       bool operator==(const Node& node) const {return _id == node._id;}
       bool operator!=(const Node& node) const {return _id != node._id;}
@@ -436,7 +436,7 @@ namespace lemon {
       explicit Edge(int id) { _id = id;}
 
     public:
-      Edge() {}
+      Edge() : _id(-1) {}
       Edge (Invalid) { _id = -1; }
       bool operator==(const Edge& arc) const {return _id == arc._id;}
       bool operator!=(const Edge& arc) const {return _id != arc._id;}
@@ -455,7 +455,7 @@ namespace lemon {
         return _id != -1 ? edgeFromId(_id / 2) : INVALID;
       }
 
-      Arc() {}
+      Arc() : _id(-1) {}
       Arc (Invalid) { _id = -1; }
       bool operator==(const Arc& arc) const {return _id == arc._id;}
       bool operator!=(const Arc& arc) const {return _id != arc._id;}
@@ -847,7 +847,7 @@ namespace lemon {
       explicit Node(int id) { _id = id;}
 
     public:
-      Node() {}
+      Node() : _id(-1) {}
       Node (Invalid) { _id = -1; }
       bool operator==(const Node& node) const {return _id == node._id;}
       bool operator!=(const Node& node) const {return _id != node._id;}
@@ -888,7 +888,7 @@ namespace lemon {
       explicit Edge(int id) { _id = id;}
 
     public:
-      Edge() {}
+      Edge() : _id(-1) {}
       Edge (Invalid) { _id = -1; }
       bool operator==(const Edge& arc) const {return _id == arc._id;}
       bool operator!=(const Edge& arc) const {return _id != arc._id;}
@@ -907,7 +907,7 @@ namespace lemon {
         return _id != -1 ? edgeFromId(_id / 2) : INVALID;
       }
 
-      Arc() {}
+      Arc() : _id(-1) {}
       Arc (Invalid) { _id = -1; }
       bool operator==(const Arc& arc) const {return _id == arc._id;}
       bool operator!=(const Arc& arc) const {return _id != arc._id;}
