@@ -154,13 +154,12 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { os: ubuntu-latest,  cc: g++,     std: 11, shell: bash }
-          - { os: ubuntu-latest,  cc: clang++, std: 20, shell: bash }
-          - { os: macos-latest,   cc: clang++, std: 17, shell: bash }
-          - { os: windows-latest, cc: g++,     std: 17, shell: 'msys2 {0}' }
-    defaults:
-      run:
-        shell: ${{ matrix.shell }}
+          - { os: ubuntu-latest,  cc: g++,     std: 11 }
+          - { os: ubuntu-latest,  cc: clang++, std: 20 }
+          - { os: macos-latest,   cc: clang++, std: 17 }
+          - { os: windows-latest, cc: g++,     std: 17 }
+    env:
+      MK: CC=${{ matrix.cc }} STD=c++${{ matrix.std }}
     steps:
       - name: Check out the repository
         uses: actions/checkout@v4
@@ -174,13 +173,20 @@ jobs:
           msystem: UCRT64
           install: make git mingw-w64-ucrt-x86_64-gcc
 
-      - name: Build and run the tests
-        run: >
-          make -C test -j4 CC=${{ matrix.cc }} STD=c++${{ matrix.std }}
-          FLAGS=-Werror check
-
-      - name: Build the tools, the demos and the static library
+      - name: Build and run everything (Linux and macOS)
+        if: runner.os != 'Windows'
+        shell: bash
         run: |
-          make -C tools -j4 CC=${{ matrix.cc }} STD=c++${{ matrix.std }}
-          make -C demo -j4 CC=${{ matrix.cc }} STD=c++${{ matrix.std }}
+          make -C test -j4 $MK FLAGS=-Werror check
+          make -C tools -j4 $MK
+          make -C demo -j4 $MK
+          make -f makefile-lib -j4 CC=${{ matrix.cc }}
+
+      - name: Build and run everything (Windows)
+        if: runner.os == 'Windows'
+        shell: msys2 {0}
+        run: |
+          make -C test -j4 $MK FLAGS=-Werror check
+          make -C tools -j4 $MK
+          make -C demo -j4 $MK
           make -f makefile-lib -j4 CC=${{ matrix.cc }}
