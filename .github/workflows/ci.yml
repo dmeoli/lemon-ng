@@ -154,13 +154,13 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { os: ubuntu-latest,  cc: g++,     std: 11 }
-          - { os: ubuntu-latest,  cc: clang++, std: 20 }
-          - { os: macos-latest,   cc: clang++, std: 17 }
-          - { os: windows-latest, cc: g++,     std: 17 }
+          - { os: ubuntu-latest,  cc: g++,     std: 11, shell: bash }
+          - { os: ubuntu-latest,  cc: clang++, std: 20, shell: bash }
+          - { os: macos-latest,   cc: clang++, std: 17, shell: bash }
+          - { os: windows-latest, cc: g++,     std: 17, shell: 'msys2 {0}' }
     defaults:
       run:
-        shell: ${{ runner.os == 'Windows' && 'msys2 {0}' || 'bash' }}
+        shell: ${{ matrix.shell }}
     steps:
       - name: Check out the repository
         uses: actions/checkout@v4
