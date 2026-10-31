@@ -2100,7 +2100,11 @@ namespace lemon {
     void drawing(const AuxGraph& graph,
                  const AuxEmbeddingMap& next,
                  PointMap& point_map) {
-      TEMPLATE_GRAPH_TYPEDEFS(AuxGraph);
+      typedef typename AuxGraph::Node Node;
+      typedef typename AuxGraph::Arc Arc;
+      typedef typename AuxGraph::NodeIt NodeIt;
+      typedef typename AuxGraph::ArcIt ArcIt;
+      typedef typename AuxGraph::OutArcIt OutArcIt;
 
       typename AuxGraph::template ArcMap<Arc> prev(graph);
 
