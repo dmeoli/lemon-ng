@@ -20,8 +20,10 @@ jobs:
         include:
           - { os: ubuntu-latest,  cc: gcc,   cxx: g++,     std: 11 }
           - { os: ubuntu-latest,  cc: gcc,   cxx: g++,     std: 17 }
-          - { os: ubuntu-latest,  cc: gcc,   cxx: g++,     std: 20 }
-          - { os: ubuntu-latest,  cc: gcc,   cxx: g++,     std: 23 }
+          - { os: ubuntu-latest,  cc: gcc,   cxx: g++,     std: 20,
+              flags: -D_GLIBCXX_USE_DEPRECATED=0 }
+          - { os: ubuntu-latest,  cc: gcc,   cxx: g++,     std: 23,
+              flags: -D_GLIBCXX_USE_DEPRECATED=0 }
           - { os: ubuntu-latest,  cc: clang, cxx: clang++, std: 11 }
           - { os: ubuntu-latest,  cc: clang, cxx: clang++, std: 20 }
           - { os: macos-latest,   cc: clang, cxx: clang++, std: 11 }
@@ -32,6 +34,11 @@ jobs:
       - name: Check out the repository
         uses: actions/checkout@v4
 
+      # The jobs of GCC in C++20 and later drop from libstdc++ what the
+      # standard has removed, as libc++ and MSVC do.
+      # AppleClang reports the types of the convenience macros
+      # DIGRAPH_TYPEDEFS and alike that a function does not use, which the
+      # macros define as a whole by design (Clang no longer does)
       - name: Configure (Linux and macOS)
         if: runner.os != 'Windows'
         run: >
@@ -39,7 +46,7 @@ jobs:
           -DCMAKE_C_COMPILER=${{ matrix.cc }}
           -DCMAKE_CXX_COMPILER=${{ matrix.cxx }}
           -DCMAKE_CXX_STANDARD=${{ matrix.std }}
-          -DCMAKE_CXX_FLAGS="-Wall -Wextra -Werror"
+          -DCMAKE_CXX_FLAGS="-Wall -Wextra -Werror ${{ matrix.flags }} ${{ runner.os == 'macOS' && '-Wno-unused-local-typedef' || '' }}"
           -DLEMON_VERSION=ci
 
       - name: Configure (Windows)
