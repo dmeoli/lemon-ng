@@ -477,12 +477,12 @@ DigraphReader< TDGR > digraphReader( TDGR & digraph , const char * fn );
 /// rules.
 ///
 ///\code
-/// DigraphReader<DGR>(digraph, std::cin)
-///   .nodeMap("coordinates", coord_map)
-///   .arcMap("capacity", cap_map)
-///   .node("source", src)
-///   .node("target", trg)
-///   .attribute("caption", caption)
+/// DigraphReader< DGR >( digraph , std::cin )
+///   .nodeMap( "coordinates" , coord_map )
+///   .arcMap( "capacity" , cap_map )
+///   .node( "source" , src )
+///   .node( "target" , trg )
+///   .attribute( "caption" , caption )
 ///   .run();
 ///\endcode
 ///
@@ -1268,14 +1268,14 @@ class DigraphReader
 /// following code:
 ///
 ///\code
-///ListDigraph digraph;
-///ListDigraph::ArcMap<int> cap(digraph);
-///ListDigraph::Node src, trg;
-///digraphReader(digraph, std::cin)
-///  .arcMap("capacity", cap)
-///  .node("source", src)
-///  .node("target", trg)
-///  .run();
+/// ListDigraph digraph;
+/// ListDigraph::ArcMap< int > cap( digraph );
+/// ListDigraph::Node src , trg;
+/// digraphReader( digraph , std::cin )
+///   .arcMap( "capacity" , cap )
+///   .node( "source" , src )
+///   .node( "target" , trg )
+///   .run();
 ///\endcode
 ///
 /// For a complete documentation, please see the
@@ -2145,11 +2145,9 @@ class GraphReader
 /// graph can be read with the following code:
 ///
 ///\code
-///ListGraph graph;
-///ListGraph::EdgeMap<int> weight(graph);
-///graphReader(graph, std::cin)
-///  .edgeMap("weight", weight)
-///  .run();
+/// ListGraph graph;
+/// ListGraph::EdgeMap< int > weight( graph );
+/// graphReader( graph , std::cin ).edgeMap( "weight" , weight ).run();
 ///\endcode
 ///
 /// For a complete documentation, please see the
@@ -3221,11 +3219,9 @@ class BpGraphReader
 /// graph can be read with the following code:
 ///
 ///\code
-///ListBpGraph graph;
-///ListBpGraph::EdgeMap<int> weight(graph);
-///bpGraphReader(graph, std::cin)
-///  .edgeMap("weight", weight)
-///  .run();
+/// ListBpGraph graph;
+/// ListBpGraph::EdgeMap< int > weight( graph );
+/// bpGraphReader( graph , std::cin ).edgeMap( "weight" , weight ).run();
 ///\endcode
 ///
 /// For a complete documentation, please see the
@@ -3379,19 +3375,21 @@ class SectionReader
  ///
  /// The functor is implemented as a struct:
  ///\code
- ///  struct NumberSection {
- ///    std::vector<int>& _data;
- ///    NumberSection(std::vector<int>& data) : _data(data) {}
- ///    void operator()(const std::string& line) {
- ///      std::istringstream ls(line);
- ///      int value;
- ///      while (ls >> value) _data.push_back(value);
- ///    }
+ /// struct NumberSection
+ /// {
+ ///  std::vector< int > & _data;
+ ///  NumberSection( std::vector< int > & data ) : _data( data ) { }
+ ///  void operator()( const std::string & line ) {
+ ///   std::istringstream ls( line );
+ ///   int value;
+ ///   while( ls >> value )
+ ///    _data.push_back( value );
+ ///   }
  ///  };
  ///
- ///  // ...
+ /// // ...
  ///
- ///  reader.sectionLines("numbers", NumberSection(vec));
+ /// reader.sectionLines( "numbers" , NumberSection( vec ) );
  ///\endcode
  template< typename Functor >
  SectionReader & sectionLines( const std::string & type , Functor functor ) {
@@ -3563,20 +3561,20 @@ inline SectionReader sectionReader( const char * fn )
 /// reading the graph.
 ///
 ///\code
-/// LgfContents contents("graph.lgf");
+/// LgfContents contents( "graph.lgf" );
 /// contents.run();
 ///
 /// // Does it contain any node section and arc section?
-/// if (contents.nodeSectionNum() == 0 || contents.arcSectionNum()) {
-///   std::cerr << "Failure, cannot find graph." << std::endl;
-///   return -1;
-/// }
+/// if( contents.nodeSectionNum() == 0 || contents.arcSectionNum() ) {
+///  std::cerr << "Failure, cannot find graph." << std::endl;
+///  return( -1 );
+///  }
 /// std::cout << "The name of the default node section: "
-///           << contents.nodeSection(0) << std::endl;
-/// std::cout << "The number of the arc maps: "
-///           << contents.arcMaps(0).size() << std::endl;
-/// std::cout << "The name of second arc map: "
-///           << contents.arcMaps(0)[1] << std::endl;
+///           << contents.nodeSection( 0 ) << std::endl;
+/// std::cout << "The number of the arc maps: " << contents.arcMaps( 0 ).size()
+///           << std::endl;
+/// std::cout << "The name of second arc map: " << contents.arcMaps( 0 )[ 1 ]
+///           << std::endl;
 ///\endcode
 class LgfContents
 {

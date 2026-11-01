@@ -347,10 +347,12 @@ class GomoryHu
  /// This example counts the nodes in the minimum cut separating \c s from
  /// \c t.
  /// \code
- /// GomoryHu<Graph> gom(g, capacities);
+ /// GomoryHu< Graph > gom( g , capacities );
  /// gom.run();
- /// int cnt=0;
- /// for(GomoryHu<Graph>::MinCutNodeIt n(gom,s,t); n!=INVALID; ++n) ++cnt;
+ /// int cnt = 0;
+ /// for( GomoryHu< Graph >::MinCutNodeIt n( gom , s , t ) ; n != INVALID ;
+ ///      ++n )
+ ///  ++cnt;
  /// \endcode
  class MinCutNodeIt
  {
@@ -376,20 +378,20 @@ class GomoryHu
 		///  otherwise it lists the other component.
 		/// \note As the minimum cut is not always unique,
 		/// \code
-		/// MinCutNodeIt(gomory, s, t, true);
+		/// MinCutNodeIt( gomory , s , t , true );
 		/// \endcode
 		/// and
 		/// \code
-		/// MinCutNodeIt(gomory, t, s, false);
+		/// MinCutNodeIt( gomory , t , s , false );
 		/// \endcode
 		/// does not necessarily give the same set of nodes.
 		/// However, it is ensured that
 		/// \code
-		/// MinCutNodeIt(gomory, s, t, true);
+		/// MinCutNodeIt( gomory , s , t , true );
 		/// \endcode
 		/// and
 		/// \code
-		/// MinCutNodeIt(gomory, s, t, false);
+		/// MinCutNodeIt( gomory , s , t , false );
 		/// \endcode
 		/// together list each node exactly once.
 		)
@@ -441,11 +443,12 @@ class GomoryHu
  /// This example computes the value of the minimum cut separating \c s from
  /// \c t.
  /// \code
- /// GomoryHu<Graph> gom(g, capacities);
+ /// GomoryHu< Graph > gom( g , capacities );
  /// gom.run();
- /// int value=0;
- /// for(GomoryHu<Graph>::MinCutEdgeIt e(gom,s,t); e!=INVALID; ++e)
- ///   value+=capacities[e];
+ /// int value = 0;
+ /// for( GomoryHu< Graph >::MinCutEdgeIt e( gom , s , t ) ; e != INVALID ;
+ ///      ++e )
+ ///  value += capacities[ e ];
  /// \endcode
  /// The result will be the same as the value returned by
  /// \ref GomoryHu::minCutValue() "gom.minCutValue(s,t)".

@@ -691,8 +691,8 @@ class Dijkstra
  ///
  ///\note <tt>d.start()</tt> is just a shortcut of the following code.
  ///\code
- ///  while ( !d.emptyQueue() ) {
- ///    d.processNextNode();
+ /// while( ! d.emptyQueue() ) {
+ ///  d.processNextNode();
  ///  }
  ///\endcode
  void start() {
@@ -759,9 +759,9 @@ class Dijkstra
  ///
  ///\note <tt>d.run(s)</tt> is just a shortcut of the following code.
  ///\code
- ///  d.init();
- ///  d.addSource(s);
- ///  d.start();
+ /// d.init();
+ /// d.addSource( s );
+ /// d.start();
  ///\endcode
  void run( Node s ) {
   init();
@@ -780,9 +780,9 @@ class Dijkstra
  ///\note Apart from the return value, <tt>d.run(s,t)</tt> is just a
  ///shortcut of the following code.
  ///\code
- ///  d.init();
- ///  d.addSource(s);
- ///  d.start(t);
+ /// d.init();
+ /// d.addSource( s );
+ /// d.start( t );
  ///\endcode
  bool run( Node s , Node t ) {
   init();
@@ -1263,11 +1263,11 @@ class DijkstraWizard : public TR
 ///they are declared as the members of class \ref DijkstraWizard.
 ///The following examples show how to use these parameters.
 ///\code
-///  // Compute shortest path from node s to each node
-///  dijkstra(g,length).predMap(preds).distMap(dists).run(s);
+/// // Compute shortest path from node s to each node
+/// dijkstra( g , length ).predMap( preds ).distMap( dists ).run( s );
 ///
-///  // Compute shortest path from s to t
-///  bool reached = dijkstra(g,length).path(p).dist(d).run(s,t);
+/// // Compute shortest path from s to t
+/// bool reached = dijkstra( g , length ).path( p ).dist( d ).run( s , t );
 ///\endcode
 ///\warning Don't forget to put the \ref DijkstraWizard::run(Node) "run()"
 ///to the end of the parameter list.

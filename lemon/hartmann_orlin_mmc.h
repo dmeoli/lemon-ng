@@ -326,7 +326,7 @@ class HartmannOrlinMmc
  ///
  /// \note <tt>mmc.run()</tt> is just a shortcut of the following code.
  /// \code
- ///   return mmc.findCycleMean() && mmc.findCycle();
+ /// return( mmc.findCycleMean() && mmc.findCycle() );
  /// \endcode
  bool run() { return( findCycleMean() && findCycle() ); }
 
@@ -425,7 +425,7 @@ class HartmannOrlinMmc
  /// \note <tt>alg.cycleMean()</tt> is just a shortcut of the
  /// following code.
  /// \code
- ///   return static_cast<double>(alg.cycleCost()) / alg.cycleSize();
+ /// return( static_cast< double >( alg.cycleCost() ) / alg.cycleSize() );
  /// \endcode
  ///
  /// \pre \ref run() or \ref findCycleMean() must be called before

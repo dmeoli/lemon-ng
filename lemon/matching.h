@@ -1983,8 +1983,8 @@ class MaxWeightedMatching
  ///
  /// \note mwm.run() is just a shortcut of the following code.
  /// \code
- ///   mwm.fractionalInit();
- ///   mwm.start();
+ /// mwm.fractionalInit();
+ /// mwm.start();
  /// \endcode
  void run() {
   fractionalInit();
@@ -3441,8 +3441,8 @@ class MaxWeightedPerfectMatching
  ///
  /// \note mwpm.run() is just a shortcut of the following code.
  /// \code
- ///   mwpm.fractionalInit();
- ///   mwpm.start();
+ /// mwpm.fractionalInit();
+ /// mwpm.start();
  /// \endcode
  bool run() {
   fractionalInit();

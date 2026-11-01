@@ -204,8 +204,9 @@ class BpGraph
  /// Its usage is quite simple, for example, you can count the number
  /// of red nodes in a graph \c g of type \c %BpGraph like this:
  ///\code
- /// int count=0;
- /// for (BpGraph::RedNodeIt n(g); n!=INVALID; ++n) ++count;
+ /// int count = 0;
+ /// for( BpGraph::RedNodeIt n( g ) ; n != INVALID ; ++n )
+ ///  ++count;
  ///\endcode
  class RedNodeIt : public RedNode
  {
@@ -255,8 +256,8 @@ class BpGraph
  /// which you can use in range-based for loops, stl algorithms, etc.
  /// For example if g is a BpGraph, you can write:
  ///\code
- /// for(auto v: g.redNodes())
- ///   doSomething(v);
+ /// for( auto v : g.redNodes() )
+ ///  doSomething( v );
  ///\endcode
  LemonRangeWrapper1< RedNodeIt , BpGraph > redNodes() const {
   return( LemonRangeWrapper1< RedNodeIt , BpGraph >( *this ) );
@@ -269,8 +270,9 @@ class BpGraph
  /// Its usage is quite simple, for example, you can count the number
  /// of blue nodes in a graph \c g of type \c %BpGraph like this:
  ///\code
- /// int count=0;
- /// for (BpGraph::BlueNodeIt n(g); n!=INVALID; ++n) ++count;
+ /// int count = 0;
+ /// for( BpGraph::BlueNodeIt n( g ) ; n != INVALID ; ++n )
+ ///  ++count;
  ///\endcode
  class BlueNodeIt : public BlueNode
  {
@@ -320,8 +322,8 @@ class BpGraph
  /// which you can use in range-based for loops, stl algorithms, etc.
  /// For example if g is a BpGraph, you can write:
  ///\code
- /// for(auto v: g.blueNodes())
- ///   doSomething(v);
+ /// for( auto v : g.blueNodes() )
+ ///  doSomething( v );
  ///\endcode
  LemonRangeWrapper1< BlueNodeIt , BpGraph > blueNodes() const {
   return( LemonRangeWrapper1< BlueNodeIt , BpGraph >( *this ) );
@@ -334,8 +336,9 @@ class BpGraph
  /// Its usage is quite simple, for example, you can count the number
  /// of nodes in a graph \c g of type \c %BpGraph like this:
  ///\code
- /// int count=0;
- /// for (BpGraph::NodeIt n(g); n!=INVALID; ++n) ++count;
+ /// int count = 0;
+ /// for( BpGraph::NodeIt n( g ) ; n != INVALID ; ++n )
+ ///  ++count;
  ///\endcode
  class NodeIt : public Node
  {
@@ -385,8 +388,8 @@ class BpGraph
  /// which you can use in range-based for loops, stl algorithms, etc.
  /// For example if g is a BpGraph, you can write:
  ///\code
- /// for(auto v: g.nodes())
- ///   doSomething(v);
+ /// for( auto v : g.nodes() )
+ ///  doSomething( v );
  ///\endcode
  LemonRangeWrapper1< NodeIt , BpGraph > nodes() const {
   return( LemonRangeWrapper1< NodeIt , BpGraph >( *this ) );
@@ -449,8 +452,9 @@ class BpGraph
  /// Its usage is quite simple, for example, you can count the number
  /// of edges in a graph \c g of type \c %BpGraph as follows:
  ///\code
- /// int count=0;
- /// for(BpGraph::EdgeIt e(g); e!=INVALID; ++e) ++count;
+ /// int count = 0;
+ /// for( BpGraph::EdgeIt e( g ) ; e != INVALID ; ++e )
+ ///  ++count;
  ///\endcode
  class EdgeIt : public Edge
  {
@@ -501,8 +505,8 @@ class BpGraph
  /// for loops, stl algorithms, etc.
  /// For example if g is a BpGraph, you can write:
  ///\code
- /// for(auto e: g.edges())
- ///   doSomething(e);
+ /// for( auto e : g.edges() )
+ ///  doSomething( e );
  ///\endcode
  LemonRangeWrapper1< EdgeIt , BpGraph > edges() const {
   return( LemonRangeWrapper1< EdgeIt , BpGraph >( *this ) );
@@ -518,8 +522,9 @@ class BpGraph
  /// in a graph \c g of type \c %BpGraph as follows.
  ///
  ///\code
- /// int count=0;
- /// for(BpGraph::IncEdgeIt e(g, n); e!=INVALID; ++e) ++count;
+ /// int count = 0;
+ /// for( BpGraph::IncEdgeIt e( g , n ) ; e != INVALID ; ++e )
+ ///  ++count;
  ///\endcode
  ///
  /// \warning Loop edges will be iterated twice.
@@ -574,8 +579,8 @@ class BpGraph
  /// for loops, stl algorithms, etc.
  /// For example if g is a BpGraph and u is a Node, you can write:
  ///\code
- /// for(auto e: g.incEdges(u))
- ///   doSomething(e);
+ /// for( auto e : g.incEdges( u ) )
+ ///  doSomething( e );
  ///\endcode
  LemonRangeWrapper2< IncEdgeIt , BpGraph , Node >
  incEdges( const Node & u ) const {
@@ -645,8 +650,9 @@ class BpGraph
  /// Its usage is quite simple, for example, you can count the number
  /// of arcs in a graph \c g of type \c %BpGraph as follows:
  ///\code
- /// int count=0;
- /// for(BpGraph::ArcIt a(g); a!=INVALID; ++a) ++count;
+ /// int count = 0;
+ /// for( BpGraph::ArcIt a( g ) ; a != INVALID ; ++a )
+ ///  ++count;
  ///\endcode
  class ArcIt : public Arc
  {
@@ -699,8 +705,8 @@ class BpGraph
  /// for loops, stl algorithms, etc.
  /// For example if g is a BpGraph you can write:
  ///\code
- /// for(auto a: g.arcs())
- ///   doSomething(a);
+ /// for( auto a : g.arcs() )
+ ///  doSomething( a );
  ///\endcode
  LemonRangeWrapper1< ArcIt , BpGraph > arcs() const {
   return( LemonRangeWrapper1< ArcIt , BpGraph >( *this ) );
@@ -715,8 +721,9 @@ class BpGraph
  /// of outgoing arcs of a node \c n
  /// in a graph \c g of type \c %BpGraph as follows.
  ///\code
- /// int count=0;
- /// for (Digraph::OutArcIt a(g, n); a!=INVALID; ++a) ++count;
+ /// int count = 0;
+ /// for( Digraph::OutArcIt a( g , n ) ; a != INVALID ; ++a )
+ ///  ++count;
  ///\endcode
  class OutArcIt : public Arc
  {
@@ -771,8 +778,8 @@ class BpGraph
  /// for loops, stl algorithms, etc.
  /// For example if g is a BpGraph and u is a Node, you can write:
  ///\code
- /// for(auto a: g.outArcs(u))
- ///   doSomething(a);
+ /// for( auto a : g.outArcs( u ) )
+ ///  doSomething( a );
  ///\endcode
  LemonRangeWrapper2< OutArcIt , BpGraph , Node >
  outArcs( const Node & u ) const {
@@ -788,8 +795,9 @@ class BpGraph
  /// of incoming arcs of a node \c n
  /// in a graph \c g of type \c %BpGraph as follows.
  ///\code
- /// int count=0;
- /// for (Digraph::InArcIt a(g, n); a!=INVALID; ++a) ++count;
+ /// int count = 0;
+ /// for( Digraph::InArcIt a( g , n ) ; a != INVALID ; ++a )
+ ///  ++count;
  ///\endcode
  class InArcIt : public Arc
  {
@@ -844,8 +852,8 @@ class BpGraph
  /// for loops, stl algorithms, etc.
  /// For example if g is a BpGraph and u is a Node, you can write:
  ///\code
- /// for(auto a: g.inArcs(u))
- ///   doSomething(a);
+ /// for( auto a : g.inArcs( u ) )
+ ///  doSomething( a );
  ///\endcode
  LemonRangeWrapper2< InArcIt , BpGraph ,
    Node > inArcs( const Node & u ) const {

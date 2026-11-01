@@ -577,8 +577,8 @@ class Bfs
  ///
  ///\note <tt>b.start()</tt> is just a shortcut of the following code.
  ///\code
- ///  while ( !b.emptyQueue() ) {
- ///    b.processNextNode();
+ /// while( ! b.emptyQueue() ) {
+ ///  b.processNextNode();
  ///  }
  ///\endcode
  void start() {
@@ -602,9 +602,9 @@ class Bfs
  ///
  ///\note <tt>b.start(t)</tt> is just a shortcut of the following code.
  ///\code
- ///  bool reach = false;
- ///  while ( !b.emptyQueue() && !reach ) {
- ///    b.processNextNode(t, reach);
+ /// bool reach = false;
+ /// while( ! b.emptyQueue() && ! reach ) {
+ ///  b.processNextNode( t , reach );
  ///  }
  ///\endcode
  void start( Node t ) {
@@ -632,11 +632,11 @@ class Bfs
  ///
  ///\note <tt>b.start(nm)</tt> is just a shortcut of the following code.
  ///\code
- ///  Node rnode = INVALID;
- ///  while ( !b.emptyQueue() && rnode == INVALID ) {
- ///    b.processNextNode(nm, rnode);
+ /// Node rnode = INVALID;
+ /// while( ! b.emptyQueue() && rnode == INVALID ) {
+ ///  b.processNextNode( nm , rnode );
  ///  }
- ///  return rnode;
+ /// return( rnode );
  ///\endcode
  template< class NodeBoolMap >
  Node start( const NodeBoolMap & nm ) {
@@ -658,9 +658,9 @@ class Bfs
  ///
  ///\note <tt>b.run(s)</tt> is just a shortcut of the following code.
  ///\code
- ///  b.init();
- ///  b.addSource(s);
- ///  b.start();
+ /// b.init();
+ /// b.addSource( s );
+ /// b.start();
  ///\endcode
  void run( Node s ) {
   init();
@@ -679,9 +679,9 @@ class Bfs
  ///\note Apart from the return value, <tt>b.run(s,t)</tt> is just a
  ///shortcut of the following code.
  ///\code
- ///  b.init();
- ///  b.addSource(s);
- ///  b.start(t);
+ /// b.init();
+ /// b.addSource( s );
+ /// b.start( t );
  ///\endcode
  bool run( Node s , Node t ) {
   init();
@@ -697,12 +697,13 @@ class Bfs
  ///
  ///\note <tt>b.run(s)</tt> is just a shortcut of the following code.
  ///\code
- ///  b.init();
- ///  for (NodeIt n(gr); n != INVALID; ++n) {
- ///    if (!b.reached(n)) {
- ///      b.addSource(n);
- ///      b.start();
- ///    }
+ /// b.init();
+ /// for( NodeIt n( gr ) ; n != INVALID ; ++n )
+ /// {
+ ///  if( ! b.reached( n ) ) {
+ ///   b.addSource( n );
+ ///   b.start();
+ ///   }
  ///  }
  ///\endcode
  void run() {
@@ -1153,11 +1154,11 @@ class BfsWizard : public TR
 ///they are declared as the members of class \ref BfsWizard.
 ///The following examples show how to use these parameters.
 ///\code
-///  // Compute shortest path from node s to each node
-///  bfs(g).predMap(preds).distMap(dists).run(s);
+/// // Compute shortest path from node s to each node
+/// bfs( g ).predMap( preds ).distMap( dists ).run( s );
 ///
-///  // Compute shortest path from s to t
-///  bool reached = bfs(g).path(p).dist(d).run(s,t);
+/// // Compute shortest path from s to t
+/// bool reached = bfs( g ).path( p ).dist( d ).run( s , t );
 ///\endcode
 ///\warning Don't forget to put the \ref BfsWizard::run(Node) "run()"
 ///to the end of the parameter list.
@@ -1570,9 +1571,9 @@ class BfsVisit
  ///
  /// \note <tt>b.start()</tt> is just a shortcut of the following code.
  /// \code
- ///   while ( !b.emptyQueue() ) {
- ///     b.processNextNode();
- ///   }
+ /// while( ! b.emptyQueue() ) {
+ ///  b.processNextNode();
+ ///  }
  /// \endcode
  void start() {
   while( ! emptyQueue() )
@@ -1595,10 +1596,10 @@ class BfsVisit
  ///
  /// \note <tt>b.start(t)</tt> is just a shortcut of the following code.
  /// \code
- ///   bool reach = false;
- ///   while ( !b.emptyQueue() && !reach ) {
- ///     b.processNextNode(t, reach);
- ///   }
+ /// bool reach = false;
+ /// while( ! b.emptyQueue() && ! reach ) {
+ ///  b.processNextNode( t , reach );
+ ///  }
  /// \endcode
  void start( Node t ) {
   bool reach = false;
@@ -1626,11 +1627,11 @@ class BfsVisit
  ///
  /// \note <tt>b.start(nm)</tt> is just a shortcut of the following code.
  /// \code
- ///   Node rnode = INVALID;
- ///   while ( !b.emptyQueue() && rnode == INVALID ) {
- ///     b.processNextNode(nm, rnode);
- ///   }
- ///   return rnode;
+ /// Node rnode = INVALID;
+ /// while( ! b.emptyQueue() && rnode == INVALID ) {
+ ///  b.processNextNode( nm , rnode );
+ ///  }
+ /// return( rnode );
  /// \endcode
  template< typename NM >
  Node start( const NM & nm ) {
@@ -1652,9 +1653,9 @@ class BfsVisit
  ///
  /// \note <tt>b.run(s)</tt> is just a shortcut of the following code.
  ///\code
- ///   b.init();
- ///   b.addSource(s);
- ///   b.start();
+ /// b.init();
+ /// b.addSource( s );
+ /// b.start();
  ///\endcode
  void run( Node s ) {
   init();
@@ -1673,9 +1674,9 @@ class BfsVisit
  /// \note Apart from the return value, <tt>b.run(s,t)</tt> is just a
  /// shortcut of the following code.
  ///\code
- ///   b.init();
- ///   b.addSource(s);
- ///   b.start(t);
+ /// b.init();
+ /// b.addSource( s );
+ /// b.start( t );
  ///\endcode
  bool run( Node s , Node t ) {
   init();
@@ -1691,12 +1692,13 @@ class BfsVisit
  ///
  /// \note <tt>b.run(s)</tt> is just a shortcut of the following code.
  ///\code
- ///  b.init();
- ///  for (NodeIt n(gr); n != INVALID; ++n) {
- ///    if (!b.reached(n)) {
- ///      b.addSource(n);
- ///      b.start();
- ///    }
+ /// b.init();
+ /// for( NodeIt n( gr ) ; n != INVALID ; ++n )
+ /// {
+ ///  if( ! b.reached( n ) ) {
+ ///   b.addSource( n );
+ ///   b.start();
+ ///   }
  ///  }
  ///\endcode
  void run() {

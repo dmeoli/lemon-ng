@@ -129,8 +129,8 @@ class Path
  /// for loops, STL algorithms, etc.
  /// For example you can write:
  ///\code
- /// for(auto a: p.arcs())
- ///   doSomething(a);
+ /// for( auto a : p.arcs() )
+ ///  doSomething( a );
  ///\endcode
  LemonRangeWrapper1< ArcIt , Path > arcs() const {
   return( LemonRangeWrapper1< ArcIt , Path >( *this ) );
@@ -297,8 +297,8 @@ class PathDumper
  /// for loops, STL algorithms, etc.
  /// For example you can write:
  ///\code
- /// for(auto a: p.arcs())
- ///   doSomething(a);
+ /// for( auto a : p.arcs() )
+ ///  doSomething( a );
  ///\endcode
  LemonRangeWrapper1< ArcIt , PathDumper > arcs() const {
   return( LemonRangeWrapper1< ArcIt , PathDumper >( *this ) );
@@ -344,8 +344,8 @@ class PathDumper
  /// for loops, STL algorithms, etc.
  /// For example you can write:
  ///\code
- /// for(auto a: p.revArcs())
- ///   doSomething(a);
+ /// for( auto a : p.revArcs() )
+ ///  doSomething( a );
  ///\endcode
  LemonRangeWrapper1< RevArcIt , PathDumper > revArcs() const {
   return( LemonRangeWrapper1< RevArcIt , PathDumper >( *this ) );

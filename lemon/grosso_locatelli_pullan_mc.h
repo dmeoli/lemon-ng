@@ -603,13 +603,14 @@ class GrossoLocatelliPullanMc
  /// The following example prints out the IDs of the nodes in the found
  /// clique.
  /// \code
- ///   GrossoLocatelliPullanMc<Graph> mc(g);
- ///   mc.run();
- ///   for (GrossoLocatelliPullanMc<Graph>::CliqueNodeIt n(mc);
- ///        n != INVALID; ++n)
- ///   {
- ///     std::cout << g.id(n) << std::endl;
- ///   }
+ /// GrossoLocatelliPullanMc< Graph > mc( g );
+ /// mc.run();
+ /// for( GrossoLocatelliPullanMc< Graph >::CliqueNodeIt n( mc ) ;
+ ///      n != INVALID ;
+ ///      ++n )
+ /// {
+ ///  std::cout << g.id( n ) << std::endl;
+ ///  }
  /// \endcode
  class CliqueNodeIt
  {

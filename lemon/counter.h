@@ -139,22 +139,22 @@ class _NoSubCounter
 /// The following example shows the usage of counters and subcounters.
 /// \code
 /// // Bubble sort
-/// std::vector<T> v;
-/// ...
-/// Counter op("Operations: ");
-/// Counter::SubCounter as(op, "Assignments: ");
-/// Counter::SubCounter co(op, "Comparisons: ");
-/// for (int i = v.size()-1; i > 0; --i) {
-///   for (int j = 0; j < i; ++j) {
-///     if (v[j] > v[j+1]) {
-///       T tmp = v[j];
-///       v[j] = v[j+1];
-///       v[j+1] = tmp;
-///       as += 3;          // three assignments
-///     }
-///     ++co;               // one comparison
+/// std::vector< T > v;
+/// ... Counter op( "Operations: " );
+/// Counter::SubCounter as( op , "Assignments: " );
+/// Counter::SubCounter co( op , "Comparisons: " );
+/// for( int i = v.size() - 1 ; i > 0 ; --i )
+/// {
+///  for( int j = 0 ; j < i ; ++j ) {
+///   if( v[ j ] > v[ j + 1 ] ) {
+///    T tmp = v[ j ];
+///    v[ j ] = v[ j + 1 ];
+///    v[ j + 1 ] = tmp;
+///    as += 3;  // three assignments
+///    }
+///   ++co;  // one comparison
 ///   }
-/// }
+///  }
 /// \endcode
 ///
 /// This code prints out something like that:

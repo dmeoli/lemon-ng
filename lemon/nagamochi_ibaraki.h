@@ -669,8 +669,8 @@ class NagamochiIbaraki
  ///
  /// \note mc.run(s) is just a shortcut of the following code.
  ///\code
- ///  mc.init();
- ///  mc.start();
+ /// mc.init();
+ /// mc.start();
  ///\endcode
  void run() {
   init();

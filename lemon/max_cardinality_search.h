@@ -710,9 +710,9 @@ class MaxCardinalitySearch
  ///
  ///\note d.run(s) is just a shortcut of the following code.
  ///\code
- ///  d.init();
- ///  d.addSource(s);
- ///  d.start();
+ /// d.init();
+ /// d.addSource( s );
+ /// d.start();
  ///\endcode
  void run( Node s ) {
   init();
@@ -728,12 +728,13 @@ class MaxCardinalitySearch
  ///
  ///\note d.run(s) is just a shortcut of the following code.
  ///\code
- ///  d.init();
- ///  for (NodeIt it(digraph); it != INVALID; ++it) {
- ///    if (!d.reached(it)) {
- ///      d.addSource(s);
- ///      d.start();
- ///    }
+ /// d.init();
+ /// for( NodeIt it( digraph ) ; it != INVALID ; ++it )
+ /// {
+ ///  if( ! d.reached( it ) ) {
+ ///   d.addSource( s );
+ ///   d.start();
+ ///   }
  ///  }
  ///\endcode
  void run() {

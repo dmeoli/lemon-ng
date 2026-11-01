@@ -209,13 +209,13 @@ class ChristofidesTsp
  /// <tt>value_type</tt> of the container must be <tt>FullGraph::Node</tt>.
  /// For example,
  /// \code
- /// std::vector<FullGraph::Node> nodes(countNodes(graph));
- /// tsp.tourNodes(nodes.begin());
+ /// std::vector< FullGraph::Node > nodes( countNodes( graph ) );
+ /// tsp.tourNodes( nodes.begin() );
  /// \endcode
  /// or
  /// \code
- /// std::list<FullGraph::Node> nodes;
- /// tsp.tourNodes(std::back_inserter(nodes));
+ /// std::list< FullGraph::Node > nodes;
+ /// tsp.tourNodes( std::back_inserter( nodes ) );
  /// \endcode
  ///
  /// \pre run() must be called before using this function.

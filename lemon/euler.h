@@ -46,9 +46,9 @@ namespace lemon
 ///for all nodes), then the following code will put the arcs of \c g
 ///to the vector \c et according to an Euler tour of \c g.
 ///\code
-///  std::vector<ListDigraph::Arc> et;
-///  for(DiEulerIt<ListDigraph> e(g); e!=INVALID; ++e)
-///    et.push_back(e);
+/// std::vector< ListDigraph::Arc > et;
+/// for( DiEulerIt< ListDigraph > e( g ) ; e != INVALID ; ++e )
+///  et.push_back( e );
 ///\endcode
 ///If \c g has no Euler tour, then the resulted walk will not be closed
 ///or not contain all arcs.
@@ -143,8 +143,9 @@ class DiEulerIt
 ///the following code will print the arc IDs according to an
 ///Euler tour of \c g.
 ///\code
-///  for(EulerIt<ListGraph> e(g); e!=INVALID; ++e) {
-///    std::cout << g.id(Edge(e)) << std::eol;
+/// for( EulerIt< ListGraph > e( g ) ; e != INVALID ; ++e )
+/// {
+///  std::cout << g.id( Edge( e ) ) << std::eol;
 ///  }
 ///\endcode
 ///Although this iterator is for undirected graphs, it still returns

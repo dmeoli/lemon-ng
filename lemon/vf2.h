@@ -641,23 +641,26 @@ class Vf2Wizard : public TR
 ///declared as the members of class \ref Vf2Wizard.
 ///The following examples show how to use these parameters.
 ///\code
-///  // Find an embedding of graph g1 into graph g2
-///  ListGraph::NodeMap<ListGraph::Node> m(g);
-///  vf2(g1,g2).mapping(m).run();
+/// // Find an embedding of graph g1 into graph g2
+/// ListGraph::NodeMap< ListGraph::Node > m( g );
+/// vf2( g1 , g2 ).mapping( m ).run();
 ///
-///  // Check whether graphs g1 and g2 are isomorphic
-///  bool is_iso = vf2(g1,g2).iso().run();
+/// // Check whether graphs g1 and g2 are isomorphic
+/// bool is_iso = vf2( g1 , g2 ).iso().run();
 ///
-///  // Count the number of isomorphisms
-///  int num_isos = vf2(g1,g2).iso().count();
+/// // Count the number of isomorphisms
+/// int num_isos = vf2( g1 , g2 ).iso().count();
 ///
-///  // Iterate through all the induced subgraph mappings of graph g1 into g2
-///  auto* myVf2 = vf2(g1,g2).mapping(m).nodeLabels(c1,c2)
-///  .induced().getPtrToVf2Object();
-///  while(myVf2->find()){
-///    //process the current mapping m
+/// // Iterate through all the induced subgraph mappings of graph g1 into g2
+/// auto * myVf2 = vf2( g1 , g2 )
+///                  .mapping( m )
+///                  .nodeLabels( c1 , c2 )
+///                  .induced()
+///                  .getPtrToVf2Object();
+/// while( myVf2->find() ) {
+///  //process the current mapping m
 ///  }
-///  delete myVf22;
+/// delete myVf22;
 ///\endcode
 ///\warning Don't forget to put the \ref Vf2Wizard::run() "run()",
 ///\ref Vf2Wizard::count() "count()" or

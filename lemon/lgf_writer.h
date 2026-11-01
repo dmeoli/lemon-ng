@@ -428,14 +428,14 @@ DigraphWriter< TDGR > digraphWriter( const TDGR & digraph , const char * fn );
 /// arc() functions are used to add attribute writing rules.
 ///
 ///\code
-/// DigraphWriter<DGR>(digraph, std::cout)
-///   .nodeMap("coordinates", coord_map)
-///   .nodeMap("size", size)
-///   .nodeMap("title", title)
-///   .arcMap("capacity", cap_map)
-///   .node("source", src)
-///   .node("target", trg)
-///   .attribute("caption", caption)
+/// DigraphWriter< DGR >( digraph , std::cout )
+///   .nodeMap( "coordinates" , coord_map )
+///   .nodeMap( "size" , size )
+///   .nodeMap( "title" , title )
+///   .arcMap( "capacity" , cap_map )
+///   .node( "source" , src )
+///   .node( "target" , trg )
+///   .attribute( "caption" , caption )
 ///   .run();
 ///\endcode
 ///
@@ -985,15 +985,15 @@ class DigraphWriter
 /// nodes:
 ///
 ///\code
-///ListDigraph digraph;
-///ListDigraph::ArcMap<int> cap(digraph);
-///ListDigraph::Node src, trg;
-///  // Setting the capacity map and source and target nodes
-///digraphWriter(digraph, std::cout)
-///  .arcMap("capacity", cap)
-///  .node("source", src)
-///  .node("target", trg)
-///  .run();
+/// ListDigraph digraph;
+/// ListDigraph::ArcMap< int > cap( digraph );
+/// ListDigraph::Node src , trg;
+/// // Setting the capacity map and source and target nodes
+/// digraphWriter( digraph , std::cout )
+///   .arcMap( "capacity" , cap )
+///   .node( "source" , src )
+///   .node( "target" , trg )
+///   .run();
 ///\endcode
 ///
 /// For a complete documentation, please see the
@@ -1636,12 +1636,10 @@ class GraphWriter
 /// graph with a \e weight map on the edges:
 ///
 ///\code
-///ListGraph graph;
-///ListGraph::EdgeMap<int> weight(graph);
-///  // Setting the weight map
-///graphWriter(graph, std::cout)
-///  .edgeMap("weight", weight)
-///  .run();
+/// ListGraph graph;
+/// ListGraph::EdgeMap< int > weight( graph );
+/// // Setting the weight map
+/// graphWriter( graph , std::cout ).edgeMap( "weight" , weight ).run();
 ///\endcode
 ///
 /// For a complete documentation, please see the
@@ -2478,12 +2476,10 @@ class BpGraphWriter
 /// i.e. a graph with a \e weight map on the edges:
 ///
 ///\code
-///ListBpGraph graph;
-///ListBpGraph::EdgeMap<int> weight(graph);
-///  // Setting the weight map
-///bpGraphWriter(graph, std::cout)
-///  .edgeMap("weight", weight)
-///  .run();
+/// ListBpGraph graph;
+/// ListBpGraph::EdgeMap< int > weight( graph );
+/// // Setting the weight map
+/// bpGraphWriter( graph , std::cout ).edgeMap( "weight" , weight ).run();
 ///\endcode
 ///
 /// For a complete documentation, please see the
@@ -2632,24 +2628,25 @@ class SectionWriter
  ///
  /// The generator is implemented as a struct.
  ///\code
- ///  struct NumberSection {
- ///    std::vector<int>::const_iterator _it, _end;
- ///    NumberSection(const std::vector<int>& data)
- ///      : _it(data.begin()), _end(data.end()) {}
- ///    std::string operator()() {
- ///      int rem_in_line = 4;
- ///      std::ostringstream ls;
- ///      while (rem_in_line > 0 && _it != _end) {
- ///        ls << *(_it++) << ' ';
- ///        --rem_in_line;
- ///      }
- ///      return ls.str();
+ /// struct NumberSection
+ /// {
+ ///  std::vector< int >::const_iterator _it , _end;
+ ///  NumberSection( const std::vector< int > & data )
+ ///      : _it( data.begin() ) , _end( data.end() ) { }
+ ///  std::string operator()() {
+ ///   int rem_in_line = 4;
+ ///   std::ostringstream ls;
+ ///   while( rem_in_line > 0 && _it != _end ) {
+ ///    ls << *( _it++ ) << ' ';
+ ///    --rem_in_line;
  ///    }
+ ///   return( ls.str() );
+ ///   }
  ///  };
  ///
- ///  // ...
+ /// // ...
  ///
- ///  writer.sectionLines("numbers", NumberSection(vec));
+ /// writer.sectionLines( "numbers" , NumberSection( vec ) );
  ///\endcode
  template< typename Functor >
  SectionWriter & sectionLines( const std::string & type , Functor functor ) {

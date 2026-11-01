@@ -67,8 +67,8 @@ This directory contains the sources of some useful complete executables.
 This is the base directory of LEMON includes, so each include file must be
 prefixed with this, e.g.
 \code
-#include<lemon/list_graph.h>
-#include<lemon/dijkstra.h>
+#include <lemon/list_graph.h>
+#include <lemon/dijkstra.h>
 \endcode
 */
 

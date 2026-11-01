@@ -152,8 +152,9 @@ class Graph
  /// Its usage is quite simple, for example, you can count the number
  /// of nodes in a graph \c g of type \c %Graph like this:
  ///\code
- /// int count=0;
- /// for (Graph::NodeIt n(g); n!=INVALID; ++n) ++count;
+ /// int count = 0;
+ /// for( Graph::NodeIt n( g ) ; n != INVALID ; ++n )
+ ///  ++count;
  ///\endcode
  class NodeIt : public Node
  {
@@ -205,11 +206,11 @@ class Graph
  /// For example you can write:
  ///\code
  /// ListGraph g;
- /// for(auto v: g.nodes())
- ///   doSomething(v);
+ /// for( auto v : g.nodes() )
+ ///  doSomething( v );
  ///
  /// //Using an STL algorithm:
- /// copy(g.nodes().begin(), g.nodes().end(), vect.begin());
+ /// copy( g.nodes().begin() , g.nodes().end() , vect.begin() );
  ///\endcode
  LemonRangeWrapper1< NodeIt , Graph > nodes() const {
   return( LemonRangeWrapper1< NodeIt , Graph >( *this ) );
@@ -273,8 +274,9 @@ class Graph
  /// Its usage is quite simple, for example, you can count the number
  /// of edges in a graph \c g of type \c %Graph as follows:
  ///\code
- /// int count=0;
- /// for(Graph::EdgeIt e(g); e!=INVALID; ++e) ++count;
+ /// int count = 0;
+ /// for( Graph::EdgeIt e( g ) ; e != INVALID ; ++e )
+ ///  ++count;
  ///\endcode
  class EdgeIt : public Edge
  {
@@ -327,11 +329,11 @@ class Graph
  /// For example you can write:
  ///\code
  /// ListGraph g;
- /// for(auto e: g.edges())
- ///   doSomething(e);
+ /// for( auto e : g.edges() )
+ ///  doSomething( e );
  ///
  /// //Using an STL algorithm:
- /// copy(g.edges().begin(), g.edges().end(), vect.begin());
+ /// copy( g.edges().begin() , g.edges().end() , vect.begin() );
  ///\endcode
  LemonRangeWrapper1< EdgeIt , Graph > edges() const {
   return( LemonRangeWrapper1< EdgeIt , Graph >( *this ) );
@@ -347,8 +349,9 @@ class Graph
  /// in a graph \c g of type \c %Graph as follows.
  ///
  ///\code
- /// int count=0;
- /// for(Graph::IncEdgeIt e(g, n); e!=INVALID; ++e) ++count;
+ /// int count = 0;
+ /// for( Graph::IncEdgeIt e( g , n ) ; e != INVALID ; ++e )
+ ///  ++count;
  ///\endcode
  ///
  /// \warning Loop edges will be iterated twice.
@@ -404,11 +407,11 @@ class Graph
  /// for loops, STL algorithms, etc.
  /// For example if g is a Graph and u is a Node, you can write:
  ///\code
- /// for(auto e: g.incEdges(u))
- ///   doSomething(e);
+ /// for( auto e : g.incEdges( u ) )
+ ///  doSomething( e );
  ///
  /// //Using an STL algorithm:
- /// copy(g.incEdges(u).begin(), g.incEdges(u).end(), vect.begin());
+ /// copy( g.incEdges( u ).begin() , g.incEdges( u ).end() , vect.begin() );
  ///\endcode
  LemonRangeWrapper2< IncEdgeIt , Graph , Node >
  incEdges( const Node & u ) const {
@@ -479,8 +482,9 @@ class Graph
  /// Its usage is quite simple, for example, you can count the number
  /// of arcs in a graph \c g of type \c %Graph as follows:
  ///\code
- /// int count=0;
- /// for(Graph::ArcIt a(g); a!=INVALID; ++a) ++count;
+ /// int count = 0;
+ /// for( Graph::ArcIt a( g ) ; a != INVALID ; ++a )
+ ///  ++count;
  ///\endcode
  class ArcIt : public Arc
  {
@@ -535,11 +539,11 @@ class Graph
  /// For example you can write:
  ///\code
  /// ListGraph g;
- /// for(auto a: g.arcs())
- ///   doSomething(a);
+ /// for( auto a : g.arcs() )
+ ///  doSomething( a );
  ///
  /// //Using an STL algorithm:
- /// copy(g.arcs().begin(), g.arcs().end(), vect.begin());
+ /// copy( g.arcs().begin() , g.arcs().end() , vect.begin() );
  ///\endcode
  LemonRangeWrapper1< ArcIt , Graph > arcs() const {
   return( LemonRangeWrapper1< ArcIt , Graph >( *this ) );
@@ -554,8 +558,9 @@ class Graph
  /// of outgoing arcs of a node \c n
  /// in a graph \c g of type \c %Graph as follows.
  ///\code
- /// int count=0;
- /// for (Digraph::OutArcIt a(g, n); a!=INVALID; ++a) ++count;
+ /// int count = 0;
+ /// for( Digraph::OutArcIt a( g , n ) ; a != INVALID ; ++a )
+ ///  ++count;
  ///\endcode
  class OutArcIt : public Arc
  {
@@ -611,11 +616,11 @@ class Graph
  /// for loops, STL algorithms, etc.
  /// For example if g is a Graph and u is a Node, you can write:
  ///\code
- /// for(auto a: g.outArcs(u))
- ///   doSomething(a);
+ /// for( auto a : g.outArcs( u ) )
+ ///  doSomething( a );
  ///
  /// //Using an STL algorithm:
- /// copy(g.outArcs(u).begin(), g.outArcs(u).end(), vect.begin());
+ /// copy( g.outArcs( u ).begin() , g.outArcs( u ).end() , vect.begin() );
  ///\endcode
  LemonRangeWrapper2< OutArcIt , Graph ,
    Node > outArcs( const Node & u ) const {
@@ -631,8 +636,9 @@ class Graph
  /// of incoming arcs of a node \c n
  /// in a graph \c g of type \c %Graph as follows.
  ///\code
- /// int count=0;
- /// for (Digraph::InArcIt a(g, n); a!=INVALID; ++a) ++count;
+ /// int count = 0;
+ /// for( Digraph::InArcIt a( g , n ) ; a != INVALID ; ++a )
+ ///  ++count;
  ///\endcode
  class InArcIt : public Arc
  {
@@ -688,11 +694,11 @@ class Graph
  /// for loops, STL algorithms, etc.
  /// For example if g is a Graph and u is a Node, you can write:
  ///\code
- /// for(auto a: g.inArcs(u))
- ///   doSomething(a);
+ /// for( auto a : g.inArcs( u ) )
+ ///  doSomething( a );
  ///
  /// //Using an STL algorithm:
- /// copy(g.inArcs(u).begin(), g.inArcs(u).end(), vect.begin());
+ /// copy( g.inArcs( u ).begin() , g.inArcs( u ).end() , vect.begin() );
  ///\endcode
  LemonRangeWrapper2< InArcIt , Graph , Node > inArcs( const Node & u ) const {
   return( LemonRangeWrapper2< InArcIt , Graph , Node >( *this , u ) );

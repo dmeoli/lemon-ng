@@ -154,8 +154,9 @@ class LpBase
  /// Its usage is quite simple, for example, you can count the number
  /// of columns in an LP \c lp:
  ///\code
- /// int count=0;
- /// for (LpBase::ColIt c(lp); c!=INVALID; ++c) ++count;
+ /// int count = 0;
+ /// for( LpBase::ColIt c( lp ) ; c != INVALID ; ++c )
+ ///  ++count;
  ///\endcode
  class ColIt : public Col
  {
@@ -197,8 +198,8 @@ class LpBase
  /// which you can use in range-based for loops, STL algorithms, etc.
  /// For example you can write:
  ///\code
- /// for(auto c: lp.cols())
- ///   doSomething(c);
+ /// for( auto c : lp.cols() )
+ ///  doSomething( c );
  ///\endcode
  LemonRangeWrapper1< ColIt , LpBase > cols() {
   return( LemonRangeWrapper1< ColIt , LpBase >( *this ) );
@@ -268,8 +269,9 @@ class LpBase
  /// Its usage is quite simple, for example, you can count the number
  /// of rows in an LP \c lp:
  ///\code
- /// int count=0;
- /// for (LpBase::RowIt c(lp); c!=INVALID; ++c) ++count;
+ /// int count = 0;
+ /// for( LpBase::RowIt c( lp ) ; c != INVALID ; ++c )
+ ///  ++count;
  ///\endcode
  class RowIt : public Row
  {
@@ -311,8 +313,8 @@ class LpBase
  /// which you can use in range-based for loops, STL algorithms, etc.
  /// For example you can write:
  ///\code
- /// for(auto c: lp.rows())
- ///   doSomething(c);
+ /// for( auto c : lp.rows() )
+ ///  doSomething( c );
  ///\endcode
  LemonRangeWrapper1< RowIt , LpBase > rows() {
   return( LemonRangeWrapper1< RowIt , LpBase >( *this ) );
@@ -335,39 +337,38 @@ class LpBase
  ///There are several ways to access and modify the contents of this
  ///container.
  ///\code
- ///e[v]=5;
- ///e[v]+=12;
- ///e.erase(v);
+ /// e[ v ] = 5;
+ /// e[ v ] += 12;
+ /// e.erase( v );
  ///\endcode
  ///or you can also iterate through its elements.
  ///\code
- ///double s=0;
- ///for(LpBase::Expr::ConstCoeffIt i(e);i!=INVALID;++i)
- ///  s+=*i * primal(i);
+ /// double s = 0;
+ /// for( LpBase::Expr::ConstCoeffIt i( e ) ; i != INVALID ; ++i )
+ ///  s += *i * primal( i );
  ///\endcode
  ///(This code computes the primal value of the expression).
  ///- Numbers (<tt>double</tt>'s)
  ///and variables (\ref Col "Col"s) directly convert to an
  ///\ref Expr and the usual linear operations are defined, so
  ///\code
- ///v+w
- ///2*v-3.12*(v-w/2)+2
- ///v*2.1+(3*v+(v*12+w+6)*3)/2
+ /// v + w 2 * v - 3.12 * ( v - w / 2 ) + 2 v * 2.1 +
+ ///   ( 3 * v + ( v * 12 + w + 6 ) * 3 ) / 2
  ///\endcode
  ///are valid expressions.
  ///The usual assignment operations are also defined.
  ///\code
- ///e=v+w;
- ///e+=2*v-3.12*(v-w/2)+2;
- ///e*=3.4;
- ///e/=5;
+ /// e = v + w;
+ /// e += 2 * v - 3.12 * ( v - w / 2 ) + 2;
+ /// e *= 3.4;
+ /// e /= 5;
  ///\endcode
  ///- The constant member can be set and read by dereference
  ///  operator (unary *)
  ///
  ///\code
- ///*e=12;
- ///double c=*e;
+ /// *e = 12;
+ /// double c = *e;
  ///\endcode
  ///
  ///\sa Constr
@@ -497,9 +498,9 @@ class LpBase
   ///The iterator iterates over the terms of the expression.
   ///
   ///\code
-  ///double s=0;
-  ///for(LpBase::Expr::CoeffIt i(e);i!=INVALID;++i)
-  ///  s+= *i * primal(i);
+  /// double s = 0;
+  /// for( LpBase::Expr::CoeffIt i( e ) ; i != INVALID ; ++i )
+  ///  s += *i * primal( i );
   ///\endcode
   class CoeffIt
   {
@@ -541,9 +542,9 @@ class LpBase
   ///The iterator iterates over the terms of the expression.
   ///
   ///\code
-  ///double s=0;
-  ///for(LpBase::Expr::ConstCoeffIt i(e);i!=INVALID;++i)
-  ///  s+=*i * primal(i);
+  /// double s = 0;
+  /// for( LpBase::Expr::ConstCoeffIt i( e ) ; i != INVALID ; ++i )
+  ///  s += *i * primal( i );
   ///\endcode
   class ConstCoeffIt
   {
@@ -597,11 +598,7 @@ class LpBase
  ///  and thus they can be used directly e.g. in \ref addRow() whenever
  ///  it makes sense.
  ///\code
- ///  e<=s
- ///  e<=f
- ///  e==f
- ///  s<=e<=t
- ///  e>=t
+ /// e <= s e <= f e == f s <= e <= t e >= t
  ///\endcode
  ///\warning The validity of a constraint is checked only at run
  ///time, so e.g. \ref addRow(<tt>x[1]\<=x[2]<=5</tt>) will
@@ -667,32 +664,31 @@ class LpBase
  ///There are several ways to access and modify the contents of this
  ///container.
  ///\code
- ///e[v]=5;
- ///e[v]+=12;
- ///e.erase(v);
+ /// e[ v ] = 5;
+ /// e[ v ] += 12;
+ /// e.erase( v );
  ///\endcode
  ///or you can also iterate through its elements.
  ///\code
- ///double s=0;
- ///for(LpBase::DualExpr::ConstCoeffIt i(e);i!=INVALID;++i)
- ///  s+=*i;
+ /// double s = 0;
+ /// for( LpBase::DualExpr::ConstCoeffIt i( e ) ; i != INVALID ; ++i )
+ ///  s += *i;
  ///\endcode
  ///(This code computes the sum of all coefficients).
  ///- Numbers (<tt>double</tt>'s)
  ///and variables (\ref LpBase::Row "Row"s) directly convert to an
  ///\ref DualExpr and the usual linear operations are defined, so
  ///\code
- ///v+w
- ///2*v-3.12*(v-w/2)
- ///v*2.1+(3*v+(v*12+w)*3)/2
+ /// v + w 2 * v - 3.12 * ( v - w / 2 ) v * 2.1 +
+ ///   ( 3 * v + ( v * 12 + w ) * 3 ) / 2
  ///\endcode
  ///are valid \ref DualExpr dual expressions.
  ///The usual assignment operations are also defined.
  ///\code
- ///e=v+w;
- ///e+=2*v-3.12*(v-w/2);
- ///e*=3.4;
- ///e/=5;
+ /// e = v + w;
+ /// e += 2 * v - 3.12 * ( v - w / 2 );
+ /// e *= 3.4;
+ /// e /= 5;
  ///\endcode
  ///
  ///\sa Expr
@@ -801,9 +797,9 @@ class LpBase
   ///The iterator iterates over the terms of the expression.
   ///
   ///\code
-  ///double s=0;
-  ///for(LpBase::DualExpr::CoeffIt i(e);i!=INVALID;++i)
-  ///  s+= *i * dual(i);
+  /// double s = 0;
+  /// for( LpBase::DualExpr::CoeffIt i( e ) ; i != INVALID ; ++i )
+  ///  s += *i * dual( i );
   ///\endcode
   class CoeffIt
   {
@@ -846,9 +842,9 @@ class LpBase
   ///The iterator iterates over the terms of the expression.
   ///
   ///\code
-  ///double s=0;
-  ///for(LpBase::DualExpr::ConstCoeffIt i(e);i!=INVALID;++i)
-  ///  s+= *i * dual(i);
+  /// double s = 0;
+  /// for( LpBase::DualExpr::ConstCoeffIt i( e ) ; i != INVALID ; ++i )
+  ///  s += *i * dual( i );
   ///\endcode
   class ConstCoeffIt
   {
@@ -1107,18 +1103,16 @@ class LpBase
  ///- a standard STL compatible iterable container with
  ///\ref Col as its \c values_type like
  ///\code
- ///std::vector<LpBase::Col>
- ///std::list<LpBase::Col>
+ /// std::vector< LpBase::Col > std::list< LpBase::Col >
  ///\endcode
  ///- a standard STL compatible iterable container with
  ///\ref Col as its \c mapped_type like
  ///\code
- ///std::map<AnyType,LpBase::Col>
+ /// std::map< AnyType , LpBase::Col >
  ///\endcode
  ///- an iterable lemon \ref concepts::WriteMap "write map" like
  ///\code
- ///ListGraph::NodeMap<LpBase::Col>
- ///ListGraph::ArcMap<LpBase::Col>
+ /// ListGraph::NodeMap< LpBase::Col > ListGraph::ArcMap< LpBase::Col >
  ///\endcode
  ///\return The number of the created column.
 #ifdef DOXYGEN
@@ -1211,18 +1205,16 @@ class LpBase
  ///- a standard STL compatible iterable container with
  ///\ref LpBase::Row "Row" as its \c values_type like
  ///\code
- ///std::vector<LpBase::Row>
- ///std::list<LpBase::Row>
+ /// std::vector< LpBase::Row > std::list< LpBase::Row >
  ///\endcode
  ///- a standard STL compatible iterable container with
  ///\ref LpBase::Row "Row" as its \c mapped_type like
  ///\code
- ///std::map<AnyType,LpBase::Row>
+ /// std::map< AnyType , LpBase::Row >
  ///\endcode
  ///- an iterable lemon \ref concepts::WriteMap "write map" like
  ///\code
- ///ListGraph::NodeMap<LpBase::Row>
- ///ListGraph::ArcMap<LpBase::Row>
+ /// ListGraph::NodeMap< LpBase::Row > ListGraph::ArcMap< LpBase::Row >
  ///\endcode
  ///\return The number of rows created.
 #ifdef DOXYGEN

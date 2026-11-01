@@ -1227,9 +1227,13 @@ const double GraphToEps< T >::A4BORDER = 15;
 ///they are declared as the members of class \ref GraphToEps. The following
 ///example shows how to use these parameters.
 ///\code
-/// graphToEps(g,os).scale(10).coords(coords)
-///              .nodeScale(2).nodeSizes(sizes)
-///              .arcWidthScale(.4).run();
+/// graphToEps( g , os )
+///   .scale( 10 )
+///   .coords( coords )
+///   .nodeScale( 2 )
+///   .nodeSizes( sizes )
+///   .arcWidthScale( .4 )
+///   .run();
 ///\endcode
 ///
 ///For more detailed examples, see the \ref graph_to_eps_demo.cc demo file.

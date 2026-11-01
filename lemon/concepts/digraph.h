@@ -121,8 +121,9 @@ class Digraph
  /// Its usage is quite simple, for example, you can count the number
  /// of nodes in a digraph \c g of type \c %Digraph like this:
  ///\code
- /// int count=0;
- /// for (Digraph::NodeIt n(g); n!=INVALID; ++n) ++count;
+ /// int count = 0;
+ /// for( Digraph::NodeIt n( g ) ; n != INVALID ; ++n )
+ ///  ++count;
  ///\endcode
  class NodeIt : public Node
  {
@@ -174,11 +175,11 @@ class Digraph
  /// For example you can write:
  ///\code
  /// ListDigraph g;
- /// for(auto v: g.nodes())
- ///   doSomething(v);
+ /// for( auto v : g.nodes() )
+ ///  doSomething( v );
  ///
  /// //Using an STL algorithm:
- /// copy(g.nodes().begin(), g.nodes().end(), vect.begin());
+ /// copy( g.nodes().begin() , g.nodes().end() , vect.begin() );
  ///\endcode
  LemonRangeWrapper1< NodeIt , Digraph > nodes() const {
   return( LemonRangeWrapper1< NodeIt , Digraph >( *this ) );
@@ -244,8 +245,9 @@ class Digraph
  /// of outgoing arcs of a node \c n
  /// in a digraph \c g of type \c %Digraph as follows.
  ///\code
- /// int count=0;
- /// for (Digraph::OutArcIt a(g, n); a!=INVALID; ++a) ++count;
+ /// int count = 0;
+ /// for( Digraph::OutArcIt a( g , n ) ; a != INVALID ; ++a )
+ ///  ++count;
  ///\endcode
  class OutArcIt : public Arc
  {
@@ -297,11 +299,11 @@ class Digraph
  /// for loops, STL algorithms, etc.
  /// For example if g is a Digraph and u is a node, you can write:
  ///\code
- /// for(auto a: g.outArcs(u))
- ///   doSomething(a);
+ /// for( auto a : g.outArcs( u ) )
+ ///  doSomething( a );
  ///
  /// //Using an STL algorithm:
- /// copy(g.outArcs(u).begin(), g.outArcs(u).end(), vect.begin());
+ /// copy( g.outArcs( u ).begin() , g.outArcs( u ).end() , vect.begin() );
  ///\endcode
  LemonRangeWrapper2< OutArcIt , Digraph , Node >
  outArcs( const Node & u ) const {
@@ -317,8 +319,9 @@ class Digraph
  /// of incoming arcs of a node \c n
  /// in a digraph \c g of type \c %Digraph as follows.
  ///\code
- /// int count=0;
- /// for(Digraph::InArcIt a(g, n); a!=INVALID; ++a) ++count;
+ /// int count = 0;
+ /// for( Digraph::InArcIt a( g , n ) ; a != INVALID ; ++a )
+ ///  ++count;
  ///\endcode
  class InArcIt : public Arc
  {
@@ -371,11 +374,11 @@ class Digraph
  /// for loops, STL algorithms, etc.
  /// For example if g is a Digraph and u is a node, you can write:
  ///\code
- /// for(auto a: g.inArcs(u))
- ///   doSomething(a);
+ /// for( auto a : g.inArcs( u ) )
+ ///  doSomething( a );
  ///
  /// //Using an STL algorithm:
- /// copy(g.inArcs(u).begin(), g.inArcs(u).end(), vect.begin());
+ /// copy( g.inArcs( u ).begin() , g.inArcs( u ).end() , vect.begin() );
  ///\endcode
  LemonRangeWrapper2< InArcIt , Digraph ,
    Node > inArcs( const Node & u ) const {
@@ -389,8 +392,9 @@ class Digraph
  /// Its usage is quite simple, for example, you can count the number
  /// of arcs in a digraph \c g of type \c %Digraph as follows:
  ///\code
- /// int count=0;
- /// for(Digraph::ArcIt a(g); a!=INVALID; ++a) ++count;
+ /// int count = 0;
+ /// for( Digraph::ArcIt a( g ) ; a != INVALID ; ++a )
+ ///  ++count;
  ///\endcode
  class ArcIt : public Arc
  {
@@ -445,11 +449,11 @@ class Digraph
  /// For example you can write:
  ///\code
  /// ListDigraph g;
- /// for(auto a: g.arcs())
- ///   doSomething(a);
+ /// for( auto a : g.arcs() )
+ ///  doSomething( a );
  ///
  /// //Using an STL algorithm:
- /// copy(g.arcs().begin(), g.arcs().end(), vect.begin());
+ /// copy( g.arcs().begin() , g.arcs().end() , vect.begin() );
  ///\endcode
  LemonRangeWrapper1< ArcIt , Digraph > arcs() const {
   return( LemonRangeWrapper1< ArcIt , Digraph >( *this ) );

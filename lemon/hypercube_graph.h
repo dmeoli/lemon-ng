@@ -367,14 +367,15 @@ class HypercubeGraph : public ExtendedHypercubeGraphBase
  ///
  ///\code
  /// const int DIM = 3;
- /// HypercubeGraph graph(DIM);
- /// dim2::Point<double> base[DIM];
- /// for (int k = 0; k < DIM; ++k) {
- ///   base[k].x = rnd();
- ///   base[k].y = rnd();
- /// }
- /// HypercubeGraph::HyperMap<dim2::Point<double> >
- ///   pos(graph, base, base + DIM, dim2::Point<double>(0.0, 0.0));
+ /// HypercubeGraph graph( DIM );
+ /// dim2::Point< double > base[ DIM ];
+ /// for( int k = 0 ; k < DIM ; ++k )
+ /// {
+ ///  base[ k ].x = rnd();
+ ///  base[ k ].y = rnd();
+ ///  }
+ /// HypercubeGraph::HyperMap< dim2::Point< double > >
+ ///   pos( graph , base , base + DIM , dim2::Point< double >( 0.0 , 0.0 ) );
  ///\endcode
  ///
  /// \see HypercubeGraph

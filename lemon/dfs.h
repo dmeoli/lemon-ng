@@ -529,8 +529,8 @@ class Dfs
  ///
  ///\note <tt>d.start()</tt> is just a shortcut of the following code.
  ///\code
- ///  while ( !d.emptyQueue() ) {
- ///    d.processNextArc();
+ /// while( ! d.emptyQueue() ) {
+ ///  d.processNextArc();
  ///  }
  ///\endcode
  void start() {
@@ -592,9 +592,9 @@ class Dfs
  ///
  ///\note <tt>d.run(s)</tt> is just a shortcut of the following code.
  ///\code
- ///  d.init();
- ///  d.addSource(s);
- ///  d.start();
+ /// d.init();
+ /// d.addSource( s );
+ /// d.start();
  ///\endcode
  void run( Node s ) {
   init();
@@ -613,9 +613,9 @@ class Dfs
  ///\note Apart from the return value, <tt>d.run(s,t)</tt> is
  ///just a shortcut of the following code.
  ///\code
- ///  d.init();
- ///  d.addSource(s);
- ///  d.start(t);
+ /// d.init();
+ /// d.addSource( s );
+ /// d.start( t );
  ///\endcode
  bool run( Node s , Node t ) {
   init();
@@ -631,12 +631,13 @@ class Dfs
  ///
  ///\note <tt>d.run()</tt> is just a shortcut of the following code.
  ///\code
- ///  d.init();
- ///  for (NodeIt n(digraph); n != INVALID; ++n) {
- ///    if (!d.reached(n)) {
- ///      d.addSource(n);
- ///      d.start();
- ///    }
+ /// d.init();
+ /// for( NodeIt n( digraph ) ; n != INVALID ; ++n )
+ /// {
+ ///  if( ! d.reached( n ) ) {
+ ///   d.addSource( n );
+ ///   d.start();
+ ///   }
  ///  }
  ///\endcode
  void run() {
@@ -1085,11 +1086,11 @@ class DfsWizard : public TR
 ///they are declared as the members of class \ref DfsWizard.
 ///The following examples show how to use these parameters.
 ///\code
-///  // Compute the DFS tree
-///  dfs(g).predMap(preds).distMap(dists).run(s);
+/// // Compute the DFS tree
+/// dfs( g ).predMap( preds ).distMap( dists ).run( s );
 ///
-///  // Compute the DFS path from s to t
-///  bool reached = dfs(g).path(p).dist(d).run(s,t);
+/// // Compute the DFS path from s to t
+/// bool reached = dfs( g ).path( p ).dist( d ).run( s , t );
 ///\endcode
 ///\warning Don't forget to put the \ref DfsWizard::run(Node) "run()"
 ///to the end of the parameter list.
@@ -1471,9 +1472,9 @@ class DfsVisit
  ///
  /// \note <tt>d.start()</tt> is just a shortcut of the following code.
  /// \code
- ///   while ( !d.emptyQueue() ) {
- ///     d.processNextArc();
- ///   }
+ /// while( ! d.emptyQueue() ) {
+ ///  d.processNextArc();
+ ///  }
  /// \endcode
  void start() {
   while( ! emptyQueue() )
@@ -1534,9 +1535,9 @@ class DfsVisit
  ///
  /// \note <tt>d.run(s)</tt> is just a shortcut of the following code.
  ///\code
- ///   d.init();
- ///   d.addSource(s);
- ///   d.start();
+ /// d.init();
+ /// d.addSource( s );
+ /// d.start();
  ///\endcode
  void run( Node s ) {
   init();
@@ -1555,9 +1556,9 @@ class DfsVisit
  /// \note Apart from the return value, <tt>d.run(s,t)</tt> is
  /// just a shortcut of the following code.
  ///\code
- ///   d.init();
- ///   d.addSource(s);
- ///   d.start(t);
+ /// d.init();
+ /// d.addSource( s );
+ /// d.start( t );
  ///\endcode
  bool run( Node s , Node t ) {
   init();
@@ -1573,13 +1574,14 @@ class DfsVisit
  ///
  /// \note <tt>d.run()</tt> is just a shortcut of the following code.
  ///\code
- ///   d.init();
- ///   for (NodeIt n(digraph); n != INVALID; ++n) {
- ///     if (!d.reached(n)) {
- ///       d.addSource(n);
- ///       d.start();
- ///     }
+ /// d.init();
+ /// for( NodeIt n( digraph ) ; n != INVALID ; ++n )
+ /// {
+ ///  if( ! d.reached( n ) ) {
+ ///   d.addSource( n );
+ ///   d.start();
  ///   }
+ ///  }
  ///\endcode
  void run() {
   init();

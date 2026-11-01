@@ -586,9 +586,9 @@ class MinCostArborescence
  ///
  ///\note mca.start() is just a shortcut of the following code.
  ///\code
- ///while (!mca.emptyQueue()) {
+ /// while( ! mca.emptyQueue() ) {
  ///  mca.processNextNode();
- ///}
+ ///  }
  ///\endcode
  void start() {
   while( ! emptyQueue() ) {
@@ -604,7 +604,7 @@ class MinCostArborescence
  /// \note mca.run(s) is just a shortcut of the following code.
  /// \code
  /// mca.init();
- /// mca.addSource(s);
+ /// mca.addSource( s );
  /// mca.start();
  /// \endcode
  void run( Node s ) {

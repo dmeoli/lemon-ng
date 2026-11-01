@@ -256,24 +256,23 @@ inline std::ostream & operator<<( std::ostream & os , const TimeStamp & t )
 ///Class for measuring the cpu time and real time usage of the process.
 ///It is quite easy-to-use, here is a short example.
 ///\code
-/// #include<lemon/time_measure.h>
-/// #include<iostream>
+/// #include <lemon/time_measure.h>
+/// #include <iostream>
 ///
 /// int main()
 /// {
 ///
-///   ...
+///  ...
 ///
-///   Timer t;
-///   doSomething();
-///   std::cout << t << '\n';
-///   t.restart();
-///   doSomethingElse();
-///   std::cout << t << '\n';
+///    Timer t;
+///  doSomething();
+///  std::cout << t << '\n';
+///  t.restart();
+///  doSomethingElse();
+///  std::cout << t << '\n';
 ///
-///   ...
-///
-/// }
+///  ...
+///  }
 ///\endcode
 ///
 ///The \ref Timer can also be \ref stop() "stopped" and
@@ -375,7 +374,8 @@ class Timer
  ///is a faster
  ///equivalent of the following.
  ///\code
- ///  while(t.running()) t.stop()
+ /// while( t.running() )
+ /// t.stop()
  ///\endcode
  ///
  ///
@@ -440,9 +440,9 @@ class Timer
  ///This conversion computes the ellapsed time, therefore you can print
  ///the ellapsed time like this.
  ///\code
- ///  Timer t;
- ///  doSomething();
- ///  std::cout << t << '\n';
+ /// Timer t;
+ /// doSomething();
+ /// std::cout << t << '\n';
  ///\endcode
  operator TimeStamp() const {
   TimeStamp t;
@@ -459,10 +459,10 @@ class Timer
 ///Same as \ref Timer but prints a report on destruction.
 ///This example shows its usage.
 ///\code
-///  void myAlg(ListGraph &g,int n)
-///  {
-///    TimeReport tr("Running time of myAlg: ");
-///    ... //Here comes the algorithm
+/// void myAlg( ListGraph & g , int n )
+/// {
+///  TimeReport tr( "Running time of myAlg: " );
+///  ...  //Here comes the algorithm
 ///  }
 ///\endcode
 ///

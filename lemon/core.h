@@ -674,23 +674,23 @@ undirected( const GR & )
 ///
 /// The next code copies a digraph with several data:
 ///\code
-///  DigraphCopy<OrigGraph, NewGraph> cg(orig_graph, new_graph);
-///  // Create references for the nodes
-///  OrigGraph::NodeMap<NewGraph::Node> nr(orig_graph);
-///  cg.nodeRef(nr);
-///  // Create cross references (inverse) for the arcs
-///  NewGraph::ArcMap<OrigGraph::Arc> acr(new_graph);
-///  cg.arcCrossRef(acr);
-///  // Copy an arc map
-///  OrigGraph::ArcMap<double> oamap(orig_graph);
-///  NewGraph::ArcMap<double> namap(new_graph);
-///  cg.arcMap(oamap, namap);
-///  // Copy a node
-///  OrigGraph::Node on;
-///  NewGraph::Node nn;
-///  cg.node(on, nn);
-///  // Execute copying
-///  cg.run();
+/// DigraphCopy< OrigGraph , NewGraph > cg( orig_graph , new_graph );
+/// // Create references for the nodes
+/// OrigGraph::NodeMap< NewGraph::Node > nr( orig_graph );
+/// cg.nodeRef( nr );
+/// // Create cross references (inverse) for the arcs
+/// NewGraph::ArcMap< OrigGraph::Arc > acr( new_graph );
+/// cg.arcCrossRef( acr );
+/// // Copy an arc map
+/// OrigGraph::ArcMap< double > oamap( orig_graph );
+/// NewGraph::ArcMap< double > namap( new_graph );
+/// cg.arcMap( oamap , namap );
+/// // Copy a node
+/// OrigGraph::Node on;
+/// NewGraph::Node nn;
+/// cg.node( on , nn );
+/// // Execute copying
+/// cg.run();
 ///\endcode
 template< typename From , typename To >
 class DigraphCopy
@@ -874,7 +874,7 @@ class DigraphCopy
 /// The complete usage of it is detailed in the DigraphCopy class, but
 /// a short example shows a basic work:
 ///\code
-/// digraphCopy(src, trg).nodeRef(nr).arcCrossRef(acr).run();
+/// digraphCopy( src , trg ).nodeRef( nr ).arcCrossRef( acr ).run();
 ///\endcode
 ///
 /// After the copy the \c nr map will contain the mapping from the
@@ -906,23 +906,23 @@ DigraphCopy< From , To > digraphCopy( const From & from , To & to )
 ///
 /// The next code copies a graph with several data:
 ///\code
-///  GraphCopy<OrigGraph, NewGraph> cg(orig_graph, new_graph);
-///  // Create references for the nodes
-///  OrigGraph::NodeMap<NewGraph::Node> nr(orig_graph);
-///  cg.nodeRef(nr);
-///  // Create cross references (inverse) for the edges
-///  NewGraph::EdgeMap<OrigGraph::Edge> ecr(new_graph);
-///  cg.edgeCrossRef(ecr);
-///  // Copy an edge map
-///  OrigGraph::EdgeMap<double> oemap(orig_graph);
-///  NewGraph::EdgeMap<double> nemap(new_graph);
-///  cg.edgeMap(oemap, nemap);
-///  // Copy a node
-///  OrigGraph::Node on;
-///  NewGraph::Node nn;
-///  cg.node(on, nn);
-///  // Execute copying
-///  cg.run();
+/// GraphCopy< OrigGraph , NewGraph > cg( orig_graph , new_graph );
+/// // Create references for the nodes
+/// OrigGraph::NodeMap< NewGraph::Node > nr( orig_graph );
+/// cg.nodeRef( nr );
+/// // Create cross references (inverse) for the edges
+/// NewGraph::EdgeMap< OrigGraph::Edge > ecr( new_graph );
+/// cg.edgeCrossRef( ecr );
+/// // Copy an edge map
+/// OrigGraph::EdgeMap< double > oemap( orig_graph );
+/// NewGraph::EdgeMap< double > nemap( new_graph );
+/// cg.edgeMap( oemap , nemap );
+/// // Copy a node
+/// OrigGraph::Node on;
+/// NewGraph::Node nn;
+/// cg.node( on , nn );
+/// // Execute copying
+/// cg.run();
 ///\endcode
 template< typename From , typename To >
 class GraphCopy
@@ -1196,7 +1196,7 @@ class GraphCopy
 /// The complete usage of it is detailed in the GraphCopy class,
 /// but a short example shows a basic work:
 ///\code
-/// graphCopy(src, trg).nodeRef(nr).edgeCrossRef(ecr).run();
+/// graphCopy( src , trg ).nodeRef( nr ).edgeCrossRef( ecr ).run();
 ///\endcode
 ///
 /// After the copy the \c nr map will contain the mapping from the
@@ -1229,23 +1229,23 @@ GraphCopy< From , To > graphCopy( const From & from , To & to )
 ///
 /// The next code copies a graph with several data:
 ///\code
-///  BpGraphCopy<OrigBpGraph, NewBpGraph> cg(orig_graph, new_graph);
-///  // Create references for the nodes
-///  OrigBpGraph::NodeMap<NewBpGraph::Node> nr(orig_graph);
-///  cg.nodeRef(nr);
-///  // Create cross references (inverse) for the edges
-///  NewBpGraph::EdgeMap<OrigBpGraph::Edge> ecr(new_graph);
-///  cg.edgeCrossRef(ecr);
-///  // Copy a red node map
-///  OrigBpGraph::RedNodeMap<double> ormap(orig_graph);
-///  NewBpGraph::RedNodeMap<double> nrmap(new_graph);
-///  cg.redNodeMap(ormap, nrmap);
-///  // Copy a node
-///  OrigBpGraph::Node on;
-///  NewBpGraph::Node nn;
-///  cg.node(on, nn);
-///  // Execute copying
-///  cg.run();
+/// BpGraphCopy< OrigBpGraph , NewBpGraph > cg( orig_graph , new_graph );
+/// // Create references for the nodes
+/// OrigBpGraph::NodeMap< NewBpGraph::Node > nr( orig_graph );
+/// cg.nodeRef( nr );
+/// // Create cross references (inverse) for the edges
+/// NewBpGraph::EdgeMap< OrigBpGraph::Edge > ecr( new_graph );
+/// cg.edgeCrossRef( ecr );
+/// // Copy a red node map
+/// OrigBpGraph::RedNodeMap< double > ormap( orig_graph );
+/// NewBpGraph::RedNodeMap< double > nrmap( new_graph );
+/// cg.redNodeMap( ormap , nrmap );
+/// // Copy a node
+/// OrigBpGraph::Node on;
+/// NewBpGraph::Node nn;
+/// cg.node( on , nn );
+/// // Execute copying
+/// cg.run();
 ///\endcode
 template< typename From , typename To >
 class BpGraphCopy
@@ -1676,7 +1676,7 @@ class BpGraphCopy
 /// The complete usage of it is detailed in the BpGraphCopy class,
 /// but a short example shows a basic work:
 ///\code
-/// graphCopy(src, trg).nodeRef(nr).edgeCrossRef(ecr).run();
+/// graphCopy( src , trg ).nodeRef( nr ).edgeCrossRef( ecr ).run();
 ///\endcode
 ///
 /// After the copy the \c nr map will contain the mapping from the
@@ -1737,9 +1737,11 @@ struct FindArcSelector<
 ///
 /// Thus you can iterate through each arc from \c u to \c v as it follows.
 ///\code
-/// for(Arc e = findArc(g,u,v); e != INVALID; e = findArc(g,u,v,e)) {
-///   ...
-/// }
+/// for( Arc e = findArc( g , u , v ) ; e != INVALID ;
+///      e = findArc( g , u , v , e ) )
+/// {
+///  ...
+///  }
 ///\endcode
 ///
 /// \note \ref ConArcIt provides iterator interface for the same
@@ -1761,9 +1763,10 @@ inline typename Graph::Arc findArc( const Graph & g , typename Graph::Node u ,
 /// a higher level interface for the \ref findArc() function. You can
 /// use it the following way:
 ///\code
-/// for (ConArcIt<Graph> it(g, src, trg); it != INVALID; ++it) {
-///   ...
-/// }
+/// for( ConArcIt< Graph > it( g , src , trg ) ; it != INVALID ; ++it )
+/// {
+///  ...
+///  }
 ///\endcode
 ///
 ///\sa findArc()
@@ -1868,9 +1871,11 @@ struct FindEdgeSelector<
 /// Thus you can iterate through each edge between \c u and \c v
 /// as it follows.
 ///\code
-/// for(Edge e = findEdge(g,u,v); e != INVALID; e = findEdge(g,u,v,e)) {
-///   ...
-/// }
+/// for( Edge e = findEdge( g , u , v ) ; e != INVALID ;
+///      e = findEdge( g , u , v , e ) )
+/// {
+///  ...
+///  }
 ///\endcode
 ///
 /// \note \ref ConEdgeIt provides iterator interface for the same
@@ -1892,9 +1897,10 @@ inline typename Graph::Edge findEdge( const Graph & g ,
 /// It is a higher level interface for the findEdge() function. You can
 /// use it the following way:
 ///\code
-/// for (ConEdgeIt<Graph> it(g, u, v); it != INVALID; ++it) {
-///   ...
-/// }
+/// for( ConEdgeIt< Graph > it( g , u , v ) ; it != INVALID ; ++it )
+/// {
+///  ...
+///  }
 ///\endcode
 ///
 ///\sa findEdge()
@@ -2304,10 +2310,10 @@ class DynArcLookUp
  ///For example, you can count the number of arcs from \c u to \c v in the
  ///following way.
  ///\code
- ///DynArcLookUp<ListDigraph> ae(g);
- ///...
- ///int n = 0;
- ///for(Arc a = ae(u,v); a != INVALID; a = ae(u,v,a)) n++;
+ /// DynArcLookUp< ListDigraph > ae( g );
+ /// ... int n = 0;
+ /// for( Arc a = ae( u , v ) ; a != INVALID ; a = ae( u , v , a ) )
+ ///  n++;
  ///\endcode
  ///
  ///Finding the arcs take at most <em>O</em>(log<em>d</em>)
@@ -2591,10 +2597,10 @@ class AllArcLookUp : public ArcLookUp< GR >
  ///For example, you can count the number of arcs from \c u to \c v in the
  ///following way.
  ///\code
- ///AllArcLookUp<ListDigraph> ae(g);
- ///...
- ///int n = 0;
- ///for(Arc a = ae(u,v); a != INVALID; a=ae(u,v,a)) n++;
+ /// AllArcLookUp< ListDigraph > ae( g );
+ /// ... int n = 0;
+ /// for( Arc a = ae( u , v ) ; a != INVALID ; a = ae( u , v , a ) )
+ ///  n++;
  ///\endcode
  ///
  ///Finding the first arc take <em>O</em>(log<em>d</em>) time,

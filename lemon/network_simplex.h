@@ -856,9 +856,12 @@ class NetworkSimplex
  /// \ref supplyType().
  /// For example,
  /// \code
- ///   NetworkSimplex<ListDigraph> ns(graph);
- ///   ns.lowerMap(lower).upperMap(upper).costMap(cost)
- ///     .supplyMap(sup).run();
+ /// NetworkSimplex< ListDigraph > ns( graph );
+ /// ns.lowerMap( lower )
+ ///   .upperMap( upper )
+ ///   .costMap( cost )
+ ///   .supplyMap( sup )
+ ///   .run();
  /// \endcode
  ///
  /// This function can be called more than once. All the given parameters
@@ -1008,22 +1011,24 @@ class NetworkSimplex
  ///
  /// For example,
  /// \code
- ///   NetworkSimplex<ListDigraph> ns(graph);
+ /// NetworkSimplex< ListDigraph > ns( graph );
  ///
- ///   // First run
- ///   ns.lowerMap(lower).upperMap(upper).costMap(cost)
- ///     .supplyMap(sup).run();
+ /// // First run
+ /// ns.lowerMap( lower )
+ ///   .upperMap( upper )
+ ///   .costMap( cost )
+ ///   .supplyMap( sup )
+ ///   .run();
  ///
- ///   // Run again with modified cost map (resetParams() is not called,
- ///   // so only the cost map have to be set again)
- ///   cost[e] += 100;
- ///   ns.costMap(cost).run();
+ /// // Run again with modified cost map (resetParams() is not called,
+ /// // so only the cost map have to be set again)
+ /// cost[ e ] += 100;
+ /// ns.costMap( cost ).run();
  ///
- ///   // Run again from scratch using resetParams()
- ///   // (the lower bounds will be set to zero on all arcs)
- ///   ns.resetParams();
- ///   ns.upperMap(capacity).costMap(cost)
- ///     .supplyMap(sup).run();
+ /// // Run again from scratch using resetParams()
+ /// // (the lower bounds will be set to zero on all arcs)
+ /// ns.resetParams();
+ /// ns.upperMap( capacity ).costMap( cost ).supplyMap( sup ).run();
  /// \endcode
  ///
  /// \return <tt>(*this)</tt>
@@ -1141,7 +1146,7 @@ class NetworkSimplex
  /// \note The return type of the function can be specified as a
  /// template parameter. For example,
  /// \code
- ///   ns.totalCost<double>();
+ /// ns.totalCost< double >();
  /// \endcode
  /// It is useful if the total cost cannot be stored in the \c Cost
  /// type of the algorithm, which is the default return type of the

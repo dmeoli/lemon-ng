@@ -409,14 +409,14 @@ class StaticDigraph : public ExtendedStaticDigraphBase
  ///
  /// For example, a simple digraph can be constructed like this.
  /// \code
- ///   std::vector<std::pair<int,int> > arcs;
- ///   arcs.push_back(std::make_pair(0,1));
- ///   arcs.push_back(std::make_pair(0,2));
- ///   arcs.push_back(std::make_pair(1,3));
- ///   arcs.push_back(std::make_pair(1,2));
- ///   arcs.push_back(std::make_pair(3,0));
- ///   StaticDigraph gr;
- ///   gr.build(4, arcs.begin(), arcs.end());
+ /// std::vector< std::pair< int , int > > arcs;
+ /// arcs.push_back( std::make_pair( 0 , 1 ) );
+ /// arcs.push_back( std::make_pair( 0 , 2 ) );
+ /// arcs.push_back( std::make_pair( 1 , 3 ) );
+ /// arcs.push_back( std::make_pair( 1 , 2 ) );
+ /// arcs.push_back( std::make_pair( 3 , 0 ) );
+ /// StaticDigraph gr;
+ /// gr.build( 4 , arcs.begin() , arcs.end() );
  /// \endcode
  template< typename ArcListIterator >
  void build( int n , ArcListIterator begin , ArcListIterator end ) {

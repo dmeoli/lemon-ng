@@ -494,8 +494,8 @@ class Suurballe
  /// \note Apart from the return value, <tt>s.run(s, t, k)</tt> is
  /// just a shortcut of the following code.
  /// \code
- ///   s.init(s);
- ///   s.start(t, k);
+ /// s.init( s );
+ /// s.start( t , k );
  /// \endcode
  int run( const Node & s , const Node & t , int k = 2 ) {
   init( s );
@@ -568,8 +568,8 @@ class Suurballe
  /// \note Apart from the return value, <tt>s.start(t, k)</tt> is
  /// just a shortcut of the following code.
  /// \code
- ///   s.findFlow(t, k);
- ///   s.findPaths();
+ /// s.findFlow( t , k );
+ /// s.findPaths();
  /// \endcode
  int start( const Node & t , int k = 2 ) {
   findFlow( t , k );

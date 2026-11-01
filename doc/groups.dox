@@ -77,8 +77,8 @@ which serve for considering graph structures in different ways.
 A short example makes this much clearer.  Suppose that we have an
 instance \c g of a directed graph type, say ListDigraph and an algorithm
 \code
-template <typename Digraph>
-int algorithm(const Digraph&);
+template< typename Digraph >
+int algorithm( const Digraph & );
 \endcode
 is needed to run on the reverse oriented graph.  It may be expensive
 (in time or in memory usage) to copy \c g with the reversed
@@ -93,13 +93,14 @@ obtained by a usual construction like filtering the node or the arc set or
 considering a new orientation, then an adaptor is worthwhile to use.
 To come back to the reverse oriented graph, in this situation
 \code
-template<typename Digraph> class ReverseDigraph;
+template< typename Digraph >
+class ReverseDigraph;
 \endcode
 template class can be used. The code looks as follows
 \code
 ListDigraph g;
-ReverseDigraph<ListDigraph> rg(g);
-int result = algorithm(rg);
+ReverseDigraph< ListDigraph > rg( g );
+int result = algorithm( rg );
 \endcode
 During running the algorithm, the original digraph \c g is untouched.
 This techniques give rise to an elegant code, and based on stable
@@ -132,16 +133,17 @@ However in case of a residual digraph, this operation has no sense.
 Let us stand one more example here to simplify your work.
 ReverseDigraph has constructor
 \code
-ReverseDigraph(Digraph& digraph);
+ReverseDigraph( Digraph & digraph );
 \endcode
 This means that in a situation, when a <tt>const %ListDigraph&</tt>
 reference to a graph is given, then it have to be instantiated with
 <tt>Digraph=const %ListDigraph</tt>.
 \code
-int algorithm1(const ListDigraph& g) {
-  ReverseDigraph<const ListDigraph> rg(g);
-  return algorithm2(rg);
-}
+int algorithm1( const ListDigraph & g )
+{
+ ReverseDigraph< const ListDigraph > rg( g );
+ return( algorithm2( rg ) );
+ }
 \endcode
 */
 
@@ -188,22 +190,27 @@ algorithms.  If a function type algorithm is called then the function
 type map adaptors can be used comfortable. For example let's see the
 usage of map adaptors with the \c graphToEps() function.
 \code
-  Color nodeColor(int deg) {
-    if (deg >= 2) {
-      return Color(0.5, 0.0, 0.5);
-    } else if (deg == 1) {
-      return Color(1.0, 0.5, 1.0);
-    } else {
-      return Color(0.0, 0.0, 0.0);
-    }
+Color nodeColor( int deg )
+{
+ if( deg >= 2 ) {
+  return( Color( 0.5 , 0.0 , 0.5 ) );
   }
+ else if( deg == 1 ) {
+  return( Color( 1.0 , 0.5 , 1.0 ) );
+  }
+ else {
+  return( Color( 0.0 , 0.0 , 0.0 ) );
+  }
+ }
 
-  Digraph::NodeMap<int> degree_map(graph);
+Digraph::NodeMap< int > degree_map( graph );
 
-  graphToEps(graph, "graph.eps")
-    .coords(coords).scaleToA4().undirected()
-    .nodeColors(composeMap(functorToMap(nodeColor), degree_map))
-    .run();
+graphToEps( graph , "graph.eps" )
+  .coords( coords )
+  .scaleToA4()
+  .undirected()
+  .nodeColors( composeMap( functorToMap( nodeColor ) , degree_map ) )
+  .run();
 \endcode
 The \c functorToMap() function makes an \c int to \c Color map from the
 \c nodeColor() function. The \c composeMap() compose the \c degree_map
@@ -214,17 +221,17 @@ The usage with class type algorithms is little bit harder. In this
 case the function type map adaptors can not be used, because the
 function map adaptors give back temporary objects.
 \code
-  Digraph graph;
+Digraph graph;
 
-  typedef Digraph::ArcMap<double> DoubleArcMap;
-  DoubleArcMap length(graph);
-  DoubleArcMap speed(graph);
+typedef Digraph::ArcMap< double > DoubleArcMap;
+DoubleArcMap length( graph );
+DoubleArcMap speed( graph );
 
-  typedef DivMap<DoubleArcMap, DoubleArcMap> TimeMap;
-  TimeMap time(length, speed);
+typedef DivMap< DoubleArcMap , DoubleArcMap > TimeMap;
+TimeMap time( length , speed );
 
-  Dijkstra<Digraph, TimeMap> dijkstra(graph, time);
-  dijkstra.run(source, target);
+Dijkstra< Digraph , TimeMap > dijkstra( graph , time );
+dijkstra.run( source , target );
 \endcode
 We have a length map and a maximum speed map on the arcs of a digraph.
 The minimum time to pass the arc can be calculated as the division of

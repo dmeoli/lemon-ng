@@ -598,9 +598,9 @@ class BellmanFord
  ///
  /// \note bf.run(s) is just a shortcut of the following code.
  /// \code
- ///   bf.init();
- ///   bf.addSource(s);
- ///   bf.start();
+ /// bf.init();
+ /// bf.addSource( s );
+ /// bf.start();
  /// \endcode
  void run( Node s ) {
   init();
@@ -627,9 +627,9 @@ class BellmanFord
  ///
  /// \note bf.run(s, num) is just a shortcut of the following code.
  /// \code
- ///   bf.init();
- ///   bf.addSource(s);
- ///   bf.limitedStart(num);
+ /// bf.init();
+ /// bf.addSource( s );
+ /// bf.limitedStart( num );
  /// \endcode
  void run( Node s , int num ) {
   init();
@@ -1113,11 +1113,11 @@ class BellmanFordWizard : public TR
 /// \ref BellmanFordWizard.
 /// The following examples show how to use these parameters.
 /// \code
-///   // Compute shortest path from node s to each node
-///   bellmanFord(g,length).predMap(preds).distMap(dists).run(s);
+/// // Compute shortest path from node s to each node
+/// bellmanFord( g , length ).predMap( preds ).distMap( dists ).run( s );
 ///
-///   // Compute shortest path from s to t
-///   bool reached = bellmanFord(g,length).path(p).dist(d).run(s,t);
+/// // Compute shortest path from s to t
+/// bool reached = bellmanFord( g , length ).path( p ).dist( d ).run( s , t );
 /// \endcode
 /// \warning Don't forget to put the \ref BellmanFordWizard::run() "run()"
 /// to the end of the parameter list.

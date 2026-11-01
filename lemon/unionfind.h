@@ -545,13 +545,14 @@ class UnionFindEnum
  /// on the items of a class. By example if you want to iterate on
  /// each items of each classes then you may write the next code.
  ///\code
- /// for (ClassIt cit(ufe); cit != INVALID; ++cit) {
- ///   std::cout << "Class: ";
- ///   for (ItemIt iit(ufe, cit); iit != INVALID; ++iit) {
- ///     std::cout << toString(iit) << ' ' << std::endl;
+ /// for( ClassIt cit( ufe ) ; cit != INVALID ; ++cit )
+ /// {
+ ///  std::cout << "Class: ";
+ ///  for( ItemIt iit( ufe , cit ) ; iit != INVALID ; ++iit ) {
+ ///   std::cout << toString( iit ) << ' ' << std::endl;
  ///   }
- ///   std::cout << std::endl;
- /// }
+ ///  std::cout << std::endl;
+ ///  }
  ///\endcode
  class ItemIt
  {
@@ -849,13 +850,14 @@ class ExtendFindEnum
  /// on the items of a class. By example if you want to iterate on
  /// each items of each classes then you may write the next code.
  ///\code
- /// for (ClassIt cit(ufe); cit != INVALID; ++cit) {
- ///   std::cout << "Class: ";
- ///   for (ItemIt iit(ufe, cit); iit != INVALID; ++iit) {
- ///     std::cout << toString(iit) << ' ' << std::endl;
+ /// for( ClassIt cit( ufe ) ; cit != INVALID ; ++cit )
+ /// {
+ ///  std::cout << "Class: ";
+ ///  for( ItemIt iit( ufe , cit ) ; iit != INVALID ; ++iit ) {
+ ///   std::cout << toString( iit ) << ' ' << std::endl;
  ///   }
- ///   std::cout << std::endl;
- /// }
+ ///  std::cout << std::endl;
+ ///  }
  ///\endcode
  class ItemIt
  {
@@ -1672,13 +1674,14 @@ class HeapUnionFind
  /// on the items of a class. By example if you want to iterate on
  /// each items of each classes then you may write the next code.
  ///\code
- /// for (ClassIt cit(huf); cit != INVALID; ++cit) {
- ///   std::cout << "Class: ";
- ///   for (ItemIt iit(huf, cit); iit != INVALID; ++iit) {
- ///     std::cout << toString(iit) << ' ' << std::endl;
+ /// for( ClassIt cit( huf ) ; cit != INVALID ; ++cit )
+ /// {
+ ///  std::cout << "Class: ";
+ ///  for( ItemIt iit( huf , cit ) ; iit != INVALID ; ++iit ) {
+ ///   std::cout << toString( iit ) << ' ' << std::endl;
  ///   }
- ///   std::cout << std::endl;
- /// }
+ ///  std::cout << std::endl;
+ ///  }
  ///\endcode
  class ItemIt
  {

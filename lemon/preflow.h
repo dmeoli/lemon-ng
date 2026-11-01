@@ -900,9 +900,9 @@ class Preflow
  /// Runs the preflow algorithm.
  /// \note pf.run() is just a shortcut of the following code.
  /// \code
- ///   pf.init();
- ///   pf.startFirstPhase();
- ///   pf.startSecondPhase();
+ /// pf.init();
+ /// pf.startFirstPhase();
+ /// pf.startSecondPhase();
  /// \endcode
  void run() {
   init();
@@ -915,8 +915,8 @@ class Preflow
  /// Runs the preflow algorithm to compute the minimum cut.
  /// \note pf.runMinCut() is just a shortcut of the following code.
  /// \code
- ///   pf.init();
- ///   pf.startFirstPhase();
+ /// pf.init();
+ /// pf.startFirstPhase();
  /// \endcode
  void runMinCut() {
   init();

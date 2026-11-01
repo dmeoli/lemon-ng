@@ -1287,8 +1287,8 @@ class MaxWeightedFractionalMatching
  ///
  /// \note mwfm.run() is just a shortcut of the following code.
  /// \code
- ///   mwfm.init();
- ///   mwfm.start();
+ /// mwfm.init();
+ /// mwfm.start();
  /// \endcode
  void run() {
   init();
@@ -2025,8 +2025,8 @@ class MaxWeightedPerfectFractionalMatching
  ///
  /// \note mwfm.run() is just a shortcut of the following code.
  /// \code
- ///   mwpfm.init();
- ///   mwpfm.start();
+ /// mwpfm.init();
+ /// mwpfm.start();
  /// \endcode
  bool run() {
   init();

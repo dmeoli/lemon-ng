@@ -49,10 +49,11 @@ namespace lemon
 ///\code
 /// int num = 0;
 /// SmartGraph graph;
-/// while (readNautyGraph(graph, std::cin)) {
-///   PlanarityChecking<SmartGraph> pc(graph);
-///   if (pc.run()) ++num;
-/// }
+/// while( readNautyGraph( graph , std::cin ) ) {
+///  PlanarityChecking< SmartGraph > pc( graph );
+///  if( pc.run() )
+///   ++num;
+///  }
 /// std::cout << "Number of planar graphs: " << num << std::endl;
 ///\endcode
 ///

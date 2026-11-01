@@ -32,7 +32,7 @@ jobs:
           pip install -q clang-format==22.1.5
           base=origin/${{ github.base_ref }}
           files=$(git diff --name-only --diff-filter=AMR $base HEAD |
-                  grep -E '\.(h|cc|cpp)$' || true)
+                  grep -E '\.(h|cc|cpp|dox)$' || true)
           [ -z "$files" ] && exit 0
           if ! python3 scripts/format.py --check --since $base $files; then
             echo "Put them in the style with"

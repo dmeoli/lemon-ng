@@ -34,28 +34,37 @@ The example below shows how to do it.
 \code
 class namedFn
 {
-  int _id;
-  double _val;
-  int _dim;
+ int _id;
+ double _val;
+ int _dim;
 
-  public:
-  namedFn() : _id(0), _val(1), _dim(2) {}
-  namedFn& id(int p)     { _id  = p ; return *this; }
-  namedFn& val(double p) { _val = p ; return *this; }
-  namedFn& dim(int p)    { _dim = p ; return *this; }
-
-  run() {
-    std::cout << "Here comes the function itself\n" <<
-              << "With parameters "
-              << _id << ", " << _val << ", " << _dim << std::endl;
+ public:
+ namedFn() : _id( 0 ) , _val( 1 ) , _dim( 2 ) { }
+ namedFn & id( int p ) {
+  _id = p;
+  return( *this );
   }
-};
+ namedFn & val( double p ) {
+  _val = p;
+  return( *this );
+  }
+ namedFn & dim( int p ) {
+  _dim = p;
+  return( *this );
+  }
+
+ run() {
+  std::cout << "Here comes the function itself\n"
+            << "With parameters " << _id << ", " << _val << ", " << _dim
+            << std::endl;
+  }
+ };
 \endcode
 
 Then you can use it like this.
 
 \code
-namedFn().id(3).val(2).run();
+namedFn().id( 3 ).val( 2 ).run();
 \endcode
 
 The trick is obvious, each "named parameter" changes one component of
@@ -103,14 +112,14 @@ the class with new traits class, but instead adaptor classes can
 be used as shown in the following example.
 
 \code
-Dijkstra<>::SetPredMap<NullMap<Node,Arc> >::Create
+Dijkstra<>::SetPredMap< NullMap< Node , Arc > >::Create
 \endcode
 
 It can also be used in conjunction with other named template
 parameters in arbitrary order.
 
 \code
-Dijkstra<>::SetDistMap<MyMap>::SetPredMap<NullMap<Node,Arc> >::Create
+Dijkstra<>::SetDistMap< MyMap >::SetPredMap< NullMap< Node , Arc > >::Create
 \endcode
 
 The result will be an instantiated Dijkstra class, in which the

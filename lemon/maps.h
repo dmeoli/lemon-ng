@@ -482,7 +482,7 @@ sparseMap( const std::map< K , V , Compare > & map , const V & value = V() )
 /// composition of two given maps. That is to say, if \c m1 is of
 /// type \c M1 and \c m2 is of \c M2, then for
 /// \code
-///   ComposeMap<M1, M2> cm(m1,m2);
+/// ComposeMap< M1 , M2 > cm( m1 , m2 );
 /// \endcode
 /// <tt>cm[x]</tt> will be equal to <tt>m1[m2[x]]</tt>.
 ///
@@ -539,7 +539,7 @@ inline ComposeMap< M1 , M2 > composeMap( const M1 & m1 , const M2 & m2 )
 /// That is to say, if \c m1 is of type \c M1 and \c m2 is of \c M2
 /// and \c f is of \c F, then for
 /// \code
-///   CombineMap<M1,M2,F,V> cm(m1,m2,f);
+/// CombineMap< M1 , M2 , F , V > cm( m1 , m2 , f );
 /// \endcode
 /// <tt>cm[x]</tt> will be equal to <tt>f(m1[x],m2[x])</tt>.
 ///
@@ -598,11 +598,11 @@ class CombineMap : public MapBase< typename M1::Key , V >
 /// For example, if \c m1 and \c m2 are both maps with \c double
 /// values, then
 /// \code
-///   combineMap(m1,m2,std::plus<double>())
+/// combineMap( m1 , m2 , std::plus< double >() )
 /// \endcode
 /// is equivalent to
 /// \code
-///   addMap(m1,m2)
+/// addMap( m1 , m2 )
 /// \endcode
 ///
 /// This function is specialized for adaptable binary function
@@ -845,7 +845,7 @@ inline ForkMap< M1 , M2 > forkMap( M1 & m1 , M2 & m2 )
 ///
 /// If \c m1 is of type \c M1 and \c m2 is of \c M2, then for
 /// \code
-///   AddMap<M1,M2> am(m1,m2);
+/// AddMap< M1 , M2 > am( m1 , m2 );
 /// \endcode
 /// <tt>am[x]</tt> will be equal to <tt>m1[x]+m2[x]</tt>.
 ///
@@ -898,7 +898,7 @@ inline AddMap< M1 , M2 > addMap( const M1 & m1 , const M2 & m2 )
 ///
 /// If \c m1 is of type \c M1 and \c m2 is of \c M2, then for
 /// \code
-///   SubMap<M1,M2> sm(m1,m2);
+/// SubMap< M1 , M2 > sm( m1 , m2 );
 /// \endcode
 /// <tt>sm[x]</tt> will be equal to <tt>m1[x]-m2[x]</tt>.
 ///
@@ -950,7 +950,7 @@ inline SubMap< M1 , M2 > subMap( const M1 & m1 , const M2 & m2 )
 ///
 /// If \c m1 is of type \c M1 and \c m2 is of \c M2, then for
 /// \code
-///   MulMap<M1,M2> mm(m1,m2);
+/// MulMap< M1 , M2 > mm( m1 , m2 );
 /// \endcode
 /// <tt>mm[x]</tt> will be equal to <tt>m1[x]*m2[x]</tt>.
 ///
@@ -1003,7 +1003,7 @@ inline MulMap< M1 , M2 > mulMap( const M1 & m1 , const M2 & m2 )
 ///
 /// If \c m1 is of type \c M1 and \c m2 is of \c M2, then for
 /// \code
-///   DivMap<M1,M2> dm(m1,m2);
+/// DivMap< M1 , M2 > dm( m1 , m2 );
 /// \endcode
 /// <tt>dm[x]</tt> will be equal to <tt>m1[x]/m2[x]</tt>.
 ///
@@ -1053,12 +1053,12 @@ inline DivMap< M1 , M2 > divMap( const M1 & m1 , const M2 & m2 )
 ///
 /// Actually,
 /// \code
-///   ShiftMap<M> sh(m,v);
+/// ShiftMap< M > sh( m , v );
 /// \endcode
 /// is equivalent to
 /// \code
-///   ConstMap<M::Key, M::Value> cm(v);
-///   AddMap<M, ConstMap<M::Key, M::Value> > sh(m,cm);
+/// ConstMap< M::Key , M::Value > cm( v );
+/// AddMap< M , ConstMap< M::Key , M::Value > > sh( m , cm );
 /// \endcode
 ///
 /// The simplest way of using this map is through the shiftMap()
@@ -1162,12 +1162,12 @@ inline ShiftWriteMap< M , C > shiftWriteMap( M & m , const C & v )
 ///
 /// Actually,
 /// \code
-///   ScaleMap<M> sc(m,v);
+/// ScaleMap< M > sc( m , v );
 /// \endcode
 /// is equivalent to
 /// \code
-///   ConstMap<M::Key, M::Value> cm(v);
-///   MulMap<ConstMap<M::Key, M::Value>, M> sc(cm,m);
+/// ConstMap< M::Key , M::Value > cm( v );
+/// MulMap< ConstMap< M::Key , M::Value > , M > sc( cm , m );
 /// \endcode
 ///
 /// The simplest way of using this map is through the scaleMap()
@@ -1272,11 +1272,11 @@ inline ScaleWriteMap< M , C > scaleWriteMap( M & m , const C & v )
 ///
 /// If M::Value is \c int, \c double etc., then
 /// \code
-///   NegMap<M> neg(m);
+/// NegMap< M > neg( m );
 /// \endcode
 /// is equivalent to
 /// \code
-///   ScaleMap<M> neg(m,-1);
+/// ScaleMap< M > neg( m , -1 );
 /// \endcode
 ///
 /// The simplest way of using this map is through the negMap()
@@ -1310,11 +1310,11 @@ class NegMap : public MapBase< typename M::Key , typename M::Value >
 ///
 /// If M::Value is \c int, \c double etc., then
 /// \code
-///   NegWriteMap<M> neg(m);
+/// NegWriteMap< M > neg( m );
 /// \endcode
 /// is equivalent to
 /// \code
-///   ScaleWriteMap<M> neg(m,-1);
+/// ScaleWriteMap< M > neg( m , -1 );
 /// \endcode
 ///
 /// The simplest way of using this map is through the negWriteMap()
@@ -1430,11 +1430,11 @@ inline AbsMap< M > absMap( const M & m )
 ///
 /// Note that
 /// \code
-///   TrueMap<K> tm;
+/// TrueMap< K > tm;
 /// \endcode
 /// is equivalent to
 /// \code
-///   ConstMap<K,bool> tm(true);
+/// ConstMap< K , bool > tm( true );
 /// \endcode
 ///
 /// \sa FalseMap
@@ -1470,11 +1470,11 @@ inline TrueMap< K > trueMap()
 ///
 /// Note that
 /// \code
-///   FalseMap<K> fm;
+/// FalseMap< K > fm;
 /// \endcode
 /// is equivalent to
 /// \code
-///   ConstMap<K,bool> fm(false);
+/// ConstMap< K , bool > fm( false );
 /// \endcode
 ///
 /// \sa TrueMap
@@ -1516,7 +1516,7 @@ inline FalseMap< K > falseMap()
 ///
 /// If \c m1 is of type \c M1 and \c m2 is of \c M2, then for
 /// \code
-///   AndMap<M1,M2> am(m1,m2);
+/// AndMap< M1 , M2 > am( m1 , m2 );
 /// \endcode
 /// <tt>am[x]</tt> will be equal to <tt>m1[x]&&m2[x]</tt>.
 ///
@@ -1568,7 +1568,7 @@ inline AndMap< M1 , M2 > andMap( const M1 & m1 , const M2 & m2 )
 ///
 /// If \c m1 is of type \c M1 and \c m2 is of \c M2, then for
 /// \code
-///   OrMap<M1,M2> om(m1,m2);
+/// OrMap< M1 , M2 > om( m1 , m2 );
 /// \endcode
 /// <tt>om[x]</tt> will be equal to <tt>m1[x]||m2[x]</tt>.
 ///
@@ -1709,7 +1709,7 @@ inline NotWriteMap< M > notWriteMap( M & m )
 ///
 /// If \c m1 is of type \c M1 and \c m2 is of \c M2, then for
 /// \code
-///   EqualMap<M1,M2> em(m1,m2);
+/// EqualMap< M1 , M2 > em( m1 , m2 );
 /// \endcode
 /// <tt>em[x]</tt> will be equal to <tt>m1[x]==m2[x]</tt>.
 ///
@@ -1761,7 +1761,7 @@ inline EqualMap< M1 , M2 > equalMap( const M1 & m1 , const M2 & m2 )
 ///
 /// If \c m1 is of type \c M1 and \c m2 is of \c M2, then for
 /// \code
-///   LessMap<M1,M2> lm(m1,m2);
+/// LessMap< M1 , M2 > lm( m1 , m2 );
 /// \endcode
 /// <tt>lm[x]</tt> will be equal to <tt>m1[x]<m2[x]</tt>.
 ///
@@ -1894,12 +1894,12 @@ class LoggerBoolMap : public MapBase< KEY , bool >
 /// For example, it makes easier to store the nodes in the processing
 /// order of Dfs algorithm, as the following examples show.
 /// \code
-///   std::vector<Node> v;
-///   dfs(g).processedMap(loggerBoolMap(std::back_inserter(v))).run(s);
+/// std::vector< Node > v;
+/// dfs( g ).processedMap( loggerBoolMap( std::back_inserter( v ) ) ).run( s );
 /// \endcode
 /// \code
-///   std::vector<Node> v(countNodes(g));
-///   dfs(g).processedMap(loggerBoolMap(v.begin())).run(s);
+/// std::vector< Node > v( countNodes( g ) );
+/// dfs( g ).processedMap( loggerBoolMap( v.begin() ) ).run( s );
 /// \endcode
 ///
 /// \note The container of the iterator must contain enough space
@@ -3863,7 +3863,7 @@ class OutDegMap
 /// PotentialDifferenceMap returns the difference between the potentials of
 /// the source and target nodes of each arc in a digraph, i.e. it returns
 /// \code
-///   potential[gr.target(arc)] - potential[gr.source(arc)].
+/// potential[ gr.target( arc ) ] - potential[ gr.source( arc ) ].
 /// \endcode
 /// \tparam GR The digraph type.
 /// \tparam POT A node map storing the potentials.
@@ -3886,7 +3886,7 @@ class PotentialDifferenceMap
  ///
  /// Returns the potential difference for the given arc, i.e.
  /// \code
- ///   potential[gr.target(arc)] - potential[gr.source(arc)].
+ /// potential[ gr.target( arc ) ] - potential[ gr.source( arc ) ].
  /// \endcode
  Value operator[]( const Key & arc ) const {
   return( _potential[ _digraph.target( arc ) ] -

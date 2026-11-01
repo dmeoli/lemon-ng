@@ -500,13 +500,14 @@ typedef GraphExtender< GridGraphBase > ExtendedGridGraphBase;
 ///
 /// A short example about the basic usage:
 ///\code
-/// GridGraph graph(rows, cols);
-/// GridGraph::NodeMap<int> val(graph);
-/// for (int i = 0; i < graph.width(); ++i) {
-///   for (int j = 0; j < graph.height(); ++j) {
-///     val[graph(i, j)] = i + j;
+/// GridGraph graph( rows , cols );
+/// GridGraph::NodeMap< int > val( graph );
+/// for( int i = 0 ; i < graph.width() ; ++i )
+/// {
+///  for( int j = 0 ; j < graph.height() ; ++j ) {
+///   val[ graph( i , j ) ] = i + j;
 ///   }
-/// }
+///  }
 ///\endcode
 ///
 /// This type fully conforms to the \ref concepts::Graph "Graph concept".

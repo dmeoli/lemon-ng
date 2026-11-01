@@ -389,9 +389,12 @@ class CycleCanceling
  /// \ref upperMap(), \ref costMap(), \ref supplyMap(), \ref stSupply().
  /// For example,
  /// \code
- ///   CycleCanceling<ListDigraph> cc(graph);
- ///   cc.lowerMap(lower).upperMap(upper).costMap(cost)
- ///     .supplyMap(sup).run();
+ /// CycleCanceling< ListDigraph > cc( graph );
+ /// cc.lowerMap( lower )
+ ///   .upperMap( upper )
+ ///   .costMap( cost )
+ ///   .supplyMap( sup )
+ ///   .run();
  /// \endcode
  ///
  /// This function can be called more than once. All the given parameters
@@ -493,22 +496,24 @@ class CycleCanceling
  ///
  /// For example,
  /// \code
- ///   CycleCanceling<ListDigraph> cs(graph);
+ /// CycleCanceling< ListDigraph > cs( graph );
  ///
- ///   // First run
- ///   cc.lowerMap(lower).upperMap(upper).costMap(cost)
- ///     .supplyMap(sup).run();
+ /// // First run
+ /// cc.lowerMap( lower )
+ ///   .upperMap( upper )
+ ///   .costMap( cost )
+ ///   .supplyMap( sup )
+ ///   .run();
  ///
- ///   // Run again with modified cost map (resetParams() is not called,
- ///   // so only the cost map have to be set again)
- ///   cost[e] += 100;
- ///   cc.costMap(cost).run();
+ /// // Run again with modified cost map (resetParams() is not called,
+ /// // so only the cost map have to be set again)
+ /// cost[ e ] += 100;
+ /// cc.costMap( cost ).run();
  ///
- ///   // Run again from scratch using resetParams()
- ///   // (the lower bounds will be set to zero on all arcs)
- ///   cc.resetParams();
- ///   cc.upperMap(capacity).costMap(cost)
- ///     .supplyMap(sup).run();
+ /// // Run again from scratch using resetParams()
+ /// // (the lower bounds will be set to zero on all arcs)
+ /// cc.resetParams();
+ /// cc.upperMap( capacity ).costMap( cost ).supplyMap( sup ).run();
  /// \endcode
  ///
  /// \return <tt>(*this)</tt>
@@ -644,7 +649,7 @@ class CycleCanceling
  /// \note The return type of the function can be specified as a
  /// template parameter. For example,
  /// \code
- ///   cc.totalCost<double>();
+ /// cc.totalCost< double >();
  /// \endcode
  /// It is useful if the total cost cannot be stored in the \c Cost
  /// type of the algorithm, which is the default return type of the

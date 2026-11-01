@@ -148,8 +148,8 @@ class Path
  /// for loops, STL algorithms, etc.
  /// For example you can write:
  ///\code
- /// for(auto a: p.arcs())
- ///   doSomething(a);
+ /// for( auto a : p.arcs() )
+ ///  doSomething( a );
  ///\endcode
  LemonRangeWrapper1< ArcIt , Path > arcs() const {
   return( LemonRangeWrapper1< ArcIt , Path >( *this ) );
@@ -371,8 +371,8 @@ class SimplePath
  /// for loops, STL algorithms, etc.
  /// For example you can write:
  ///\code
- /// for(auto a: p.arcs())
- ///   doSomething(a);
+ /// for( auto a : p.arcs() )
+ ///  doSomething( a );
  ///\endcode
  LemonRangeWrapper1< ArcIt , SimplePath > arcs() const {
   return( LemonRangeWrapper1< ArcIt , SimplePath >( *this ) );
@@ -578,8 +578,8 @@ class ListPath
  /// for loops, STL algorithms, etc.
  /// For example you can write:
  ///\code
- /// for(auto a: p.arcs())
- ///   doSomething(a);
+ /// for( auto a : p.arcs() )
+ ///  doSomething( a );
  ///\endcode
  LemonRangeWrapper1< ArcIt , ListPath > arcs() const {
   return( LemonRangeWrapper1< ArcIt , ListPath >( *this ) );
@@ -946,8 +946,8 @@ class StaticPath
  /// for loops, STL algorithms, etc.
  /// For example you can write:
  ///\code
- /// for(auto a: p.arcs())
- ///   doSomething(a);
+ /// for( auto a : p.arcs() )
+ ///  doSomething( a );
  ///\endcode
  LemonRangeWrapper1< ArcIt , StaticPath > arcs() const {
   return( LemonRangeWrapper1< ArcIt , StaticPath >( *this ) );
@@ -1253,8 +1253,8 @@ class PathNodeIt
 /// for loops, STL algorithms, etc.
 /// For example you can write:
 ///\code
-/// for(auto u: pathNodes(g,p))
-///   doSomething(u);
+/// for( auto u : pathNodes( g , p ) )
+///  doSomething( u );
 ///\endcode
 template< typename Path >
 LemonRangeWrapper2< PathNodeIt< Path > , typename Path::Digraph , Path >

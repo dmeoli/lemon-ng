@@ -650,8 +650,8 @@ class Circulation
  /// \note Apart from the return value, c.run() is just a shortcut of
  /// the following code.
  /// \code
- ///   c.greedyInit();
- ///   c.start();
+ /// c.greedyInit();
+ /// c.start();
  /// \endcode
  bool run() {
   greedyInit();

@@ -529,20 +529,20 @@ struct BoolProducer
 ///
 ///\code
 /// // The commented code is identical to the other
-/// double a = rnd();                     // [0.0, 1.0)
+/// double a = rnd();  // [0.0, 1.0)
 /// // double a = rnd.real();             // [0.0, 1.0)
-/// double b = rnd(100.0);                // [0.0, 100.0)
+/// double b = rnd( 100.0 );  // [0.0, 100.0)
 /// // double b = rnd.real(100.0);        // [0.0, 100.0)
-/// double c = rnd(1.0, 2.0);             // [1.0, 2.0)
+/// double c = rnd( 1.0 , 2.0 );  // [1.0, 2.0)
 /// // double c = rnd.real(1.0, 2.0);     // [1.0, 2.0)
-/// int d = rnd[100000];                  // 0..99999
+/// int d = rnd[ 100000 ];  // 0..99999
 /// // int d = rnd.integer(100000);       // 0..99999
-/// int e = rnd[6] + 1;                   // 1..6
+/// int e = rnd[ 6 ] + 1;  // 1..6
 /// // int e = rnd.integer(1, 1 + 6);     // 1..6
-/// int b = rnd.uinteger<int>();          // 0 .. 2^31 - 1
-/// int c = rnd.integer<int>();           // - 2^31 .. 2^31 - 1
-/// bool g = rnd.boolean();               // P(g = true) = 0.5
-/// bool h = rnd.boolean(0.8);            // P(h = true) = 0.8
+/// int b = rnd.uinteger< int >();  // 0 .. 2^31 - 1
+/// int c = rnd.integer< int >();   // - 2^31 .. 2^31 - 1
+/// bool g = rnd.boolean();         // P(g = true) = 0.5
+/// bool h = rnd.boolean( 0.8 );    // P(h = true) = 0.8
 ///\endcode
 ///
 /// LEMON provides a global instance of the random number generator:

@@ -299,14 +299,14 @@ struct KruskalOutputSelector<
 /// spanning tree of the graph \c g has say 53 arcs, then we can
 /// put its arcs into an STL vector \c tree with a code like this.
 ///\code
-/// std::vector<Arc> tree(53);
-/// kruskal(g,cost,tree.begin());
+/// std::vector< Arc > tree( 53 );
+/// kruskal( g , cost , tree.begin() );
 ///\endcode
 /// Or if we don't know in advance the size of the tree, we can
 /// write this.
 ///\code
-/// std::vector<Arc> tree;
-/// kruskal(g,cost,std::back_inserter(tree));
+/// std::vector< Arc > tree;
+/// kruskal( g , cost , std::back_inserter( tree ) );
 ///\endcode
 ///
 /// \return The total cost of the found spanning tree.
