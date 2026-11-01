@@ -3,7 +3,7 @@ class LemonNg < Formula
   homepage "https://github.com/dmeoli/lemon-ng"
   url "https://github.com/dmeoli/lemon-ng/archive/refs/tags/1.4.0.tar.gz"
   sha256 "6cd337ef985bbce1d1c8515c7ddc8ce1df24ece8e51b6b817c89eb346d3cd34c"
-  license "BSL-1.0"
+  license all_of: ["BSL-1.0", "BSD-3-Clause"]
   head "https://github.com/dmeoli/lemon-ng.git", branch: "master"
 
   depends_on "cmake" => :build
