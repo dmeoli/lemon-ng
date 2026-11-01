@@ -97,5 +97,5 @@ jobs:
         run: |
           pip install -q conan
           conan profile detect
-          conan create packaging/conan/all --version 1.4.0 \
+          conan create packaging/conan/all --version 1.4.1 \
             --build=missing -o "lemon-ng/*:shared=${{ matrix.shared }}"
