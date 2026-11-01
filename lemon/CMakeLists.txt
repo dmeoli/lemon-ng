@@ -70,7 +70,16 @@ IF(UNIX)
   SET_TARGET_PROPERTIES(lemon PROPERTIES OUTPUT_NAME emon VERSION ${LEMON_VERSION} SOVERSION ${LEMON_VERSION})
 ENDIF()
 
-TARGET_INCLUDE_DIRECTORIES(lemon INTERFACE $<INSTALL_INTERFACE:include>)
+# the headers, and lemon/config.h written in the build directory, to whoever
+# links the target, in the build tree (with add_subdirectory() or
+# FetchContent) as after the installation; the standard is the oldest that
+# LEMON accepts, a later one of the project being kept
+TARGET_INCLUDE_DIRECTORIES(lemon PUBLIC
+  $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
+  $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}>
+  $<INSTALL_INTERFACE:include>)
+TARGET_COMPILE_FEATURES(lemon PUBLIC cxx_std_11)
+ADD_LIBRARY(LEMON::lemon ALIAS lemon)
 
 INSTALL(
   TARGETS lemon
