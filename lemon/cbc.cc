@@ -21,27 +21,27 @@
 
 #include "cbc.h"
 
-#include <coin/CoinModel.hpp>
-#include <coin/CbcModel.hpp>
-#include <coin/OsiSolverInterface.hpp>
+#include <CoinModel.hpp>
+#include <CbcModel.hpp>
+#include <OsiSolverInterface.hpp>
 
-#include "coin/OsiClpSolverInterface.hpp"
+#include <OsiClpSolverInterface.hpp>
 
-#include "coin/CbcCutGenerator.hpp"
-#include "coin/CbcHeuristicLocal.hpp"
-#include "coin/CbcHeuristicGreedy.hpp"
-#include "coin/CbcHeuristicFPump.hpp"
-#include "coin/CbcHeuristicRINS.hpp"
+#include <CbcCutGenerator.hpp>
+#include <CbcHeuristicLocal.hpp>
+#include <CbcHeuristicGreedy.hpp>
+#include <CbcHeuristicFPump.hpp>
+#include <CbcHeuristicRINS.hpp>
 
-#include "coin/CglGomory.hpp"
-#include "coin/CglProbing.hpp"
-#include "coin/CglKnapsackCover.hpp"
-#include "coin/CglOddHole.hpp"
-#include "coin/CglClique.hpp"
-#include "coin/CglFlowCover.hpp"
-#include "coin/CglMixedIntegerRounding.hpp"
+#include <CglGomory.hpp>
+#include <CglProbing.hpp>
+#include <CglKnapsackCover.hpp>
+#include <CglOddHole.hpp>
+#include <CglClique.hpp>
+#include <CglFlowCover.hpp>
+#include <CglMixedIntegerRounding.hpp>
 
-#include "coin/CbcHeuristic.hpp"
+#include <CbcHeuristic.hpp>
 
 namespace lemon
 {

@@ -1,7 +1,10 @@
 SET(COIN_ROOT_DIR "" CACHE PATH "COIN root directory")
 
-FIND_PATH(COIN_INCLUDE_DIR coin/CoinUtilsConfig.h
+# the headers are in include/coin-or from COIN-OR 2.11 on, and in
+# include/coin before (and in some distributions)
+FIND_PATH(COIN_INCLUDE_DIR CoinUtilsConfig.h
   HINTS ${COIN_ROOT_DIR}/include
+  PATH_SUFFIXES coin-or coin
 )
 FIND_LIBRARY(COIN_CBC_LIBRARY
   NAMES Cbc libCbc
