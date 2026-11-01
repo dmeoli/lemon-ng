@@ -125,7 +125,7 @@ void aTest( MipSolver & mip , bool solve_empty = true )
 
 // an integer column whose bounds are not integer: x in [ 0.5 , 2.5 ] has
 // its optimum at 2 when maximized and at 1 when minimized, and x in
-// [ 1.2 , 1.8 ] has no integer value
+// [ 1.2 , 1.8 ] has no integer value, the bounds staying as they are given
 void boundsTest( MipSolver & mip )
 {
  MipSolver::Col x = mip.addCol();
@@ -140,6 +140,8 @@ void boundsTest( MipSolver & mip )
  mip.colLowerBound( x , 1.2 );
  mip.colUpperBound( x , 1.8 );
  solveAndCheck( mip , MipSolver::INFEASIBLE , 0 );
+ check( mip.colLowerBound( x ) == 1.2 && mip.colUpperBound( x ) == 1.8 ,
+	"The bounds of an integer column changed" );
  }
 
 template< class MIP >

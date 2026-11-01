@@ -21,6 +21,8 @@
 
 #include "cbc.h"
 
+#include <cmath>
+
 #include <CoinModel.hpp>
 #include <CbcModel.hpp>
 #include <OsiSolverInterface.hpp>
@@ -312,6 +314,22 @@ CbcMip::SolveExitStatus CbcMip::_solve()
  _osi_solver = new OsiClpSolverInterface();
 
  _osi_solver->loadFromCoinModel( *_prob );
+
+ // An integer column takes the integer values within its bounds, which
+ // Cbc does not round: the bounds are rounded inwards in the copy that it
+ // solves, up to its integer tolerance, and they cross on a column without
+ // integer values, which makes the problem infeasible
+ const double itol = 1e-6;
+ for( int j = 0 ; j != _osi_solver->getNumCols() ; ++j ) {
+  if( ! _osi_solver->isInteger( j ) )
+   continue;
+  const double l = _osi_solver->getColLower()[ j ];
+  const double u = _osi_solver->getColUpper()[ j ];
+  if( l > -COIN_DBL_MAX )
+   _osi_solver->setColLower( j , std::ceil( l - itol ) );
+  if( u < COIN_DBL_MAX )
+   _osi_solver->setColUpper( j , std::floor( u + itol ) );
+  }
 
  if( _cbc_model ) {
   delete _cbc_model;

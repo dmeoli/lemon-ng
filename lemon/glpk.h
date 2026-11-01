@@ -246,6 +246,11 @@ class GlpkMip : public MipSolver , public GlpkBase
  virtual ProblemType _getType() const;
  virtual Value _getSol( int i ) const;
  virtual Value _getSolValue() const;
+
+ private:
+ // Whether the last solve found an integer column without integer
+ // values within its bounds, which makes the problem infeasible
+ bool _no_integer;
  };
 
 

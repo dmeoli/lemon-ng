@@ -22,6 +22,9 @@
 #include <lemon/glpk.h>
 #include <glpk.h>
 
+#include <cmath>
+#include <vector>
+
 #include <lemon/assert.h>
 
 namespace lemon
@@ -983,11 +986,12 @@ void GlpkLp::presolver( bool presolve )
 
 // GlpkMip members
 
-GlpkMip::GlpkMip() : LpBase() , MipSolver() , GlpkBase()
+GlpkMip::GlpkMip()
+    : LpBase() , MipSolver() , GlpkBase() , _no_integer( false )
 { }
 
 GlpkMip::GlpkMip( const GlpkMip & other )
-    : LpBase() , MipSolver() , GlpkBase( other )
+    : LpBase() , MipSolver() , GlpkBase( other ) , _no_integer( false )
 { }
 
 void GlpkMip::_setColType( int i , GlpkMip::ColTypes col_type )
@@ -1015,6 +1019,7 @@ GlpkMip::ColTypes GlpkMip::_getColType( int i ) const
 
 GlpkMip::SolveExitStatus GlpkMip::_solve()
 {
+ _no_integer = false;
  glp_smcp smcp;
  glp_init_smcp( &smcp );
 
@@ -1047,16 +1052,41 @@ GlpkMip::SolveExitStatus GlpkMip::_solve()
 
  iocp.msg_lev = _message_level;
 
- int ret = glp_intopt( lp , &iocp );
- if( ret == GLP_EBOUND ) {
-  // an integer column has a bound that is not integer, which glp_intopt
-  // takes only through its presolver, which rounds the bound
-  iocp.presolve = GLP_ON;
-  ret = glp_intopt( lp , &iocp );
+ // glp_intopt refuses an integer column whose bounds are not integer:
+ // they are rounded inwards for it, up to an integer tolerance, and given
+ // back afterwards, and if they cross the column has no integer value and
+ // the problem is infeasible
+ const double itol = 1e-6;
+ struct Bounds
+ {
+  int col , type;
+  double lb , ub;
+  };
+ std::vector< Bounds > given;
+ for( int j = 1 ; j <= glp_get_num_cols( lp ) && ! _no_integer ; ++j ) {
+  if( glp_get_col_kind( lp , j ) == GLP_CV )
+   continue;
+  const int type = glp_get_col_type( lp , j );
+  const double lb = glp_get_col_lb( lp , j ) , ub = glp_get_col_ub( lp , j );
+  double rlb = lb , rub = ub;
+  if( type == GLP_LO || type == GLP_DB || type == GLP_FX )
+   rlb = std::ceil( lb - itol );
+  if( type == GLP_UP || type == GLP_DB || type == GLP_FX )
+   rub = std::floor( ub + itol );
+  if( rlb == lb && rub == ub )
+   continue;
+  given.push_back( { j , type , lb , ub } );
+  if( ( type == GLP_DB || type == GLP_FX ) && rlb > rub )
+   _no_integer = true;
+  else if( ( type == GLP_DB || type == GLP_FX ) && rlb == rub )
+   glp_set_col_bnds( lp , j , GLP_FX , rlb , rub );
+  else
+   glp_set_col_bnds( lp , j , type , rlb , rub );
   }
- // the presolver says so when no integer solution exists, setting the
- // status of the problem
- if( ret != 0 && ret != GLP_ENOPFS )
+ const int ret = _no_integer ? 0 : glp_intopt( lp , &iocp );
+ for( const Bounds & b : given )
+  glp_set_col_bnds( lp , b.col , b.type , b.lb , b.ub );
+ if( ret != 0 )
   return( UNSOLVED );
  return( SOLVED );
  }
@@ -1064,6 +1094,8 @@ GlpkMip::SolveExitStatus GlpkMip::_solve()
 
 GlpkMip::ProblemType GlpkMip::_getType() const
 {
+ if( _no_integer )
+  return( INFEASIBLE );
  switch( glp_get_status( lp ) ) {
   case GLP_OPT:
    switch( glp_mip_status( lp ) ) {
