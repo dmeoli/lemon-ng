@@ -1,10 +1,11 @@
-prefix=${pcfiledir}/../..
-exec_prefix=${prefix}/bin
-libdir=${prefix}/lib
-includedir=${prefix}/include
+prefix=${pcfiledir}/@LEMON_PC_RELPREFIX@
+exec_prefix=${prefix}
+libdir=${prefix}/@CMAKE_INSTALL_LIBDIR@
+includedir=${prefix}/@CMAKE_INSTALL_INCLUDEDIR@
 
 Name: @PROJECT_NAME@
 Description: Library for Efficient Modeling and Optimization in Networks
 Version: @PROJECT_VERSION@
-Libs: -L${libdir} -l@LEMON_PC_LIB@ @GLPK_LIBS@ @CPLEX_LIBS@ @SOPLEX_LIBS@ @CLP_LIBS@ @CBC_LIBS@
+Libs: -L${libdir} -l@LEMON_PC_LIB@
+Libs.private:@LEMON_PC_PRIVATE@
 Cflags: -I${includedir}

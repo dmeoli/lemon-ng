@@ -83,6 +83,18 @@ ENDIF()
 
 SET(PROJECT_VERSION ${LEMON_VERSION})
 
+# the numeric part of the version (1.4.0 out of 1.4.0-5-g63754b6), which the
+# shared library and the version file of the CMake configuration carry, and
+# its first two numbers, the version of the interface of the shared library;
+# empty when the version is no number (e.g., a commit, or unknown)
+STRING(REGEX MATCH "^[0-9]+\\.[0-9]+(\\.[0-9]+)?" LEMON_NUMERIC_VERSION
+  "${LEMON_VERSION}")
+STRING(REGEX MATCH "^[0-9]+\\.[0-9]+" LEMON_SOVERSION "${LEMON_VERSION}")
+
+# the directories of the installation as the system wants them (e.g., lib64
+# or lib/x86_64-linux-gnu for the libraries)
+INCLUDE(GNUInstallDirs)
+
 SET(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
 FIND_PACKAGE(Doxygen)
@@ -335,19 +347,35 @@ IF(${CMAKE_SOURCE_DIR} STREQUAL ${PROJECT_SOURCE_DIR})
   ENDIF()
 ENDIF()
 
+# the CMake configuration, as lemon-config.cmake, which find_package() finds
+# both as LEMON and as lemon (trac #628), with the version file that
+# find_package(LEMON 1.4) needs, when the version is a number
+SET(LEMON_CMAKE_DIR ${CMAKE_INSTALL_DATADIR}/lemon/cmake)
 CONFIGURE_FILE(
   ${PROJECT_SOURCE_DIR}/cmake/LEMONConfig.cmake.in
-  ${PROJECT_BINARY_DIR}/cmake/LEMONConfig.cmake
+  ${PROJECT_BINARY_DIR}/cmake/lemon-config.cmake
   @ONLY
 )
 INSTALL(
-  FILES ${PROJECT_BINARY_DIR}/cmake/LEMONConfig.cmake
-  DESTINATION share/lemon/cmake
+  FILES ${PROJECT_BINARY_DIR}/cmake/lemon-config.cmake
+  DESTINATION ${LEMON_CMAKE_DIR}
 )
+IF(LEMON_NUMERIC_VERSION)
+  INCLUDE(CMakePackageConfigHelpers)
+  WRITE_BASIC_PACKAGE_VERSION_FILE(
+    ${PROJECT_BINARY_DIR}/cmake/lemon-config-version.cmake
+    VERSION ${LEMON_NUMERIC_VERSION}
+    COMPATIBILITY SameMajorVersion
+  )
+  INSTALL(
+    FILES ${PROJECT_BINARY_DIR}/cmake/lemon-config-version.cmake
+    DESTINATION ${LEMON_CMAKE_DIR}
+  )
+ENDIF()
 INSTALL(
   EXPORT LEMONTargets
   NAMESPACE LEMON::
-  DESTINATION share/lemon/cmake
+  DESTINATION ${LEMON_CMAKE_DIR}
 )
 
 CONFIGURE_FILE(
