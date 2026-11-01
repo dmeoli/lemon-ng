@@ -82,7 +82,7 @@ IF(LEMON_HAVE_LP)
   ENDIF()
 
   TARGET_LINK_LIBRARIES(lp_test ${LP_TEST_LIBS})
-  ADD_TEST(lp_test lp_test)
+  ADD_TEST(NAME lp_test COMMAND lp_test)
   ADD_DEPENDENCIES(check lp_test)
 
   IF(WIN32 AND LEMON_HAVE_GLPK)
@@ -122,7 +122,7 @@ IF(LEMON_HAVE_MIP)
   ENDIF()
 
   TARGET_LINK_LIBRARIES(mip_test ${MIP_TEST_LIBS})
-  ADD_TEST(mip_test mip_test)
+  ADD_TEST(NAME mip_test COMMAND mip_test)
   ADD_DEPENDENCIES(check mip_test)
 
   IF(WIN32 AND LEMON_HAVE_GLPK)
@@ -152,16 +152,18 @@ FOREACH(TEST_NAME ${TESTS})
   ENDIF()
   TARGET_LINK_LIBRARIES(${TEST_NAME} lemon)
     IF(TEST_WITH_VALGRIND)
-      ADD_TEST(${TEST_NAME}
-        valgrind --error-exitcode=1 ${VALGRIND_FLAGS}
-        ${CMAKE_CURRENT_BINARY_DIR}/${TEST_NAME} )
+      ADD_TEST(NAME ${TEST_NAME}
+        COMMAND valgrind --error-exitcode=1 ${VALGRIND_FLAGS}
+        $<TARGET_FILE:${TEST_NAME}>)
     ELSE()
-      ADD_TEST(${TEST_NAME} ${TEST_NAME})
+      ADD_TEST(NAME ${TEST_NAME} COMMAND ${TEST_NAME})
     ENDIF()
   ADD_DEPENDENCIES(check ${TEST_NAME})
 ENDFOREACH()
 
-# with LEMON as a DLL, the tests find it in the directory where it is built
+# with LEMON as a DLL, the tests find it in the directory where it is built;
+# the generator expression is expanded in the property of a test created by
+# ADD_TEST(NAME ...) only, which all of them are
 IF(WIN32 AND BUILD_SHARED_LIBS)
   GET_DIRECTORY_PROPERTY(_lemon_tests TESTS)
   SET_TESTS_PROPERTIES(${_lemon_tests} PROPERTIES ENVIRONMENT_MODIFICATION
