@@ -144,6 +144,45 @@ jobs:
           $(PKG_CONFIG_PATH="${{ github.workspace }}/prefix/lib/pkgconfig"
           pkg-config --cflags --libs lemon) && ./pc_test
 
+  # the library built static with the LP and MIP solvers of the distribution
+  # (GLPK, and Clp and Cbc of COIN-OR), their tests run, and a project that
+  # uses the installation, which gets the libraries of the solvers only from
+  # the configuration of LEMON, built and run
+  lp-backends:
+    name: LP and MIP solvers on ubuntu-latest
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Install GLPK and COIN-OR
+        run: >
+          sudo apt-get update -q &&
+          sudo apt-get install -y -q libglpk-dev coinor-libcbc-dev
+          coinor-libclp-dev
+
+      - name: Build, test and install the library
+        run: >
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+          -DCMAKE_INSTALL_PREFIX="${{ github.workspace }}/prefix"
+          -DLEMON_BUILD_DEMOS=NO -DLEMON_BUILD_TOOLS=NO -DLEMON_BUILD_DOC=NO
+          -DLEMON_ENABLE_ILOG=NO -DLEMON_ENABLE_SOPLEX=NO
+          && grep -q "define LEMON_HAVE_GLPK" build/lemon/config.h
+          && grep -q "define LEMON_HAVE_CBC" build/lemon/config.h
+          && cmake --build build --parallel 4
+          && ctest --test-dir build --output-on-failure -R "lp_test|mip_test"
+          && cmake --install build
+
+      - name: The installed configuration names no path of this machine
+        run: "! grep -n /usr/lib prefix/share/lemon/cmake/LEMONTargets*.cmake"
+
+      - name: Build and run a project that uses the installation
+        run: >
+          cmake -S test/install -B use -DCMAKE_BUILD_TYPE=Release
+          -DCMAKE_PREFIX_PATH="${{ github.workspace }}/prefix"
+          -DLEMON_INSTALL_TEST_LP=ON
+          && cmake --build use && ./use/lp_install_test
+
   # the library, the tests, the tools and the demos built with the makefiles
   # instead of CMake, and the tests run, on Linux, macOS (whose sed is the
   # one of BSD) and Windows (MinGW in MSYS2)

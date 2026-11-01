@@ -83,9 +83,29 @@ ENDIF()
 
 ADD_LIBRARY(lemon ${LEMON_SOURCES})
 
-TARGET_LINK_LIBRARIES(lemon
-  ${GLPK_LIBRARIES} ${COIN_LIBRARIES} ${ILOG_LIBRARIES} ${SOPLEX_LIBRARIES}
-  )
+# the libraries of the LP and MIP solvers are linked by their paths on the
+# machine that builds LEMON, which the installed configuration does not
+# carry: it has their file names, and a static LEMON looks for them again
+# on the machine that uses it [see cmake/LEMONConfig.cmake.in]
+SET(LEMON_SOLVER_LIBRARIES "")
+SET(LEMON_SOLVER_DIRS "")
+FOREACH(_lemon_lib ${GLPK_LIBRARIES} ${COIN_LIBRARIES} ${ILOG_LIBRARIES}
+    ${SOPLEX_LIBRARIES})
+  IF(_lemon_lib MATCHES "^(debug|optimized|general)$")
+    CONTINUE()
+  ENDIF()
+  TARGET_LINK_LIBRARIES(lemon PRIVATE $<BUILD_INTERFACE:${_lemon_lib}>)
+  GET_FILENAME_COMPONENT(_lemon_name ${_lemon_lib} NAME)
+  LIST(APPEND LEMON_SOLVER_LIBRARIES ${_lemon_name})
+  IF(IS_ABSOLUTE ${_lemon_lib})
+    GET_FILENAME_COMPONENT(_lemon_dir ${_lemon_lib} DIRECTORY)
+    LIST(APPEND LEMON_SOLVER_DIRS ${_lemon_dir})
+  ENDIF()
+ENDFOREACH()
+LIST(REMOVE_DUPLICATES LEMON_SOLVER_LIBRARIES)
+LIST(REMOVE_DUPLICATES LEMON_SOLVER_DIRS)
+SET(LEMON_SOLVER_LIBRARIES "${LEMON_SOLVER_LIBRARIES}" PARENT_SCOPE)
+SET(LEMON_SOLVER_DIRS "${LEMON_SOLVER_DIRS}" PARENT_SCOPE)
 
 # the shared library carries the numeric version and, as the version of its
 # interface, its first two numbers; the static one is position-independent

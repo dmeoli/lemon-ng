@@ -8,6 +8,26 @@
 
 INCLUDE(${CMAKE_CURRENT_LIST_DIR}/LEMONTargets.cmake)
 
+# a static LEMON needs the libraries of the LP and MIP solvers it was built
+# with, looked for on this machine (first where they were when LEMON was
+# built); a shared one carries them
+GET_TARGET_PROPERTY(_lemon_type LEMON::lemon TYPE)
+IF(_lemon_type STREQUAL "STATIC_LIBRARY")
+  FOREACH(_lemon_name @LEMON_SOLVER_LIBRARIES@)
+    STRING(MAKE_C_IDENTIFIER "LEMON_SOLVER_${_lemon_name}" _lemon_var)
+    FIND_LIBRARY(${_lemon_var} NAMES ${_lemon_name}
+      HINTS @LEMON_SOLVER_DIRS@)
+    IF(NOT ${_lemon_var})
+      SET(LEMON_FOUND FALSE)
+      SET(LEMON_NOT_FOUND_MESSAGE
+        "LEMON was built with ${_lemon_name}, which is not found")
+      RETURN()
+    ENDIF()
+    SET_PROPERTY(TARGET LEMON::lemon APPEND PROPERTY
+      INTERFACE_LINK_LIBRARIES ${${_lemon_var}})
+  ENDFOREACH()
+ENDIF()
+
 GET_TARGET_PROPERTY(LEMON_INCLUDE_DIR LEMON::lemon
   INTERFACE_INCLUDE_DIRECTORIES)
 SET(LEMON_INCLUDE_DIRS "${LEMON_INCLUDE_DIR}")
