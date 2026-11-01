@@ -126,7 +126,8 @@ struct MaxFlowClassConcept
    const Constraints & me = *this;
 
    typedef typename MF ::template SetFlowMap< FlowMap >::Create MaxFlowType;
-   typedef typename MF::Create MaxFlowType2;
+   // MF::Create has to be a type
+   typedef typename MF::Create MaxFlowType2 LEMON_UNUSED_TYPEDEF;
    MaxFlowType max_flow( me.g , me.cap , me.n , me.n );
    const MaxFlowType & const_max_flow = max_flow;
 

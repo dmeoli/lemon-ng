@@ -424,7 +424,6 @@ void checkEdgeIds( const Graph & G )
 template< typename Graph >
 void checkGraphNodeMap( const Graph & G )
 {
- typedef typename Graph::Node Node;
  typedef typename Graph::NodeIt NodeIt;
 
  typedef typename Graph::template NodeMap< int > IntNodeMap;
@@ -455,7 +454,6 @@ void checkGraphNodeMap( const Graph & G )
 template< typename Graph >
 void checkGraphRedNodeMap( const Graph & G )
 {
- typedef typename Graph::Node Node;
  typedef typename Graph::RedNodeIt RedNodeIt;
 
  typedef typename Graph::template RedNodeMap< int > IntRedNodeMap;
@@ -486,7 +484,6 @@ void checkGraphRedNodeMap( const Graph & G )
 template< typename Graph >
 void checkGraphBlueNodeMap( const Graph & G )
 {
- typedef typename Graph::Node Node;
  typedef typename Graph::BlueNodeIt BlueNodeIt;
 
  typedef typename Graph::template BlueNodeMap< int > IntBlueNodeMap;
@@ -517,7 +514,6 @@ void checkGraphBlueNodeMap( const Graph & G )
 template< typename Graph >
 void checkGraphArcMap( const Graph & G )
 {
- typedef typename Graph::Arc Arc;
  typedef typename Graph::ArcIt ArcIt;
 
  typedef typename Graph::template ArcMap< int > IntArcMap;
@@ -548,7 +544,6 @@ void checkGraphArcMap( const Graph & G )
 template< typename Graph >
 void checkGraphEdgeMap( const Graph & G )
 {
- typedef typename Graph::Edge Edge;
  typedef typename Graph::EdgeIt EdgeIt;
 
  typedef typename Graph::template EdgeMap< int > IntEdgeMap;

@@ -268,7 +268,6 @@ void dijkstraHeapTest( const Digraph & digraph , const IntArcMap & length ,
 int main()
 {
 
- typedef int Item;
  typedef int Prio;
  typedef RangeMap< int > ItemIntMap;
 

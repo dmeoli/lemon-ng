@@ -63,8 +63,6 @@ int main()
 
  typedef ListGraph::Node Node;
  typedef ListGraph::Edge Edge;
- typedef ListGraph::NodeIt NodeIt;
- typedef ListGraph::ArcIt ArcIt;
 
  ListGraph G;
 
