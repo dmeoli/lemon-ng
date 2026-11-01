@@ -1,7 +1,3 @@
-<p align="center">
-  <img src="doc/theme/lemon-logo.png" alt="lemon-ng" width="60">
-</p>
-
 # lemon-ng
 
 [![CI](https://github.com/dmeoli/lemon-ng/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/dmeoli/lemon-ng/actions/workflows/ci.yml)

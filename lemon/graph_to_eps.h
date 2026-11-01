@@ -268,24 +268,19 @@ class GraphToEps : public T
  ///
  enum NodeShapes {
   /// = 0
-  ///\image html nodeshape_0.png
-  ///\image latex nodeshape_0.eps "CIRCLE shape (0)" width=2cm
+  ///\image html nodeshape_0.png "CIRCLE shape (0)"
   CIRCLE = 0 ,
   /// = 1
-  ///\image html nodeshape_1.png
-  ///\image latex nodeshape_1.eps "SQUARE shape (1)" width=2cm
+  ///\image html nodeshape_1.png "SQUARE shape (1)"
   SQUARE = 1 ,
   /// = 2
-  ///\image html nodeshape_2.png
-  ///\image latex nodeshape_2.eps "DIAMOND shape (2)" width=2cm
+  ///\image html nodeshape_2.png "DIAMOND shape (2)"
   DIAMOND = 2 ,
   /// = 3
-  ///\image html nodeshape_3.png
-  ///\image latex nodeshape_3.eps "MALE shape (3)" width=2cm
+  ///\image html nodeshape_3.png "MALE shape (3)"
   MALE = 3 ,
   /// = 4
-  ///\image html nodeshape_4.png
-  ///\image latex nodeshape_4.eps "FEMALE shape (4)" width=2cm
+  ///\image html nodeshape_4.png "FEMALE shape (4)"
   FEMALE = 4
   };
 
