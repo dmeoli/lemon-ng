@@ -34,3 +34,6 @@ cmake/version.cmake
 /doc/html/
 /doc/*.tag
 /doc/gen-images/
+
+# the bytecode of the Python scripts
+__pycache__/
