@@ -54,14 +54,13 @@ clean::
 	rm -rf $(LEMONSDR)/obj $(LEMONSDR)/*~
 
 # lemon/config.h, as CMake writes it for GCC and Clang with no LP or MIP
-# solver: the version, long long, the threads, the pragma that keeps quiet
-# the unused local types, every other #cmakedefine left undefined - - - - - -
+# solver: the version, long long, the threads, and every other #cmakedefine
+# left undefined - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 $(LEMONSDR)/obj/lemon/config.h: $(LEMONSDR)/lemon/config.h.in
 	mkdir -p $(dir $@)
 	sed -e 's/@PROJECT_VERSION@/$(LEMON_VERSION)/' \
 	  -e 's/^#cmakedefine \(LEMON_HAVE_LONG_LONG\) 1/#define \1 1/' \
-	  -e 's/^#cmakedefine \(LEMON_NO_UNUSED_[A-Z_]*\) 1/#define \1 1/' \
 	  $(LEMON_SYS_SED) \
 	  -e 's/^#cmakedefine \([A-Za-z0-9_]*\).*/\/* #undef \1 *\//' $< > $@
 

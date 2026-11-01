@@ -29,6 +29,5 @@
 #cmakedefine LEMON_USE_PTHREAD 1
 #cmakedefine LEMON_USE_WIN32_THREADS 1
 
-#cmakedefine LEMON_NO_UNUSED_LOCAL_TYPEDEF_WARNINGS 1
 
 #endif

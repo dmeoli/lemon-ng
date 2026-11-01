@@ -41,9 +41,14 @@
 #pragma warning( disable : 4250 4267 4355 4503 4800 4996 )
 #endif
 
-#if LEMON_NO_UNUSED_LOCAL_TYPEDEF_WARNINGS
-// Needed by the [DI]GRAPH_TYPEDEFS marcos for gcc >=4.8 and clang
-#pragma GCC diagnostic ignored "-Wunused-local-typedefs"
+// The types that the [DI]GRAPH_TYPEDEFS macros define in the scope of the
+// user, who may not use them all: marked as possibly unused, so that GCC and
+// Clang do not warn of them, rather than turning the warning off for the
+// whole of the compilation of the user
+#if defined( __GNUC__ )
+#define LEMON_UNUSED_TYPEDEF __attribute__( ( __unused__ ) )
+#else
+#define LEMON_UNUSED_TYPEDEF
 #endif
 
 #include <vector>
@@ -94,18 +99,18 @@ extern const Invalid INVALID;
 ///on a template parameter, then use \c TEMPLATE_DIGRAPH_TYPEDEFS()
 ///macro.
 #define DIGRAPH_TYPEDEFS( Digraph )                                           \
- typedef Digraph::Node Node;                                                  \
- typedef Digraph::NodeIt NodeIt;                                              \
- typedef Digraph::Arc Arc;                                                    \
- typedef Digraph::ArcIt ArcIt;                                                \
- typedef Digraph::InArcIt InArcIt;                                            \
- typedef Digraph::OutArcIt OutArcIt;                                          \
- typedef Digraph::NodeMap< bool > BoolNodeMap;                                \
- typedef Digraph::NodeMap< int > IntNodeMap;                                  \
- typedef Digraph::NodeMap< double > DoubleNodeMap;                            \
- typedef Digraph::ArcMap< bool > BoolArcMap;                                  \
- typedef Digraph::ArcMap< int > IntArcMap;                                    \
- typedef Digraph::ArcMap< double > DoubleArcMap
+ typedef Digraph::Node Node LEMON_UNUSED_TYPEDEF;                             \
+ typedef Digraph::NodeIt NodeIt LEMON_UNUSED_TYPEDEF;                         \
+ typedef Digraph::Arc Arc LEMON_UNUSED_TYPEDEF;                               \
+ typedef Digraph::ArcIt ArcIt LEMON_UNUSED_TYPEDEF;                           \
+ typedef Digraph::InArcIt InArcIt LEMON_UNUSED_TYPEDEF;                       \
+ typedef Digraph::OutArcIt OutArcIt LEMON_UNUSED_TYPEDEF;                     \
+ typedef Digraph::NodeMap< bool > BoolNodeMap LEMON_UNUSED_TYPEDEF;           \
+ typedef Digraph::NodeMap< int > IntNodeMap LEMON_UNUSED_TYPEDEF;             \
+ typedef Digraph::NodeMap< double > DoubleNodeMap LEMON_UNUSED_TYPEDEF;       \
+ typedef Digraph::ArcMap< bool > BoolArcMap LEMON_UNUSED_TYPEDEF;             \
+ typedef Digraph::ArcMap< int > IntArcMap LEMON_UNUSED_TYPEDEF;               \
+ typedef Digraph::ArcMap< double > DoubleArcMap LEMON_UNUSED_TYPEDEF
 
 ///Create convenience typedefs for the digraph types and iterators
 
@@ -114,18 +119,24 @@ extern const Invalid INVALID;
 ///\note Use this macro, if the graph type is a dependent type,
 ///ie. the graph type depend on a template parameter.
 #define TEMPLATE_DIGRAPH_TYPEDEFS( Digraph )                                  \
- typedef typename Digraph::Node Node;                                         \
- typedef typename Digraph::NodeIt NodeIt;                                     \
- typedef typename Digraph::Arc Arc;                                           \
- typedef typename Digraph::ArcIt ArcIt;                                       \
- typedef typename Digraph::InArcIt InArcIt;                                   \
- typedef typename Digraph::OutArcIt OutArcIt;                                 \
- typedef typename Digraph::template NodeMap< bool > BoolNodeMap;              \
- typedef typename Digraph::template NodeMap< int > IntNodeMap;                \
- typedef typename Digraph::template NodeMap< double > DoubleNodeMap;          \
- typedef typename Digraph::template ArcMap< bool > BoolArcMap;                \
- typedef typename Digraph::template ArcMap< int > IntArcMap;                  \
- typedef typename Digraph::template ArcMap< double > DoubleArcMap
+ typedef typename Digraph::Node Node LEMON_UNUSED_TYPEDEF;                    \
+ typedef typename Digraph::NodeIt NodeIt LEMON_UNUSED_TYPEDEF;                \
+ typedef typename Digraph::Arc Arc LEMON_UNUSED_TYPEDEF;                      \
+ typedef typename Digraph::ArcIt ArcIt LEMON_UNUSED_TYPEDEF;                  \
+ typedef typename Digraph::InArcIt InArcIt LEMON_UNUSED_TYPEDEF;              \
+ typedef typename Digraph::OutArcIt OutArcIt LEMON_UNUSED_TYPEDEF;            \
+ typedef typename Digraph::template NodeMap< bool > BoolNodeMap               \
+   LEMON_UNUSED_TYPEDEF;                                                      \
+ typedef typename Digraph::template NodeMap< int > IntNodeMap                 \
+   LEMON_UNUSED_TYPEDEF;                                                      \
+ typedef typename Digraph::template NodeMap< double > DoubleNodeMap           \
+   LEMON_UNUSED_TYPEDEF;                                                      \
+ typedef typename Digraph::template ArcMap< bool > BoolArcMap                 \
+   LEMON_UNUSED_TYPEDEF;                                                      \
+ typedef typename Digraph::template ArcMap< int > IntArcMap                   \
+   LEMON_UNUSED_TYPEDEF;                                                      \
+ typedef typename Digraph::template ArcMap< double > DoubleArcMap             \
+   LEMON_UNUSED_TYPEDEF
 
 ///Create convenience typedefs for the graph types and iterators
 
@@ -139,12 +150,12 @@ extern const Invalid INVALID;
 ///macro.
 #define GRAPH_TYPEDEFS( Graph )                                               \
  DIGRAPH_TYPEDEFS( Graph );                                                   \
- typedef Graph::Edge Edge;                                                    \
- typedef Graph::EdgeIt EdgeIt;                                                \
- typedef Graph::IncEdgeIt IncEdgeIt;                                          \
- typedef Graph::EdgeMap< bool > BoolEdgeMap;                                  \
- typedef Graph::EdgeMap< int > IntEdgeMap;                                    \
- typedef Graph::EdgeMap< double > DoubleEdgeMap
+ typedef Graph::Edge Edge LEMON_UNUSED_TYPEDEF;                               \
+ typedef Graph::EdgeIt EdgeIt LEMON_UNUSED_TYPEDEF;                           \
+ typedef Graph::IncEdgeIt IncEdgeIt LEMON_UNUSED_TYPEDEF;                     \
+ typedef Graph::EdgeMap< bool > BoolEdgeMap LEMON_UNUSED_TYPEDEF;             \
+ typedef Graph::EdgeMap< int > IntEdgeMap LEMON_UNUSED_TYPEDEF;               \
+ typedef Graph::EdgeMap< double > DoubleEdgeMap LEMON_UNUSED_TYPEDEF
 
 ///Create convenience typedefs for the graph types and iterators
 
@@ -154,12 +165,15 @@ extern const Invalid INVALID;
 ///ie. the graph type depend on a template parameter.
 #define TEMPLATE_GRAPH_TYPEDEFS( Graph )                                      \
  TEMPLATE_DIGRAPH_TYPEDEFS( Graph );                                          \
- typedef typename Graph::Edge Edge;                                           \
- typedef typename Graph::EdgeIt EdgeIt;                                       \
- typedef typename Graph::IncEdgeIt IncEdgeIt;                                 \
- typedef typename Graph::template EdgeMap< bool > BoolEdgeMap;                \
- typedef typename Graph::template EdgeMap< int > IntEdgeMap;                  \
- typedef typename Graph::template EdgeMap< double > DoubleEdgeMap
+ typedef typename Graph::Edge Edge LEMON_UNUSED_TYPEDEF;                      \
+ typedef typename Graph::EdgeIt EdgeIt LEMON_UNUSED_TYPEDEF;                  \
+ typedef typename Graph::IncEdgeIt IncEdgeIt LEMON_UNUSED_TYPEDEF;            \
+ typedef typename Graph::template EdgeMap< bool > BoolEdgeMap                 \
+   LEMON_UNUSED_TYPEDEF;                                                      \
+ typedef typename Graph::template EdgeMap< int > IntEdgeMap                   \
+   LEMON_UNUSED_TYPEDEF;                                                      \
+ typedef typename Graph::template EdgeMap< double > DoubleEdgeMap             \
+   LEMON_UNUSED_TYPEDEF
 
 ///Create convenience typedefs for the bipartite graph types and iterators
 
@@ -174,16 +188,16 @@ extern const Invalid INVALID;
 ///macro.
 #define BPGRAPH_TYPEDEFS( BpGraph )                                           \
  GRAPH_TYPEDEFS( BpGraph );                                                   \
- typedef BpGraph::RedNode RedNode;                                            \
- typedef BpGraph::RedNodeIt RedNodeIt;                                        \
- typedef BpGraph::RedNodeMap< bool > BoolRedNodeMap;                          \
- typedef BpGraph::RedNodeMap< int > IntRedNodeMap;                            \
- typedef BpGraph::RedNodeMap< double > DoubleRedNodeMap;                      \
- typedef BpGraph::BlueNode BlueNode;                                          \
- typedef BpGraph::BlueNodeIt BlueNodeIt;                                      \
- typedef BpGraph::BlueNodeMap< bool > BoolBlueNodeMap;                        \
- typedef BpGraph::BlueNodeMap< int > IntBlueNodeMap;                          \
- typedef BpGraph::BlueNodeMap< double > DoubleBlueNodeMap
+ typedef BpGraph::RedNode RedNode LEMON_UNUSED_TYPEDEF;                       \
+ typedef BpGraph::RedNodeIt RedNodeIt LEMON_UNUSED_TYPEDEF;                   \
+ typedef BpGraph::RedNodeMap< bool > BoolRedNodeMap LEMON_UNUSED_TYPEDEF;     \
+ typedef BpGraph::RedNodeMap< int > IntRedNodeMap LEMON_UNUSED_TYPEDEF;       \
+ typedef BpGraph::RedNodeMap< double > DoubleRedNodeMap LEMON_UNUSED_TYPEDEF; \
+ typedef BpGraph::BlueNode BlueNode LEMON_UNUSED_TYPEDEF;                     \
+ typedef BpGraph::BlueNodeIt BlueNodeIt LEMON_UNUSED_TYPEDEF;                 \
+ typedef BpGraph::BlueNodeMap< bool > BoolBlueNodeMap LEMON_UNUSED_TYPEDEF;   \
+ typedef BpGraph::BlueNodeMap< int > IntBlueNodeMap LEMON_UNUSED_TYPEDEF;     \
+ typedef BpGraph::BlueNodeMap< double > DoubleBlueNodeMap LEMON_UNUSED_TYPEDEF
 
 ///Create convenience typedefs for the bipartite graph types and iterators
 
@@ -193,16 +207,22 @@ extern const Invalid INVALID;
 ///ie. the graph type depend on a template parameter.
 #define TEMPLATE_BPGRAPH_TYPEDEFS( BpGraph )                                  \
  TEMPLATE_GRAPH_TYPEDEFS( BpGraph );                                          \
- typedef typename BpGraph::RedNode RedNode;                                   \
- typedef typename BpGraph::RedNodeIt RedNodeIt;                               \
- typedef typename BpGraph::template RedNodeMap< bool > BoolRedNodeMap;        \
- typedef typename BpGraph::template RedNodeMap< int > IntRedNodeMap;          \
- typedef typename BpGraph::template RedNodeMap< double > DoubleRedNodeMap;    \
- typedef typename BpGraph::BlueNode BlueNode;                                 \
- typedef typename BpGraph::BlueNodeIt BlueNodeIt;                             \
- typedef typename BpGraph::template BlueNodeMap< bool > BoolBlueNodeMap;      \
- typedef typename BpGraph::template BlueNodeMap< int > IntBlueNodeMap;        \
- typedef typename BpGraph::template BlueNodeMap< double > DoubleBlueNodeMap
+ typedef typename BpGraph::RedNode RedNode LEMON_UNUSED_TYPEDEF;              \
+ typedef typename BpGraph::RedNodeIt RedNodeIt LEMON_UNUSED_TYPEDEF;          \
+ typedef typename BpGraph::template RedNodeMap< bool > BoolRedNodeMap         \
+   LEMON_UNUSED_TYPEDEF;                                                      \
+ typedef typename BpGraph::template RedNodeMap< int > IntRedNodeMap           \
+   LEMON_UNUSED_TYPEDEF;                                                      \
+ typedef typename BpGraph::template RedNodeMap< double > DoubleRedNodeMap     \
+   LEMON_UNUSED_TYPEDEF;                                                      \
+ typedef typename BpGraph::BlueNode BlueNode LEMON_UNUSED_TYPEDEF;            \
+ typedef typename BpGraph::BlueNodeIt BlueNodeIt LEMON_UNUSED_TYPEDEF;        \
+ typedef typename BpGraph::template BlueNodeMap< bool > BoolBlueNodeMap       \
+   LEMON_UNUSED_TYPEDEF;                                                      \
+ typedef typename BpGraph::template BlueNodeMap< int > IntBlueNodeMap         \
+   LEMON_UNUSED_TYPEDEF;                                                      \
+ typedef typename BpGraph::template BlueNodeMap< double > DoubleBlueNodeMap   \
+   LEMON_UNUSED_TYPEDEF
 
 /// \brief Function to count the items in a graph.
 ///
