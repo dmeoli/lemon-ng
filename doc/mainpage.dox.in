@@ -65,7 +65,8 @@ href="http://lemon.cs.elte.hu/trac/lemon/wiki/InstallGuide/">Installation
 Guide</a>.
 
 If you know what you are looking for, then try to find it under the
-<a class="el" href="modules.html">Modules</a> section.
+<a class="el" href="topics.html">Topics</a>, where the data structures and
+the algorithms are gathered by what they do.
 
 If you are a user of the old (0.x) series of LEMON, please check out the
 \ref migration "Migration Guide" for the backward incompatibilities.

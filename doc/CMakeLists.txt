@@ -4,8 +4,10 @@ SET(abs_top_srcdir ${PROJECT_SOURCE_DIR})
 SET(abs_top_builddir ${PROJECT_BINARY_DIR})
 
 SET(LEMON_DOC_SOURCE_BROWSER "NO" CACHE STRING "Include source into the doc (YES/NO).")
-SET(LEMON_DOC_USE_MATHJAX "NO" CACHE STRING "Use MathJax to display math formulae (YES/NO).")
-SET(LEMON_DOC_MATHJAX_RELPATH "http://www.mathjax.org/mathjax" CACHE STRING "MathJax library location.")
+# the formulae drawn by MathJax in the browser, which needs no LaTeX where
+# the documentation is built
+SET(LEMON_DOC_USE_MATHJAX "YES" CACHE STRING "Use MathJax to display math formulae (YES/NO).")
+SET(LEMON_DOC_MATHJAX_RELPATH "https://cdn.jsdelivr.net/npm/mathjax@3" CACHE STRING "MathJax library location.")
 
 SET(LEMON_DOC_LIBSTDC++_URL
   "http://gcc.gnu.org/onlinedocs/gcc-4.7.3/libstdc++/api"
