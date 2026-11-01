@@ -26,19 +26,16 @@
 ///It is automatically included by all graph types, therefore it usually
 ///do not have to be included directly.
 
-// Disable the following warnings when compiling with MSVC:
+// The warnings of MSVC that the headers of LEMON give, turned off:
 // C4250: 'class1' : inherits 'class2::member' via dominance
 // C4267: conversion from 'size_t' to 'type', possible loss of data
-// C4355: 'this' : used in base member initializer list
-// C4503: 'function' : decorated name length exceeded, name was truncated
-// C4800: 'type' : forcing value to bool 'true' or 'false'
-//        (performance warning)
-// C4996: 'function': was declared deprecated
+// (the others that LEMON turned off, among them C4996 on what is declared
+// deprecated, it does not give, and they are left to the user)
 
 #include <lemon/config.h>
 
 #ifdef _MSC_VER
-#pragma warning( disable : 4250 4267 4355 4503 4800 4996 )
+#pragma warning( disable : 4250 4267 )
 #endif
 
 // The types that the [DI]GRAPH_TYPEDEFS macros define in the scope of the
