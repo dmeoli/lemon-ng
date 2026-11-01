@@ -20,6 +20,7 @@
 #include <cmath>
 #include <fstream>
 #include <limits>
+#include <string>
 #include <vector>
 
 #include <lemon/list_graph.h>
@@ -291,7 +292,8 @@ bool checkDualCost( const GR & gr , const LM & lower , const UM & upper ,
  for( ArcIt a( gr ) ; a != INVALID ; ++a ) {
   typename CM::Value red_cost =
     cost[ a ] + pi[ gr.source( a ) ] - pi[ gr.target( a ) ];
-  dual_cost -= ( upper[ a ] - lower[ a ] ) * std::max( -red_cost , 0 );
+  dual_cost -= ( upper[ a ] - lower[ a ] ) *
+	       std::max( -red_cost , typename CM::Value( 0 ) );
   }
 
  return( dual_cost == total );
@@ -352,8 +354,10 @@ void checkNarrowType()
 
 // NetworkSimplex::runWarm() after every change of a pseudo-random sequence
 // of changes of the costs, of the upper bounds (some of them infinite) and
-// of the supplies, against a run from scratch: the same result, and on an
-// unbounded problem a cycle of negative cost and infinite capacity
+// of the supplies, on instances with and without lower bounds, against a
+// run from scratch: the same result, a feasible flow of the same cost,
+// and on an unbounded problem a cycle of negative cost and infinite
+// capacity
 template< typename V >
 void checkWarmStart( int seeds )
 {
@@ -384,6 +388,19 @@ void checkWarmStart( int seeds )
    cap[ arcs[ k ] ] = ( r >> 4 ) % 5 == 0 ? inf : V( ( r >> 8 ) % 15 );
    cost[ arcs[ k ] ] = V( int( ( r >> 16 ) % 41 ) - 5 );
    }
+  // On every other instance, lower bounds on a third of the arcs, which
+  // the upper bounds never go below
+  SmartDigraph::ArcMap< V > low( g , 0 );
+  const bool lower = seed % 2 == 1;
+  if( lower ) {
+   for( std::size_t k = 0 ; k != arcs.size() ; ++k ) {
+    r = r * 1103515245 + 12345;
+    if( ( r >> 12 ) % 3 == 0 )
+     low[ arcs[ k ] ] = V( 1 + ( r >> 16 ) % 3 );
+    if( cap[ arcs[ k ] ] < low[ arcs[ k ] ] )
+     cap[ arcs[ k ] ] = low[ arcs[ k ] ];
+    }
+   }
   NS warm( g );
   for( int step = 0 ; step != 20 ; ++step ) {
    r = r * 1103515245 + 12345;
@@ -395,6 +412,8 @@ void checkWarmStart( int seeds )
      cost[ a ] = V( int( ( r >> 16 ) % 41 ) - 5 );
     if( what == 1 )
      cap[ a ] = ( r >> 4 ) % 4 == 0 ? inf : V( ( r >> 16 ) % 15 );
+    if( cap[ a ] < low[ a ] )
+     cap[ a ] = low[ a ];
     }
    if( what == 2 || step == 0 ) {
     V t = 0;
@@ -406,15 +425,21 @@ void checkWarmStart( int seeds )
      }
     sup[ g.nodeFromId( 0 ) ] = t;
     }
+   if( step == 0 && lower )
+    warm.lowerMap( low );
    warm.costMap( cost ).upperMap( cap ).supplyMap( sup );
    typename NS::ProblemType rw = step == 0 ? warm.run() : warm.runWarm();
    NS cold( g );
-   cold.costMap( cost ).upperMap( cap ).supplyMap( sup );
+   cold.lowerMap( low ).costMap( cost ).upperMap( cap ).supplyMap( sup );
    typename NS::ProblemType rc = cold.run();
    check( rw == rc , "Wrong result of runWarm()" );
    if( rw == NS::OPTIMAL ) {
     check( warm.totalCost() == cold.totalCost() ,
 	   "Wrong total cost of runWarm()" );
+    SmartDigraph::ArcMap< V > flow( g );
+    warm.flowMap( flow );
+    check( checkFlow( g , low , cap , sup , flow ) ,
+	   "Wrong flow of runWarm()" );
     }
    if( rw == NS::UNBOUNDED ) {
     std::vector< SmartDigraph::Arc > cyc = warm.unboundedCycle();
@@ -428,6 +453,111 @@ void checkWarmStart( int seeds )
     check( ! cyc.empty() && c < 0 , "Wrong unbounded cycle: cost" );
     }
    }
+  }
+ }
+
+// A pseudo-random instance for the tests below: up to 10 nodes, three
+// times as many arcs, among them loops and parallel arcs, lower bounds on
+// some, infinite upper bounds on others, costs of both signs, and supplies
+// that sum to zero but on one instance in eight
+struct RandomMcf
+{
+ SmartDigraph g;
+ SmartDigraph::ArcMap< long > lower , upper , cost;
+ SmartDigraph::NodeMap< long > supply;
+ long inf;
+
+ RandomMcf( unsigned int & r )
+     : lower( g ) , upper( g ) , cost( g ) , supply( g ) ,
+       inf( std::numeric_limits< long >::max() ) {
+  r = r * 1103515245 + 12345;
+  int n = 1 + ( r >> 16 ) % 10;
+  for( int i = 0 ; i != n ; ++i )
+   g.addNode();
+  for( int k = 0 ; k != 3 * n ; ++k ) {
+   r = r * 1103515245 + 12345;
+   SmartDigraph::Arc a = g.addArc( g.nodeFromId( ( r >> 8 ) % n ) ,
+				   g.nodeFromId( ( r >> 20 ) % n ) );
+   r = r * 1103515245 + 12345;
+   lower[ a ] = ( r >> 4 ) % 10 < 3 ? long( ( r >> 8 ) % 4 ) : 0;
+   upper[ a ] =
+     ( r >> 12 ) % 20 < 3 ? inf : lower[ a ] + long( ( r >> 16 ) % 10 );
+   cost[ a ] = long( ( r >> 20 ) % 31 ) - 10;
+   }
+  long total = 0;
+  for( int i = 1 ; i != n ; ++i ) {
+   r = r * 1103515245 + 12345;
+   supply[ g.nodeFromId( i ) ] = long( ( r >> 16 ) % 9 ) - 4;
+   total += supply[ g.nodeFromId( i ) ];
+   }
+  r = r * 1103515245 + 12345;
+  supply[ g.nodeFromId( 0 ) ] = -total + ( ( r >> 16 ) % 8 == 0 ? 1 : 0 );
+  }
+ };
+
+// CostScaling, CycleCanceling and CapacityScaling against NetworkSimplex on
+// the instances above: the same result, and an optimal flow that is
+// feasible, potentials that meet complementary slackness and a dual cost
+// equal to the primal one, whose total cost is the one of NetworkSimplex
+template< typename MCF >
+void checkAgainstNetworkSimplex( int seeds , const std::string & name )
+{
+ typedef NetworkSimplex< SmartDigraph , long , long > NS;
+ unsigned int r = 625;
+ for( int seed = 0 ; seed != seeds ; ++seed ) {
+  RandomMcf p( r );
+  NS ns( p.g );
+  ns.lowerMap( p.lower ).upperMap( p.upper ).costMap( p.cost ).supplyMap(
+    p.supply );
+  typename NS::ProblemType rn = ns.run();
+  // a second run of the same object, whose data have to be those given
+  const long nc = rn == NS::OPTIMAL ? ns.totalCost() : 0;
+  check( ns.run() == rn && ( rn != NS::OPTIMAL || ns.totalCost() == nc ) ,
+	 "Wrong second run of NetworkSimplex on instance " +
+	   std::to_string( seed ) );
+  MCF mcf( p.g );
+  mcf.lowerMap( p.lower ).upperMap( p.upper ).costMap( p.cost ).supplyMap(
+    p.supply );
+  typename MCF::ProblemType rm = mcf.run();
+  std::string id = name + " on instance " + std::to_string( seed );
+  check( int( rm ) == int( rn ) , "Wrong result of " + id );
+  if( rn == NS::OPTIMAL ) {
+   checkMcf( mcf , rm , p.g , p.lower , p.upper , p.cost , p.supply , rm ,
+	     true ,
+	     ns.totalCost() , id );
+   checkMcf( ns , rn , p.g , p.lower , p.upper , p.cost , p.supply , rn ,
+	     true ,
+	     ns.totalCost() ,
+	     "NetworkSimplex on instance " + std::to_string( seed ) );
+   }
+  }
+ }
+
+// NetworkSimplex with the supply constraints GEQ and LEQ on the instances
+// above, whose total supply is turned positive or negative as each type
+// needs: an optimal flow is checked by its certificate, a feasible flow,
+// potentials that meet complementary slackness and a dual cost equal to
+// the primal one
+void checkSupplyTypes( int seeds )
+{
+ typedef NetworkSimplex< SmartDigraph , long , long > NS;
+ unsigned int r = 626;
+ for( int seed = 0 ; seed != seeds ; ++seed ) {
+  RandomMcf p( r );
+  SupplyType type = seed % 2 == 0 ? GEQ : LEQ;
+  p.supply[ p.g.nodeFromId( 0 ) ] += type == GEQ ? -2 : 2;
+  NS ns( p.g );
+  ns.lowerMap( p.lower ).upperMap( p.upper ).costMap( p.cost ).supplyMap(
+    p.supply );
+  ns.supplyType( type == GEQ ? NS::GEQ : NS::LEQ );
+  typename NS::ProblemType rn = ns.run();
+  if( rn == NS::OPTIMAL )
+   checkMcf( ns , rn , p.g , p.lower , p.upper , p.cost , p.supply , rn ,
+	     true ,
+	     ns.totalCost() ,
+	     std::string( type == GEQ ? "GEQ" : "LEQ" ) + " on instance " +
+	       std::to_string( seed ) ,
+	     type );
   }
  }
 
@@ -501,8 +631,7 @@ void checkWarmStartOf( int seeds )
  }
 
 template< typename MCF , typename Param >
-void runMcfGeqTests( Param param , const std::string & test_str = "" ,
-		     bool full_neg_cost_support = false )
+void runMcfGeqTests( Param param , const std::string & test_str = "" )
 {
  MCF mcf1( gr ) , mcf2( neg1_gr ) , mcf3( neg2_gr );
 
@@ -573,16 +702,9 @@ void runMcfGeqTests( Param param , const std::string & test_str = "" ,
 	   mcf2.UNBOUNDED , false , 0 , test_str + "-15" );
 
  mcf3.costMap( neg2_c ).supplyMap( neg2_s );
- if( full_neg_cost_support ) {
-  checkMcf( mcf3 , mcf3.run( param ) , neg2_gr , neg2_l , neg2_u , neg2_c ,
-	    neg2_s ,
-	    mcf3.OPTIMAL , true , -300 , test_str + "-16" , GEQ );
-  }
- else {
-  checkMcf( mcf3 , mcf3.run( param ) , neg2_gr , neg2_l , neg2_u , neg2_c ,
-	    neg2_s ,
-	    mcf3.UNBOUNDED , false , 0 , test_str + "-17" , GEQ );
-  }
+ checkMcf( mcf3 , mcf3.run( param ) , neg2_gr , neg2_l , neg2_u , neg2_c ,
+	   neg2_s ,
+	   mcf3.OPTIMAL , true , -300 , test_str + "-16" , GEQ );
  mcf3.upperMap( neg2_u );
  checkMcf( mcf3 , mcf3.run( param ) , neg2_gr , neg2_l , neg2_u , neg2_c ,
 	   neg2_s ,
@@ -710,15 +832,15 @@ int main()
  // Test NetworkSimplex
  {
   typedef NetworkSimplex< Digraph > MCF;
-  runMcfGeqTests< MCF >( MCF::FIRST_ELIGIBLE , "NS-FE" , true );
+  runMcfGeqTests< MCF >( MCF::FIRST_ELIGIBLE , "NS-FE" );
   runMcfLeqTests< MCF >( MCF::FIRST_ELIGIBLE , "NS-FE" );
-  runMcfGeqTests< MCF >( MCF::BEST_ELIGIBLE , "NS-BE" , true );
+  runMcfGeqTests< MCF >( MCF::BEST_ELIGIBLE , "NS-BE" );
   runMcfLeqTests< MCF >( MCF::BEST_ELIGIBLE , "NS-BE" );
-  runMcfGeqTests< MCF >( MCF::BLOCK_SEARCH , "NS-BS" , true );
+  runMcfGeqTests< MCF >( MCF::BLOCK_SEARCH , "NS-BS" );
   runMcfLeqTests< MCF >( MCF::BLOCK_SEARCH , "NS-BS" );
-  runMcfGeqTests< MCF >( MCF::CANDIDATE_LIST , "NS-CL" , true );
+  runMcfGeqTests< MCF >( MCF::CANDIDATE_LIST , "NS-CL" );
   runMcfLeqTests< MCF >( MCF::CANDIDATE_LIST , "NS-CL" );
-  runMcfGeqTests< MCF >( MCF::ALTERING_LIST , "NS-AL" , true );
+  runMcfGeqTests< MCF >( MCF::ALTERING_LIST , "NS-AL" );
   runMcfLeqTests< MCF >( MCF::ALTERING_LIST , "NS-AL" );
   }
 
@@ -858,6 +980,14 @@ int main()
  checkWarmStartOf< CostScaling< SmartDigraph , long > >( 100 );
  checkWarmStartOf< CycleCanceling< SmartDigraph , long > >( 100 );
  checkWarmStartOf< CapacityScaling< SmartDigraph , long > >( 100 );
+
+ checkAgainstNetworkSimplex< CostScaling< SmartDigraph , long > >(
+   500 , "CostScaling" );
+ checkAgainstNetworkSimplex< CycleCanceling< SmartDigraph , long > >(
+   500 , "CycleCanceling" );
+ checkAgainstNetworkSimplex< CapacityScaling< SmartDigraph , long > >(
+   500 , "CapacityScaling" );
+ checkSupplyTypes( 500 );
 
  // Test CapacityScaling
  {

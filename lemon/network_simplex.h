@@ -98,8 +98,8 @@ class NetworkSimplex
   /// bounded), and the algorithm has found optimal flow and node
   /// potentials (primal and dual solutions).
   OPTIMAL ,
-  /// The objective function of the problem is unbounded, i.e.
-  /// there is a directed cycle having negative total cost and
+  /// The problem is feasible and its objective function is unbounded,
+  /// i.e. there is a directed cycle having negative total cost and
   /// infinite upper bound.
   UNBOUNDED
   };
@@ -194,6 +194,9 @@ class NetworkSimplex
 
  // Parameters of the problem
  bool _has_lower;
+ // Whether init() has moved the lower bounds into the supplies, which
+ // restoreSupply() takes out again
+ bool _supply_shifted = false;
  SupplyType _stype;
  Value _sum_supply;
 
@@ -878,9 +881,9 @@ class NetworkSimplex
  /// \n \c OPTIMAL if the problem has optimal solution
  /// (i.e. it is feasible and bounded), and the algorithm has found
  /// optimal flow and node potentials (primal and dual solutions),
- /// \n \c UNBOUNDED if the objective function of the problem is
- /// unbounded, i.e. there is a directed cycle having negative total
- /// cost and infinite upper bound.
+ /// \n \c UNBOUNDED if the problem is feasible and its objective
+ /// function is unbounded, i.e. there is a directed cycle having
+ /// negative total cost and infinite upper bound.
  ///
  /// \see ProblemType, PivotRule
  /// \see resetParams(), reset()
@@ -890,9 +893,11 @@ class NetworkSimplex
   // A problem without nodes has the empty flow, which is optimal
   if( _node_num == 0 )
    return( OPTIMAL );
-  if( ! init() )
+  if( ! init() ) {
+   restoreSupply();
    return( INFEASIBLE );
-  return( finish( start( pivot_rule ) ) );
+   }
+  return( finish( feasibleUnbounded( start( pivot_rule ) , pivot_rule ) ) );
   }
 
  /// \brief Run the algorithm again from the basis of the last run.
@@ -931,6 +936,18 @@ class NetworkSimplex
    _repair = false;
    }
 
+  // The flow and the supplies go back to the form that start() works on,
+  // the lower bounds taken out of them as init() does
+  if( _has_lower ) {
+   for( int i = 0 ; i != _arc_num ; ++i ) {
+    const Value c = _lower[ i ];
+    _flow[ i ] -= c;
+    _supply[ _source[ i ] ] -= c;
+    _supply[ _target[ i ] ] += c;
+    }
+   _supply_shifted = true;
+   }
+
   // The artificial arcs keep a cost larger than that of any path, which
   // the change may have made larger than it was
   const Cost art = initArtificialCost();
@@ -947,7 +964,7 @@ class NetworkSimplex
    _pi[ u ] = _pred_dir[ u ] == DIR_UP ? _pi[ _parent[ u ] ] - _cost[ e ]
 				       : _pi[ _parent[ u ] ] + _cost[ e ];
    }
-  return( finish( start( pivot_rule ) ) );
+  return( finish( feasibleUnbounded( start( pivot_rule ) , pivot_rule ) ) );
   }
 
  /// \brief The cycle that proves the problem unbounded.
@@ -1253,6 +1270,7 @@ class NetworkSimplex
     _supply[ _source[ i ] ] -= c;
     _supply[ _target[ i ] ] += c;
     }
+   _supply_shifted = true;
    }
   else {
    for( int i = 0 ; i != _arc_num ; ++i ) {
@@ -1868,11 +1886,46 @@ class NetworkSimplex
   return( true );
   }
 
+ // The supplies as they were before init() moved the lower bounds into
+ // them, which start() does on every exit, so that the next run starts
+ // from the supplies that were given
+ void restoreSupply() {
+  if( ! _supply_shifted )
+   return;
+  _supply_shifted = false;
+  for( int i = 0 ; i != _arc_num ; ++i ) {
+   const Value c = _lower[ i ];
+   if( c != 0 ) {
+    _supply[ _source[ i ] ] += c;
+    _supply[ _target[ i ] ] -= c;
+    }
+   }
+  }
+
+ // A cycle of negative cost and infinite upper bound makes the objective
+ // unbounded only over a feasible problem: on an unbounded answer, the
+ // problem with the costs of the arcs set to zero says whether it is
+ // feasible, and if it is the problem is solved again with its costs,
+ // which gives the cycle that unboundedCycle() returns
+ ProblemType feasibleUnbounded( ProblemType pt , PivotRule pivot_rule ) {
+  if( pt != UNBOUNDED )
+   return( pt );
+  const CostVector cost( _cost.begin() , _cost.begin() + _arc_num );
+  std::fill( _cost.begin() , _cost.begin() + _arc_num , Cost( 0 ) );
+  const ProblemType feasible = init() ? start( pivot_rule ) : INFEASIBLE;
+  restoreSupply();
+  std::copy( cost.begin() , cost.end() , _cost.begin() );
+  if( feasible == INFEASIBLE )
+   return( INFEASIBLE );
+  init();
+  return( start( pivot_rule ) );
+  }
+
  // The end of a run: a basis is there to reuse if the run has ended at
  // an optimal one, or at one that proves the problem infeasible, which
  // is optimal for the problem with the artificial arcs and as good a
- // start after a change as any; not with lower bounds, which start()
- // does not put back in the supplies when it answers INFEASIBLE
+ // start after a change as any; not with lower bounds, whose flow
+ // start() puts back in the original form only when it is optimal
  ProblemType finish( ProblemType pt ) {
   _warm = pt == OPTIMAL || ( pt == INFEASIBLE && ! _has_lower );
   return( pt );
@@ -2017,6 +2070,7 @@ class NetworkSimplex
   // Perform heuristic initial pivots
   if( ! initialPivots() ) {
    _unb_arc = in_arc;
+   restoreSupply();
    return( UNBOUNDED );
    }
 
@@ -2026,6 +2080,7 @@ class NetworkSimplex
    bool change = findLeavingArc();
    if( delta >= MAX_VALUE ) {
     _unb_arc = in_arc;
+    restoreSupply();
     return( UNBOUNDED );
     }
    changeFlow( change );
@@ -2039,20 +2094,17 @@ class NetworkSimplex
   // Check feasibility, up to the tolerance on the artificial arcs
   const Value feps = flowTolerance( _supply , _node_num );
   for( int e = _search_arc_num ; e != _all_arc_num ; ++e ) {
-   if( _flow[ e ] > feps || _flow[ e ] < -feps )
+   if( _flow[ e ] > feps || _flow[ e ] < -feps ) {
+    restoreSupply();
     return( INFEASIBLE );
+    }
    }
 
   // Transform the solution and the supply map to the original form
   if( _has_lower ) {
-   for( int i = 0 ; i != _arc_num ; ++i ) {
-    Value c = _lower[ i ];
-    if( c != 0 ) {
-     _flow[ i ] += c;
-     _supply[ _source[ i ] ] += c;
-     _supply[ _target[ i ] ] -= c;
-     }
-    }
+   for( int i = 0 ; i != _arc_num ; ++i )
+    _flow[ i ] += _lower[ i ];
+   restoreSupply();
    }
 
   // Shift potentials to meet the requirements of the GEQ/LEQ type

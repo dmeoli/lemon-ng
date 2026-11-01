@@ -29,6 +29,7 @@
 #include <lemon/core.h>
 #include <lemon/maps.h>
 #include <lemon/quad_heap.h>
+#include <lemon/bits/mcf_feasible_flow.h>
 
 namespace lemon
 {
@@ -100,8 +101,6 @@ struct CapacityScalingDefaultTraits
 /// \warning Both \c V and \c C must be signed number types.
 /// \warning Capacity bounds and supply values must be integer, but
 /// arc costs can be arbitrary real numbers.
-/// \warning This algorithm does not support negative costs for
-/// arcs having infinite upper bound.
 #ifdef DOXYGEN
 template< typename GR , typename V , typename C , typename TR >
 #else
@@ -137,11 +136,9 @@ class CapacityScaling
   /// bounded), and the algorithm has found optimal flow and node
   /// potentials (primal and dual solutions).
   OPTIMAL ,
-  /// The digraph contains an arc of negative cost and infinite
-  /// upper bound. It means that the objective function is unbounded
-  /// on that arc, however, note that it could actually be bounded
-  /// over the feasible flows, but this algroithm cannot handle
-  /// these cases.
+  /// The problem is feasible and its objective function is unbounded,
+  /// i.e. there is a directed cycle having negative total cost and
+  /// infinite upper bound.
   UNBOUNDED
   };
 
@@ -173,6 +170,9 @@ class CapacityScaling
  // The flow and the potentials of the last run are there for runWarm()
  // to start from
  bool _warm;
+ // Whether a cycle of negative cost is made of arcs of infinite upper
+ // bound, which makes a feasible problem unbounded
+ bool _unbounded;
  IntVector _first_out;
  BoolVector _forward;
  IntVector _source;
@@ -325,6 +325,7 @@ class CapacityScaling
        _arc_idb( graph ) , INF( std::numeric_limits< Value >::has_infinity
 				 ? std::numeric_limits< Value >::infinity()
 				 : ( std::numeric_limits< Value >::max )() ) {
+  _unbounded = false;
   // Check the number types
   LEMON_ASSERT( std::numeric_limits< Value >::is_signed ,
 		"The flow type of CapacityScaling must be signed" );
@@ -484,11 +485,9 @@ class CapacityScaling
  /// \n \c OPTIMAL if the problem has optimal solution
  /// (i.e. it is feasible and bounded), and the algorithm has found
  /// optimal flow and node potentials (primal and dual solutions),
- /// \n \c UNBOUNDED if the digraph contains an arc of negative cost
- /// and infinite upper bound. It means that the objective function
- /// is unbounded on that arc, however, note that it could actually be
- /// bounded over the feasible flows, but this algroithm cannot handle
- /// these cases.
+ /// \n \c UNBOUNDED if the problem is feasible and its objective
+ /// function is unbounded, i.e. there is a directed cycle having
+ /// negative total cost and infinite upper bound.
  ///
  /// \see ProblemType
  /// \see resetParams(), reset()
@@ -503,6 +502,8 @@ class CapacityScaling
   if( pt != OPTIMAL )
    return( pt );
   pt = start();
+  if( pt == OPTIMAL && _unbounded )
+   pt = UNBOUNDED;
   _warm = pt == OPTIMAL;
   return( pt );
   }
@@ -902,14 +903,23 @@ class CapacityScaling
     }
    }
 
-  // Handle negative costs
+  // Handle negative costs: an arc of infinite upper bound is saturated at
+  // a bound that some optimal flow does not reach, unless a cycle of
+  // negative cost is made of such arcs, when a feasible problem is
+  // unbounded [see bits/mcf_feasible_flow.h]
+  _unbounded = _mcf_bits::negativeInfiniteCycle( _root , _first_out , _target ,
+						 _forward , _upper , _cost );
+  const Value bound =
+    _mcf_bits::infiniteBound( _root , _first_out , _target , _forward ,
+			      _lower ,
+			      _upper , _supply , _has_lower );
   for( int i = 0 ; i != _root ; ++i ) {
    last_out = _first_out[ i + 1 ] - 1;
    for( int j = _first_out[ i ] ; j != last_out ; ++j ) {
     Value rc = _res_cap[ j ];
     if( _cost[ j ] < 0 && rc > 0 ) {
      if( rc >= MAX )
-      return( UNBOUNDED );
+      rc = bound;
      _excess[ i ] -= rc;
      _excess[ _target[ j ] ] += rc;
      _res_cap[ j ] = 0;

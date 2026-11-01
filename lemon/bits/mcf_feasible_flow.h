@@ -17,11 +17,14 @@
 #ifndef LEMON_BITS_MCF_FEASIBLE_FLOW_H
  #define LEMON_BITS_MCF_FEASIBLE_FLOW_H
 
+#include <cmath>
+#include <limits>
 #include <vector>
 
 //\ingroup min_cost_flow_algs
 //\file
-//\brief The feasible flow that CostScaling and CycleCanceling start from.
+//\brief The feasible flow that CostScaling and CycleCanceling start from,
+//and the bound that replaces an infinite one in them and in CapacityScaling.
 
 namespace lemon
 {
@@ -166,6 +169,87 @@ bool feasibleFlow( MCF & mcf , bool warm , typename MCF::Value root_cap ,
   mcf._cost[ ra ] = 0;
   }
  return( true );
+ }
+
+// Whether a cycle of negative cost is made of arcs of infinite upper bound
+// (those of the digraph, not those of the root): if the problem is
+// feasible, it is then unbounded. Bellman-Ford from a virtual node joined
+// to all the others, on those arcs only, which still improves a distance
+// after as many rounds as there are nodes if and only if there is one.
+template< typename IV , typename BV , typename VV , typename CV >
+bool negativeInfiniteCycle( int root , const IV & first_out ,
+			    const IV & target ,
+			    const BV & forward , const VV & upper ,
+			    const CV & cost )
+{
+ typedef typename VV::value_type Value;
+ typedef typename CV::value_type Cost;
+ const Value MAX = ( std::numeric_limits< Value >::max )();
+ bool negative = false;
+ for( int u = 0 ; u != root && ! negative ; ++u )
+  for( int j = first_out[ u ] ; j != first_out[ u + 1 ] ; ++j )
+   if( forward[ j ] && target[ j ] != root && upper[ j ] >= MAX &&
+       cost[ j ] < 0 ) {
+    negative = true;
+    break;
+    }
+ if( ! negative )
+  return( false );
+ std::vector< Cost > dist( root , Cost( 0 ) );
+ for( int round = 0 ; round != root ; ++round ) {
+  bool changed = false;
+  for( int u = 0 ; u != root ; ++u )
+   for( int j = first_out[ u ] ; j != first_out[ u + 1 ] ; ++j ) {
+    const int v = target[ j ];
+    if( forward[ j ] && v != root && upper[ j ] >= MAX &&
+	dist[ u ] + cost[ j ] < dist[ v ] ) {
+     dist[ v ] = dist[ u ] + cost[ j ];
+     changed = true;
+     }
+    }
+  if( ! changed )
+   return( false );
+  }
+ return( true );
+ }
+
+// The bound, net of the lower bound, that replaces an infinite upper
+// bound. When no cycle of negative cost is made of arcs of infinite upper
+// bound, some optimal flow sends on every arc at most B beyond its lower
+// bound, B being the sum of the absolute values of the supplies and of
+// the finite bounds: a flow is made of paths, which carry at most the
+// supplies, and of cycles, each of which has an arc of finite bound, the
+// other ones having a nonnegative cost and then being of no use. One more
+// than B makes an arc that reaches it keep a nonnegative reduced cost in
+// an optimal solution, so that the potentials are optimal for the
+// infinite bounds too. The bound is cut where the sums of the flows over
+// the arcs that it replaces would no longer fit in Value.
+template< typename IV , typename BV , typename VV >
+typename VV::value_type infiniteBound( int root , const IV & first_out ,
+				       const IV & target , const BV & forward ,
+				       const VV & lower , const VV & upper ,
+				       const VV & supply , bool has_lower )
+{
+ typedef typename VV::value_type Value;
+ const Value MAX = ( std::numeric_limits< Value >::max )();
+ long double b = 1;
+ int inf = 0;
+ for( int u = 0 ; u != root ; ++u ) {
+  b += std::abs( static_cast< long double >( supply[ u ] ) );
+  for( int j = first_out[ u ] ; j != first_out[ u + 1 ] ; ++j ) {
+   if( ! forward[ j ] || target[ j ] == root )
+    continue;
+   if( upper[ j ] < MAX )
+    b += std::abs( static_cast< long double >( upper[ j ] ) );
+   else
+    ++inf;
+   if( has_lower )
+    b += std::abs( static_cast< long double >( lower[ j ] ) );
+   }
+  }
+ const long double most = static_cast< long double >( MAX ) / ( inf + 2 );
+ return( b < most ? static_cast< Value >( b )
+		   : static_cast< Value >( most ) );
  }
 
 }

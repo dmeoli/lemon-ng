@@ -71,8 +71,6 @@ namespace lemon
 /// \warning Both \c V and \c C must be signed number types.
 /// \warning All input data (capacities, supply values, and costs) must
 /// be integer.
-/// \warning This algorithm does not support negative costs for
-/// arcs having infinite upper bound.
 ///
 /// \note For more information about the three available methods,
 /// see \ref Method.
@@ -107,11 +105,9 @@ class CycleCanceling
   /// bounded), and the algorithm has found optimal flow and node
   /// potentials (primal and dual solutions).
   OPTIMAL ,
-  /// The digraph contains an arc of negative cost and infinite
-  /// upper bound. It means that the objective function is unbounded
-  /// on that arc, however, note that it could actually be bounded
-  /// over the feasible flows, but this algroithm cannot handle
-  /// these cases.
+  /// The problem is feasible and its objective function is unbounded,
+  /// i.e. there is a directed cycle having negative total cost and
+  /// infinite upper bound.
   UNBOUNDED
   };
 
@@ -411,11 +407,9 @@ class CycleCanceling
  /// \n \c OPTIMAL if the problem has optimal solution
  /// (i.e. it is feasible and bounded), and the algorithm has found
  /// optimal flow and node potentials (primal and dual solutions),
- /// \n \c UNBOUNDED if the digraph contains an arc of negative cost
- /// and infinite upper bound. It means that the objective function
- /// is unbounded on that arc, however, note that it could actually be
- /// bounded over the feasible flows, but this algroithm cannot handle
- /// these cases.
+ /// \n \c UNBOUNDED if the problem is feasible and its objective
+ /// function is unbounded, i.e. there is a directed cycle having
+ /// negative total cost and infinite upper bound.
  ///
  /// \see ProblemType, Method
  /// \see resetParams(), reset()
@@ -750,48 +744,21 @@ class CycleCanceling
   for( int i = 0 ; i != _res_node_num ; ++i ) {
    _pi[ i ] = 0;
    }
-  ValueVector excess( _supply );
 
-  // Remove infinite upper bounds and check negative arcs
+  // Replace the infinite upper bounds by one that some optimal flow does
+  // not reach, unless a cycle of negative cost is made of such arcs, when
+  // a feasible problem is unbounded [see bits/mcf_feasible_flow.h]
   const Value MAX = ( std::numeric_limits< Value >::max )();
-  int last_out;
-  if( _has_lower ) {
-   for( int i = 0 ; i != _root ; ++i ) {
-    last_out = _first_out[ i + 1 ];
-    for( int j = _first_out[ i ] ; j != last_out ; ++j ) {
-     if( _forward[ j ] ) {
-      Value c = _cost[ j ] < 0 ? _upper[ j ] : _lower[ j ];
-      if( c >= MAX )
-       return( UNBOUNDED );
-      excess[ i ] -= c;
-      excess[ _target[ j ] ] += c;
-      }
-     }
-    }
-   }
-  else {
-   for( int i = 0 ; i != _root ; ++i ) {
-    last_out = _first_out[ i + 1 ];
-    for( int j = _first_out[ i ] ; j != last_out ; ++j ) {
-     if( _forward[ j ] && _cost[ j ] < 0 ) {
-      Value c = _upper[ j ];
-      if( c >= MAX )
-       return( UNBOUNDED );
-      excess[ i ] -= c;
-      excess[ _target[ j ] ] += c;
-      }
-     }
-    }
-   }
-  Value ex , max_cap = 0;
-  for( int i = 0 ; i != _res_node_num ; ++i ) {
-   ex = excess[ i ];
-   if( ex < 0 )
-    max_cap -= ex;
-   }
+  const bool unbounded = _mcf_bits::negativeInfiniteCycle(
+    _root , _first_out , _target , _forward , _upper , _cost );
+  const Value bound =
+    _mcf_bits::infiniteBound( _root , _first_out , _target , _forward ,
+			      _lower ,
+			      _upper , _supply , _has_lower );
   for( int j = 0 ; j != _res_arc_num ; ++j ) {
    if( _upper[ j ] >= MAX ) {
-    _upper[ j ] = max_cap;
+    const Value low = _has_lower && _forward[ j ] ? _lower[ j ] : Value( 0 );
+    _upper[ j ] = low < MAX - bound ? low + bound : MAX - 1;
     _inf_upper.push_back( j );
     }
    }
@@ -801,6 +768,8 @@ class CycleCanceling
   if( ! _mcf_bits::feasibleFlow( *this , false , Value( 1 ) , sup_num ) ) {
    return( INFEASIBLE );
    }
+  if( unbounded )
+   return( UNBOUNDED );
 
   return( OPTIMAL );
   }
