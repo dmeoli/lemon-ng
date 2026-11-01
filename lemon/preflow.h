@@ -19,6 +19,8 @@
 #ifndef LEMON_PREFLOW_H
  #define LEMON_PREFLOW_H
 
+#include <limits>
+#include <type_traits>
 #include <lemon/tolerance.h>
 #include <lemon/elevator.h>
 
@@ -200,6 +202,26 @@ class Preflow
   if( _excess ) {
    delete _excess;
    }
+  }
+
+ // whether the excess of a node is negative beyond the rounding of the
+ // sums that gave it, through being the flow into and out of the node: for
+ // a floating-point Value the tolerance is relative to that flow, since on
+ // large capacities the rounding errors exceed its absolute epsilon (trac
+ // #625)
+ bool negativeExcess( Value excess , Value through ) const {
+  return( negativeExcess(
+    excess , through ,
+    std::integral_constant< bool ,
+			    std::numeric_limits< Value >::is_integer >() ) );
+  }
+
+ bool negativeExcess( Value excess , Value , std::true_type ) const {
+  return( _tolerance.negative( excess ) );
+  }
+
+ bool negativeExcess( Value excess , Value through , std::false_type ) const {
+  return( _tolerance.negative( through > 1 ? excess / through : excess ) );
   }
 
  public:
@@ -482,14 +504,16 @@ class Preflow
    }
 
   for( NodeIt n( _graph ) ; n != INVALID ; ++n ) {
-   Value excess = 0;
+   Value excess = 0 , through = 0;
    for( InArcIt e( _graph , n ) ; e != INVALID ; ++e ) {
     excess += ( *_flow )[ e ];
+    through += ( *_flow )[ e ];
     }
    for( OutArcIt e( _graph , n ) ; e != INVALID ; ++e ) {
     excess -= ( *_flow )[ e ];
+    through += ( *_flow )[ e ];
     }
-   if( _tolerance.negative( excess ) && n != _source )
+   if( n != _source && negativeExcess( excess , through ) )
     return( false );
    ( *_excess )[ n ] = excess;
    }

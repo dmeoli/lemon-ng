@@ -27,6 +27,7 @@
 #include <lemon/lgf_reader.h>
 #include <lemon/elevator.h>
 #include <lemon/tolerance.h>
+#include <lemon/random.h>
 
 using namespace lemon;
 
@@ -277,6 +278,56 @@ void checkInitPreflow()
  check( ! pre.minCut( t ) , "Wrong min cut (Node t)." );
  }
 
+// the maximum flow of a Preflow, on capacities of the order of 1e9, given
+// to another Preflow as its initial flow: the sums at the nodes have
+// rounding errors far larger than the absolute epsilon of the tolerance,
+// and the flow is still a preflow (trac #625)
+void checkInitPreflowLarge()
+{
+ DIGRAPH_TYPEDEFS( SmartDigraph );
+
+ SmartDigraph g;
+ std::vector< Node > nodes;
+ for( int i = 0 ; i < 60 ; ++i )
+  nodes.push_back( g.addNode() );
+ Random rng( 625 );
+ SmartDigraph::ArcMap< double > cap( g );
+ for( int k = 0 ; k < 900 ; ++k ) {
+  int i = rng[ 60 ] , j = rng[ 60 ];
+  if( i != j )
+   cap[ g.addArc( nodes[ i ] , nodes[ j ] ) ] = 1e9 * rng() + 0.1 * rng();
+  }
+
+ Preflow< SmartDigraph , SmartDigraph::ArcMap< double > > first(
+   g , cap , nodes[ 0 ] , nodes[ 1 ] );
+ first.run();
+ SmartDigraph::ArcMap< double > flow( g );
+ for( ArcIt e( g ) ; e != INVALID ; ++e )
+  flow[ e ] = first.flow( e );
+
+ Preflow< SmartDigraph , SmartDigraph::ArcMap< double > > second(
+   g , cap , nodes[ 0 ] , nodes[ 1 ] );
+ check( second.init( flow ) ,
+	"The maximum flow of a Preflow is not taken as a preflow." );
+ second.startFirstPhase();
+
+ // less flow into a node than out of it, by 1e3 on flows of 1e9, is still
+ // no preflow
+ for( ArcIt e( g ) ; e != INVALID ; ++e )
+  if( g.target( e ) != nodes[ 0 ] && g.target( e ) != nodes[ 1 ] &&
+      flow[ e ] > 1e4 ) {
+   flow[ e ] -= 1e3;
+   break;
+   }
+ Preflow< SmartDigraph , SmartDigraph::ArcMap< double > > third(
+   g , cap , nodes[ 0 ] , nodes[ 1 ] );
+ check( ! third.init( flow ) , "A flow that is no preflow is taken." );
+
+ check( std::abs( second.flowValue() - first.flowValue() ) <=
+	  1e-9 * first.flowValue() ,
+	"Wrong max flow value from a maximum flow." );
+ }
+
 template< typename MF , typename SF >
 void checkMaxFlowAlg( const char * input_lgf , typename MF::Value expected )
 {
@@ -424,6 +475,7 @@ int main()
 							     0.3 );
 
  checkInitPreflow();
+ checkInitPreflowLarge();
 
  // Check EdmondsKarp
  typedef EdmondsKarp< SmartDigraph , SmartDigraph::ArcMap< int > > EKType1;
