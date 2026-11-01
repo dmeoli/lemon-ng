@@ -100,7 +100,11 @@ jobs:
         run: cmake --build build --config Release --parallel 4
 
       - name: Test
-        run: ctest --test-dir build -C Release --output-on-failure --no-tests=error
+        # a test that does not end within 300 s fails, rather than holding
+        # the job until GitHub stops it
+        run: >-
+          ctest --test-dir build -C Release --output-on-failure
+          --no-tests=error --timeout 300
 
   # LEMON installed with the library alone, as a package builds it, and a
   # project built against the installation through its CMake configuration
