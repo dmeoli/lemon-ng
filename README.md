@@ -111,23 +111,26 @@ objects, the `-I` directives and the headers of the library (see
 has a generator of random graphs, a converter from the DIMACS formats and a
 solver of DIMACS instances, and `demo/` has a few programs to start from.
 In `doc/` is the documentation, which Doxygen builds with the target `html`
-of CMake, and `scripts/` has the tools of the development (among them, the
-formatter of the code).
+of CMake, and `scripts/` has the tools of the development.
 
 ## Code style
 
-Its code follows the `.clang-format` at the root, with what
-`scripts/format.py` adds to it (e.g., `return( x );` and a space before each
-comma), which clang-format has no option for. On a pull request, the
-continuous integration checks the lines that a pull request changes, and
+Its code follows the style of the repository
+[code-style](https://github.com/dmeoli/code-style), i.e., its `.clang-format`
+with what its `format.py` adds to it (e.g., `return( x );` and a space before
+each comma), which clang-format has no option for. On a pull request, the
+continuous integration checks the lines that the request changes, and posts
+the changes that put them in the style as suggestions on them; with that
+repository cloned in `~/code-style`,
 
 ```sh
-python3 scripts/format.py --since origin/master FILE...
+~/code-style/code-format --since origin/master FILE...
 ```
 
-puts them in the style. This needs clang-format 22 (e.g., `pip install
-clang-format==22.1.5`); `scripts/ide-format` does the same on the file that
-an IDE shows.
+does the same before a commit. This needs clang-format 22 (e.g., `pip install
+clang-format==22.1.5`); `~/code-style/ide-format` does it on the file that an
+IDE shows, and `~/code-style/hooks/install-hooks .` installs a hook of git
+that stops a commit out of the style.
 
 ## License
 

@@ -16,11 +16,14 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # the lines that a pull request changes, in the style of .clang-format and
-  # of scripts/format.py
+  # the lines that a pull request changes, in the style of the repository
+  # code-style, with the changes that put them there posted as suggestions
   style:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
     steps:
       - name: Check out the repository
         uses: actions/checkout@v4
@@ -28,17 +31,7 @@ jobs:
           fetch-depth: 0
 
       - name: Check the style of the changed lines
-        run: |
-          pip install -q clang-format==22.1.5
-          base=origin/${{ github.base_ref }}
-          files=$(git diff --name-only --diff-filter=AMR $base HEAD |
-                  grep -E '\.(h|cc|cpp|dox)$' || true)
-          [ -z "$files" ] && exit 0
-          if ! python3 scripts/format.py --check --since $base $files; then
-            echo "Put them in the style with"
-            echo "  python3 scripts/format.py --since $base <files>"
-            exit 1
-          fi
+        uses: dmeoli/code-style@v1
 
   build-test:
     name: ${{ matrix.os }} ${{ matrix.cc }} C++${{ matrix.std }} ${{ matrix.name }}
