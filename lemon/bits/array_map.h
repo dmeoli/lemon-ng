@@ -20,6 +20,7 @@
  #define LEMON_BITS_ARRAY_MAP_H
 
 #include <memory>
+#include <utility>
 
 #include <lemon/bits/traits.h>
 #include <lemon/bits/alteration_notifier.h>
@@ -218,10 +219,9 @@ class ArrayMap
    Item it;
    for( nf->first( it ) ; it != INVALID ; nf->next( it ) ) {
     int jd = nf->id( it );
-    ;
     if( id != jd ) {
      AllocatorTraits::construct( allocator , &( new_values[ jd ] ) ,
-				 values[ jd ] );
+				 std::move_if_noexcept( values[ jd ] ) );
      AllocatorTraits::destroy( allocator , &( values[ jd ] ) );
      }
     }
@@ -266,7 +266,7 @@ class ArrayMap
     if( found )
      continue;
     AllocatorTraits::construct( allocator , &( new_values[ id ] ) ,
-				values[ id ] );
+				std::move_if_noexcept( values[ id ] ) );
     AllocatorTraits::destroy( allocator , &( values[ id ] ) );
     }
    if( capacity != 0 )
