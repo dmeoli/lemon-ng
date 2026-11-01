@@ -1,3 +1,50 @@
+2026-11-01 Version 1.4.1 (lemon-ng) released
+
+        A release of fixes, among them one of NetworkSimplex::runWarm(),
+        which gave a flow that is not feasible on a problem with lower
+        bounds
+
+        * Bug fixes
+
+          ----: NetworkSimplex::runWarm() after a change of the costs of a
+                problem with lower bounds added the lower bounds to the flow
+                a second time, which gave a flow that is not feasible
+          ----: The four minimum cost flow algorithms answer UNBOUNDED on
+                the same problems, the feasible ones with a cycle of
+                negative cost made of arcs of infinite upper bound:
+                CostScaling and CycleCanceling no longer answer it on any
+                arc of negative cost and infinite upper bound, nor
+                CapacityScaling on a feasible problem, and NetworkSimplex
+                checks that the problem is feasible first
+          #625: Preflow::init() takes the maximum flow of another Preflow
+                on large floating-point capacities
+          ----: GlpkMip and CbcMip take an integer column whose bounds are
+                not integer as the integer values within its bounds, and
+                a column without any as an infeasible problem
+          ----: ArrayMap moves the values into its larger buffer when it
+                grows, rather than copying them
+
+        * Building and installing
+
+          #657: LEMON can be built as a DLL on Windows, with its data
+                exported, and the tests find the DLL
+          ----: LEMON can be taken in by another project with
+                add_subdirectory() or FetchContent
+          ----: The installation follows GNUInstallDirs, and lemon.pc
+                finds its prefix wherever it is
+          ----: The installed configuration names the libraries of the LP
+                and MIP solvers by their file names, not by the paths of
+                the machine that built LEMON
+          ----: The headers of COIN-OR are found also in include/coin-or
+          ----: The headers turn off only the warnings of MSVC that they
+                give (C4250 and C4267), and mark the types of the
+                [DI]GRAPH_TYPEDEFS macros as possibly unused
+          ----: The packages declare, besides the Boost Software License,
+                the BSD-3-Clause notice of the Mersenne Twister of
+                lemon/random.h
+          ----: The documentation in the theme of doxygen-awesome, with
+                its formulae drawn by MathJax and its citations resolved
+
 2026-11-01 Version 1.4.0 (lemon-ng) released
 
         This is the first release of lemon-ng, the maintained fork of
