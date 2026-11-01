@@ -25,6 +25,8 @@
 ///floating point numbers.
 ///
 
+#include <lemon/config.h>
+
 namespace lemon
 {
 
@@ -91,7 +93,7 @@ class Tolerance
 template<>
 class Tolerance< float >
 {
- static float def_epsilon;
+ static LEMON_DATA float def_epsilon;
  float _epsilon;
 
  public:
@@ -145,7 +147,7 @@ class Tolerance< float >
 template<>
 class Tolerance< double >
 {
- static double def_epsilon;
+ static LEMON_DATA double def_epsilon;
  double _epsilon;
 
  public:
@@ -199,7 +201,7 @@ class Tolerance< double >
 template<>
 class Tolerance< long double >
 {
- static long double def_epsilon;
+ static LEMON_DATA long double def_epsilon;
  long double _epsilon;
 
  public:

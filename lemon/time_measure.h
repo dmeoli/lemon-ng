@@ -80,7 +80,7 @@ class TimeStamp
   };
 
  private:
- static Format _format;
+ static LEMON_DATA Format _format;
 
  void _reset() { utime = stime = cutime = cstime = rtime = 0; }
 

@@ -160,3 +160,10 @@ FOREACH(TEST_NAME ${TESTS})
     ENDIF()
   ADD_DEPENDENCIES(check ${TEST_NAME})
 ENDFOREACH()
+
+# with LEMON as a DLL, the tests find it in the directory where it is built
+IF(WIN32 AND BUILD_SHARED_LIBS)
+  GET_DIRECTORY_PROPERTY(_lemon_tests TESTS)
+  SET_TESTS_PROPERTIES(${_lemon_tests} PROPERTIES ENVIRONMENT_MODIFICATION
+    "PATH=path_list_prepend:$<TARGET_FILE_DIR:lemon>")
+ENDIF()

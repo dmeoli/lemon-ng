@@ -3,6 +3,9 @@ INCLUDE_DIRECTORIES(
   ${PROJECT_BINARY_DIR}
 )
 
+# config.h says whether the library is shared, for the data that a DLL
+# exports and its users import [see LEMON_DATA in config.h.in]
+SET(LEMON_SHARED_LIBRARY ${BUILD_SHARED_LIBS})
 CONFIGURE_FILE(
   ${CMAKE_CURRENT_SOURCE_DIR}/config.h.in
   ${CMAKE_CURRENT_BINARY_DIR}/config.h
@@ -82,6 +85,13 @@ IF(LEMON_HAVE_SOPLEX)
 ENDIF()
 
 ADD_LIBRARY(lemon ${LEMON_SOURCES})
+
+# a DLL exports its functions and its classes without a mark, and the data
+# marked LEMON_DATA, which its users import
+TARGET_COMPILE_DEFINITIONS(lemon PRIVATE LEMON_BUILDING_LIBRARY)
+IF(WIN32 AND BUILD_SHARED_LIBS)
+  SET_TARGET_PROPERTIES(lemon PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
+ENDIF()
 
 # the libraries of the LP and MIP solvers are linked by their paths on the
 # machine that builds LEMON, which the installed configuration does not

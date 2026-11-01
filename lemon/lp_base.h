@@ -89,9 +89,9 @@ class LpBase
  ///The floating point type used by the solver
  typedef double Value;
  ///The infinity constant
- static const Value INF;
+ static LEMON_DATA const Value INF;
  ///The not a number constant
- static const Value NaN;
+ static LEMON_DATA const Value NaN;
 
  friend class Col;
  friend class ColIt;

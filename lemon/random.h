@@ -1052,7 +1052,7 @@ typedef _random_bits::Random< unsigned int > Random32;
 /// \sa \ref _random_bits::Random
 typedef _random_bits::Random< unsigned long long > Random64;
 
-extern Random rnd;
+extern LEMON_DATA Random rnd;
 
 }
 

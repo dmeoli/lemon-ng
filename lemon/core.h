@@ -79,7 +79,7 @@ struct Invalid
 #ifdef LEMON_ONLY_TEMPLATES
 const Invalid INVALID = Invalid();
 #else
-extern const Invalid INVALID;
+extern LEMON_DATA const Invalid INVALID;
 #endif
 
 /// \addtogroup gutils

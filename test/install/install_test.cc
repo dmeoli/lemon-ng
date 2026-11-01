@@ -17,13 +17,17 @@
  */
 
 // A program built against an installed LEMON: it uses a header-only
-// algorithm and a function of the library (the parser of the arguments),
-// so that it needs both the include directory and the library.
+// algorithm, a function of the library (the parser of the arguments) and
+// two data of the library (rnd and the default epsilon of Tolerance), so
+// that it needs the include directory and the library, from which a DLL
+// has to export the data too.
 
 #include <iostream>
 #include <lemon/arg_parser.h>
 #include <lemon/network_simplex.h>
+#include <lemon/random.h>
 #include <lemon/smart_graph.h>
+#include <lemon/tolerance.h>
 
 int main( int argc , char * argv[] )
 {
@@ -42,6 +46,11 @@ int main( int argc , char * argv[] )
  ns.costMap( cost ).upperMap( cap ).supplyMap( supply );
  if( ns.run() != ns.OPTIMAL || ns.totalCost() != 6 || ns.flow( a ) != 3 ) {
   std::cerr << "wrong result" << std::endl;
+  return( 1 );
+  }
+ if( lemon::Tolerance< double >::defaultEpsilon() != 1e-10 ||
+     lemon::rnd.integer( 1 ) != 0 ) {
+  std::cerr << "wrong data of the library" << std::endl;
   return( 1 );
   }
  std::cout << "ok" << std::endl;

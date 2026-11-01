@@ -20,6 +20,7 @@
  #define LEMON_COLOR_H
 
 #include <vector>
+#include <lemon/config.h>
 #include <lemon/math.h>
 #include <lemon/maps.h>
 
@@ -68,35 +69,35 @@ class Color
  };
 
 /// White color constant
-extern const Color WHITE;
+extern LEMON_DATA const Color WHITE;
 /// Black color constant
-extern const Color BLACK;
+extern LEMON_DATA const Color BLACK;
 /// Red color constant
-extern const Color RED;
+extern LEMON_DATA const Color RED;
 /// Green color constant
-extern const Color GREEN;
+extern LEMON_DATA const Color GREEN;
 /// Blue color constant
-extern const Color BLUE;
+extern LEMON_DATA const Color BLUE;
 /// Yellow color constant
-extern const Color YELLOW;
+extern LEMON_DATA const Color YELLOW;
 /// Magenta color constant
-extern const Color MAGENTA;
+extern LEMON_DATA const Color MAGENTA;
 /// Cyan color constant
-extern const Color CYAN;
+extern LEMON_DATA const Color CYAN;
 /// Grey color constant
-extern const Color GREY;
+extern LEMON_DATA const Color GREY;
 /// Dark red color constant
-extern const Color DARK_RED;
+extern LEMON_DATA const Color DARK_RED;
 /// Dark green color constant
-extern const Color DARK_GREEN;
+extern LEMON_DATA const Color DARK_GREEN;
 /// Drak blue color constant
-extern const Color DARK_BLUE;
+extern LEMON_DATA const Color DARK_BLUE;
 /// Dark yellow color constant
-extern const Color DARK_YELLOW;
+extern LEMON_DATA const Color DARK_YELLOW;
 /// Dark magenta color constant
-extern const Color DARK_MAGENTA;
+extern LEMON_DATA const Color DARK_MAGENTA;
 /// Dark cyan color constant
-extern const Color DARK_CYAN;
+extern LEMON_DATA const Color DARK_CYAN;
 
 ///Map <tt>int</tt>s to different <tt>Color</tt>s
 

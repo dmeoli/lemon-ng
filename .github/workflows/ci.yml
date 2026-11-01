@@ -63,6 +63,10 @@ jobs:
           - { os: macos-latest,   cc: clang, cxx: clang++, std: 20 }
           - { os: windows-latest, cc: cl,    cxx: cl,      std: 14 }
           - { os: windows-latest, cc: cl,    cxx: cl,      std: 20 }
+          - { os: windows-latest, cc: cl,    cxx: cl,      std: 20,
+              cmake: -DBUILD_SHARED_LIBS=ON, name: DLL }
+          - { os: ubuntu-latest,  cc: gcc,   cxx: g++,     std: 20,
+              cmake: -DBUILD_SHARED_LIBS=ON, name: shared }
     steps:
       - name: Check out the repository
         uses: actions/checkout@v4
@@ -77,7 +81,7 @@ jobs:
           -DCMAKE_CXX_COMPILER=${{ matrix.cxx }}
           -DCMAKE_CXX_STANDARD=${{ matrix.std }}
           -DCMAKE_CXX_FLAGS="-Wall -Wextra -Werror ${{ matrix.flags }}"
-          -DLEMON_VERSION=ci
+          -DLEMON_VERSION=ci ${{ matrix.cmake }}
 
       - name: Configure (Windows)
         if: runner.os == 'Windows'
@@ -85,7 +89,7 @@ jobs:
           cmake -S . -B build
           -DCMAKE_CXX_STANDARD=${{ matrix.std }}
           -DCMAKE_CXX_FLAGS="/W3 /EHsc"
-          -DLEMON_VERSION=ci
+          -DLEMON_VERSION=ci ${{ matrix.cmake }}
 
       - name: Build
         if: runner.os != 'Windows'
@@ -102,12 +106,16 @@ jobs:
   # project built against the installation through its CMake configuration
   # (and on Linux through pkg-config too)
   install:
-    name: install on ${{ matrix.os }}
+    name: install on ${{ matrix.os }} ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        include:
+          - { os: ubuntu-latest }
+          - { os: macos-latest }
+          - { os: windows-latest }
+          - { os: windows-latest, cmake: -DBUILD_SHARED_LIBS=ON, name: DLL }
     steps:
       - name: Check out the repository
         uses: actions/checkout@v4
@@ -119,7 +127,7 @@ jobs:
           -DLEMON_BUILD_TESTS=NO -DLEMON_BUILD_DEMOS=NO
           -DLEMON_BUILD_TOOLS=NO -DLEMON_BUILD_DOC=NO
           -DLEMON_ENABLE_GLPK=NO -DLEMON_ENABLE_ILOG=NO
-          -DLEMON_ENABLE_COIN=NO -DLEMON_ENABLE_SOPLEX=NO
+          -DLEMON_ENABLE_COIN=NO -DLEMON_ENABLE_SOPLEX=NO ${{ matrix.cmake }}
           && cmake --build build --config Release --parallel 4
           && cmake --install build --config Release
 
@@ -135,7 +143,9 @@ jobs:
 
       - name: Run it (Windows)
         if: runner.os == 'Windows'
-        run: ./use/Release/install_test.exe
+        run: |
+          $env:PATH = "${{ github.workspace }}\prefix\bin;$env:PATH"
+          ./use/Release/install_test.exe
 
       - name: Build it through pkg-config (Linux)
         if: runner.os == 'Linux'

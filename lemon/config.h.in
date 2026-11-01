@@ -29,5 +29,19 @@
 #cmakedefine LEMON_USE_PTHREAD 1
 #cmakedefine LEMON_USE_WIN32_THREADS 1
 
+#cmakedefine LEMON_SHARED_LIBRARY 1
+
+/* the declaration of a datum of the library, which whoever uses LEMON as a
+   DLL imports from it (its functions are exported without a mark) */
+#if defined( _WIN32 ) && defined( LEMON_SHARED_LIBRARY )
+ #ifdef LEMON_BUILDING_LIBRARY
+  #define LEMON_DATA __declspec( dllexport )
+ #else
+  #define LEMON_DATA __declspec( dllimport )
+ #endif
+#else
+ #define LEMON_DATA
+#endif
+
 
 #endif
