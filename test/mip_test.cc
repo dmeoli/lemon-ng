@@ -123,6 +123,25 @@ void aTest( MipSolver & mip , bool solve_empty = true )
  }
 
 
+// an integer column whose bounds are not integer: x in [ 0.5 , 2.5 ] has
+// its optimum at 2 when maximized and at 1 when minimized, and x in
+// [ 1.2 , 1.8 ] has no integer value
+void boundsTest( MipSolver & mip )
+{
+ MipSolver::Col x = mip.addCol();
+ mip.colType( x , MipSolver::INTEGER );
+ mip.colLowerBound( x , 0.5 );
+ mip.colUpperBound( x , 2.5 );
+ mip.obj( x );
+ mip.max();
+ solveAndCheck( mip , MipSolver::OPTIMAL , 2 );
+ mip.min();
+ solveAndCheck( mip , MipSolver::OPTIMAL , 1 );
+ mip.colLowerBound( x , 1.2 );
+ mip.colUpperBound( x , 1.8 );
+ solveAndCheck( mip , MipSolver::INFEASIBLE , 0 );
+ }
+
 template< class MIP >
 void cloneTest()
 {
@@ -146,6 +165,8 @@ int main()
 #else
   aTest( mip1 );
 #endif
+  Mip mip2;
+  boundsTest( mip2 );
   cloneTest< Mip >();
   }
 #endif
@@ -154,6 +175,8 @@ int main()
  {
   GlpkMip mip1;
   aTest( mip1 );
+  GlpkMip mip2;
+  boundsTest( mip2 );
   cloneTest< GlpkMip >();
   }
 #endif
@@ -162,6 +185,8 @@ int main()
  try {
   CplexMip mip2;
   aTest( mip2 );
+  CplexMip mip3;
+  boundsTest( mip3 );
   cloneTest< CplexMip >();
   }
  catch( CplexEnv::LicenseError & error ) {
@@ -173,6 +198,8 @@ int main()
  {
   CbcMip mip1;
   aTest( mip1 , false );
+  CbcMip mip2;
+  boundsTest( mip2 );
   cloneTest< CbcMip >();
   }
 #endif

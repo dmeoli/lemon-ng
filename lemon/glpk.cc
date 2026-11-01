@@ -1047,7 +1047,16 @@ GlpkMip::SolveExitStatus GlpkMip::_solve()
 
  iocp.msg_lev = _message_level;
 
- if( glp_intopt( lp , &iocp ) != 0 )
+ int ret = glp_intopt( lp , &iocp );
+ if( ret == GLP_EBOUND ) {
+  // an integer column has a bound that is not integer, which glp_intopt
+  // takes only through its presolver, which rounds the bound
+  iocp.presolve = GLP_ON;
+  ret = glp_intopt( lp , &iocp );
+  }
+ // the presolver says so when no integer solution exists, setting the
+ // status of the problem
+ if( ret != 0 && ret != GLP_ENOPFS )
   return( UNSOLVED );
  return( SOLVED );
  }

@@ -319,8 +319,6 @@ void solveAndCheck( LpSolver & lp , LpSolver::ProblemType stat ,
 
 void aTest( LpSolver & lp )
 {
- typedef LpSolver LP;
-
  //The following example is very simple
 
  typedef LpSolver::Row Row;
